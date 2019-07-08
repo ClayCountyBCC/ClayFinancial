@@ -13,6 +13,8 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+[Cc]onnection[Ss]trings.config
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
