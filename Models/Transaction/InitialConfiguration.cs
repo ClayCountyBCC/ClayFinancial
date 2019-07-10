@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace ClayFinancial.Models
+namespace ClayFinancial.Models.Transaction
 {
   public class InitialConfiguration
   {
@@ -14,6 +14,9 @@ namespace ClayFinancial.Models
     // dictionary of controls by department id
     // dictionary of controls by payment type id
     // Some flags to indicate the user's access level
+    public List<Department> departments { get; set; } = new List<Department>();
+    public List<PaymentType> payment_types { get; set; } = new List<PaymentType>();
+    public List<Control> controls { get; set; } = new List<Control>();
 
 
   }

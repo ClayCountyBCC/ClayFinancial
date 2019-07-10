@@ -1725,6 +1725,7 @@
     </Compile>
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\ErrorLog.cs" />
+    <Compile Include="Models\Transaction\Control.cs" />
     <Compile Include="Models\Transaction\Department.cs" />
     <Compile Include="Models\Transaction\InitialConfiguration.cs" />
     <Compile Include="Models\Transaction\PaymentType.cs" />
@@ -1861,6 +1862,8 @@
     <Content Include="node_modules\%40fortawesome\fontawesome-free\webfonts\fa-solid-900.woff2" />
     <Content Include="lib\main.scss" />
     <Content Include="lib\myBulma.sass" />
+    <Content Include="package-lock.json" />
+    <Content Include="package.json" />
     <None Include="packages.config" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Transaction\Index.cshtml" />

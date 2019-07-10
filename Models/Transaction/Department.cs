@@ -9,6 +9,7 @@ namespace ClayFinancial.Models.Transaction
   {
     public int id { get; set; }
     public string name { get; set; }
+    public bool is_active { get; set; }
     public string organisation { get; set; }
 
     public Department() { }
@@ -20,6 +21,7 @@ namespace ClayFinancial.Models.Transaction
           id
           ,name
           ,ISNULL(organisation, '') organisation
+          ,is_active
         FROM departments
         WHERE is_active = 1
         ORDER BY name ASC";
