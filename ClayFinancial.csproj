@@ -1724,6 +1724,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Constants.cs" />
+    <Compile Include="Models\DataControl\DataControl.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Transaction\Control.cs" />
     <Compile Include="Models\Transaction\Department.cs" />
