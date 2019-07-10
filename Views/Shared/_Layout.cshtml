@@ -2,14 +2,39 @@
 
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=11">
+  <title>@ViewBag.Title</title>
   <link href="~/lib/bulma.min.css" rel="stylesheet" />
+  <link href="~/lib/fontawesome.min.css" rel="stylesheet" />
+  <link href="~/lib/main.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div>
-        @RenderBody()
-    </div>
-    <script src="~/lib/react/umd/react.development.js"></script>
+  <section class="hero is-primary is-small">
+    <nav style="margin-bottom: 1em;"
+         class="navbar is-light hide-for-print" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <a style="text-shadow: 2px 2px 0px rgba(90, 90, 90, 1);"
+             class="navbar-item has-text-weight-bold is-size-4 has-text-white"
+             href="index.html">
+            Clay County Financial
+          </a>
+        </div>
+        <div class="navbar-menu is-active">
+          <div class="navbar-start">
+          </div>
+          <div class="navbar-end">
+          </div>
+        </div>
+      </div>
+    </nav>
+  </section>
+
+  <div>
+    @RenderBody()
+  </div>  
+  <script src="~/lib/react/cjs/react.development.js"></script>
 </body>
 </html>

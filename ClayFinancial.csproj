@@ -36,7 +36,7 @@
     <WarningLevel>4</WarningLevel>
     <TypeScriptTarget>ES2015</TypeScriptTarget>
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
-    <TypeScriptModuleKind>UMD</TypeScriptModuleKind>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
@@ -126,6 +126,12 @@
       <DependentUpon>bulma.css</DependentUpon>
     </Content>
     <Content Include="lib\fontawesome.min.css" />
+    <Content Include="lib\main.css">
+      <DependentUpon>main.scss</DependentUpon>
+    </Content>
+    <Content Include="lib\main.min.css">
+      <DependentUpon>main.css</DependentUpon>
+    </Content>
     <Content Include="lib\react\cjs\react.development.js" />
     <Content Include="lib\react\cjs\react.production.min.js" />
     <Content Include="lib\react\umd\react.development.js" />
@@ -1847,6 +1853,7 @@
     <Content Include="node_modules\%40fortawesome\fontawesome-free\webfonts\fa-solid-900.ttf" />
     <Content Include="node_modules\%40fortawesome\fontawesome-free\webfonts\fa-solid-900.woff" />
     <Content Include="node_modules\%40fortawesome\fontawesome-free\webfonts\fa-solid-900.woff2" />
+    <Content Include="lib\main.scss" />
     <None Include="packages.config" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Transaction\Index.cshtml" />
