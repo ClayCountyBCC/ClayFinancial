@@ -6,5 +6,9 @@
   {
     "outputFile": "lib/main.css",
     "inputFile": "lib/main.scss"
+  },
+  {
+    "outputFile": "lib/myBulma.css",
+    "inputFile": "lib/myBulma.sass"
   }
 ]
