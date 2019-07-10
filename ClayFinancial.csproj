@@ -1719,6 +1719,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\API\DataControl\DataControlController.cs" />
     <Compile Include="Controllers\MVC\TransactionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -1877,7 +1878,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\API\" />
     <Folder Include="scripts\" />
   </ItemGroup>
   <ItemGroup>
