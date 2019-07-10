@@ -1,0 +1,8 @@
+[
+  {
+    "outputFileName": "lib/fontawesome.min.css",
+    "inputFiles": [
+      "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css"
+    ]
+  }
+]
