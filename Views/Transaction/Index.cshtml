@@ -1,8 +1,56 @@
 ﻿
 @{
-    ViewBag.Title = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+  ViewBag.Title = "Index";
+  Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>This stuff is working gud</h2>
 
+<div id="root">
+
+</div>
+
+
+
+@*<script src="~/scripts/Transaction/Transaction.js"></script>
+  <script src="~/scripts/Transaction/Control.js"></script>
+  <script src="~/scripts/Transaction/Department.js"></script>
+  <script src="~/scripts/Transaction/PaymentType.js"></script>*@
+<script src="~/lib/react/umd/react.development.js"></script>
+<script src="~/lib/react-dom/umd/react-dom.development.js"></script>
+@*<script src="~/scripts/Utilities.js"></script>*@
+<script src="~/scripts/Transaction/Transaction.js"></script>
+<script src="~/scripts/Transaction/app.js"></script>
+
+
+@*<script type="module">
+
+      //import * as App from 'app';
+      //document.addEventListener("DOMContentLoaded", function (event)
+      //{
+
+      //  //render(<Transact />, document.getElementById("root"));
+      //  App.Start();
+      //});
+  (function (factory) {
+      if (typeof module === "object" && typeof module.exports === "object") {
+          var v = factory(require, exports);
+          if (v !== undefined) module.exports = v;
+      }
+      else if (typeof define === "function" && define.amd) {
+          define(["require", "exports", "../../lib/react/umd/react.development", "../../lib/react-dom/umd/react-dom.development", "./Transaction"], factory);
+      }
+  })(function (require, exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      //declare var ReactDOM: any;
+      const React = require("../../lib/react/umd/react.development");
+      const react_dom_development_1 = require("../../lib/react-dom/umd/react-dom.development");
+      const Transaction_1 = require("./Transaction");
+      //  //let departments: Array<Transaction.Department> = [];
+      //    //Transaction.Department.GetDepartments();
+      //console.log('Start');
+      react_dom_development_1.render(React.createElement(Transaction_1.default, null), document.getElementById("root"));
+  });
+
+    </script>*@
