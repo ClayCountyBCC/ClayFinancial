@@ -11,7 +11,8 @@ namespace ClayFinancial.Models.DataControl
   /*
    * 
    *  This class will be designed to facilitate
-   *  the maintenance of the core data used in the ClayFinancial application.
+   *  the maintenance of the following core data_types 
+   *  used in the ClayFinancial application:
    *  
    *    1. Payment Types
    *    2. Departments
@@ -24,7 +25,6 @@ namespace ClayFinancial.Models.DataControl
    *  
    *  This class is not concerned with any trasnactions,
    *  only the core data used to render them.
-   *  
    *  
    * 
   */
@@ -48,13 +48,13 @@ namespace ClayFinancial.Models.DataControl
 
     }
     
-    public List<DataControl> SaveNewPaymentType()
+    public List<DataControl> SaveNewPaymentType(DataControl new_payment_type)
     {
 
       return new List<DataControl>();
     }
 
-    public List<DataControl> UpdatePaymentType()
+    public List<DataControl> UpdatePaymentType(DataControl old_payment_type)
     {
 
       return new List<DataControl>();
