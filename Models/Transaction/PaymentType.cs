@@ -7,25 +7,49 @@ namespace ClayFinancial.Models.Transaction
 {
   public class PaymentType
   {
+    public int department_id { get; set; }
     public int id { get; set; }
     public string name { get; set; }
     public bool is_active { get; set; }
     public bool does_tax_exempt_apply { get; set; }
+    public List<Control> controls { get; set; } = new List<Control>();
     
     public PaymentType() { }
 
     public static List<PaymentType> Get()
     {
+      var controls = (from c in Control.GetCached()
+                      where c.is_active &&
+                      c.payment_type_id.HasValue
+                      select c).ToList();
+
       string sql = @"
         SELECT
-          id
+          department_id
+          ,id
           ,name
           ,does_tax_exempt_apply
           ,is_active
-        FROM departments
-        WHERE is_active = 1
-        ORDER BY name ASC";
-      return Constants.Get_Data<PaymentType>(sql, Constants.ConnectionString.ClayFinancial);
+        FROM vw_payment_types
+        ORDER BY department_id ASC, name ASC";
+      var payment_types = Constants.Get_Data<PaymentType>(sql, Constants.ConnectionString.ClayFinancial);
+
+
+      foreach(PaymentType pt in payment_types)
+      {
+        pt.controls.AddRange((from c in controls
+                              where c.payment_type_id == pt.id
+                              select c).ToList());
+      }
+
+
+      return payment_types;
     }
+
+    public static List<PaymentType> GetCached()
+    {
+      return (List<PaymentType>)myCache.GetItem("payment_types");
+    }
+
   }
 }

@@ -10,5 +10,9 @@
   {
     "outputFile": "lib/myBulma.css",
     "inputFile": "lib/myBulma.sass"
+  },
+  {
+    "outputFile": "lib/Utilities.css",
+    "inputFile": "lib/Utilities.scss"
   }
 ]

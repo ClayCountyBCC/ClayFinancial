@@ -7,6 +7,10 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Control
   {
+    public int? department_id { get; set; } 
+    public int? department_sort_order { get; set; } 
+    public int? payment_type_id { get; set; } 
+    public int? payment_type_sort_order { get; set; } 
     public int id { get; set; }
     public string label { get; set; }
     public string value { get; set; }    
@@ -22,7 +26,11 @@ namespace ClayFinancial.Models.Transaction
     {
       string sql = @"
         SELECT
-          id
+          department_id
+          ,department_sort_order
+          ,payment_type_id
+          ,payment_type_sort_order
+          ,id
           ,label
           ,value
           ,group_by
@@ -30,11 +38,23 @@ namespace ClayFinancial.Models.Transaction
           ,is_active
           ,required
           ,max_length
-          ,ISNULL(validation_regex, '') validation_regex
-        FROM departments
-        WHERE is_active = 1
-        ORDER BY name ASC";
+          ,validation_regex
+        FROM vw_controls
+        WHERE 
+          (department_id IS NOT NULL
+          OR payment_type_id IS NOT NULL)
+        ORDER BY 
+          department_id ASC, 
+          department_sort_order ASC, 
+          payment_type_id ASC, 
+          payment_type_sort_order ASC";
       return Constants.Get_Data<Control>(sql, Constants.ConnectionString.ClayFinancial);
     }
+
+    public static List<Control> GetCached()
+    {
+      return (List<Control>)myCache.GetItem("controls");
+    }
+
   }
 }

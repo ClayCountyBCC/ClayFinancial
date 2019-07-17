@@ -1,35 +1,3 @@
-﻿
-@{
-  ViewBag.Title = "Index";
-  Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<h2>This stuff is working gud</h2>
-
-<div id="root">
-
-</div>
-
-
-
-@*<script src="~/scripts/Transaction/Transaction.js"></script>
-  <script src="~/scripts/Transaction/Control.js"></script>
-  <script src="~/scripts/Transaction/Department.js"></script>
-  <script src="~/scripts/Transaction/PaymentType.js"></script>*@
-@*<script src="~/lib/react/umd/react.development.js"></script>
-<script src="~/lib/react-dom/umd/react-dom.development.js"></script>*@
-@*<script src="~/scripts/Utilities.js"></script>
-<script src="~/scripts/Transaction/app.js"></script>*@
-
-<script type="module">
-  
-    //import * as App from 'app';
-    //document.addEventListener("DOMContentLoaded", function (event)
-    //{
-
-    //  //render(<Transact />, document.getElementById("root"));
-    //  App.Start();
-    //});
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
@@ -50,5 +18,4 @@
     //console.log('Start');    
     react_dom_development_1.render(React.createElement(Transaction_1.default, null), document.getElementById("root"));
 });
-
-  </script>
+//# sourceMappingURL=app.js.map
