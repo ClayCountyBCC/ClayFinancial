@@ -1,6 +1,7 @@
-﻿import * as React from '../../lib/react/umd/react.development';
+﻿//import * as React from '../../lib/react/umd/react.development';
+//import React = require('react');
 
-const Transact = () =>
+const Transact: React.FunctionComponent = () =>
 {
   return (
     <div>
@@ -9,4 +10,4 @@ const Transact = () =>
   );
 }
 
-export default Transact;
+//export default Transact;
