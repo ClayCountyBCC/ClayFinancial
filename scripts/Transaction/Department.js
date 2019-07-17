@@ -2,7 +2,7 @@ var Transaction;
 (function (Transaction) {
     class Department {
         constructor() {
-            this.organisation = "";
+            this.organization = "";
             this.payment_types = [];
             this.controls = [];
         }
@@ -28,4 +28,4 @@ var Transaction;
     }
     Transaction.Department = Department;
 })(Transaction || (Transaction = {}));
-//# sourceMappingURL=Department.js.map
+//# sourceMappingURL=department.js.map

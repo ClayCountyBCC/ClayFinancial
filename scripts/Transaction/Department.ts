@@ -6,7 +6,7 @@
     id: number;
     name: string;
     is_active: boolean;
-    organisation: string;
+    organization: string;
     payment_types: Array<PaymentType>;
     controls: Array<Control>;
   }
@@ -16,7 +16,7 @@
     public id: number;
     public name: string;
     public is_active: boolean;
-    public organisation: string = "";
+    public organization: string = "";
     public payment_types: Array<PaymentType> = [];
     public controls: Array<Control> = [];
 

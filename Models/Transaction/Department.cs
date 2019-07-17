@@ -10,7 +10,7 @@ namespace ClayFinancial.Models.Transaction
     public int id { get; set; }
     public string name { get; set; }
     public bool is_active { get; set; }
-    public string organisation { get; set; }
+    public string organization { get; set; }
     public List<PaymentType> payment_types { get; set; } = new List<PaymentType>();
     public List<Control> controls { get; set; } = new List<Control>();
 
@@ -33,7 +33,7 @@ namespace ClayFinancial.Models.Transaction
         SELECT
           id
           ,name
-          ,ISNULL(organisation, '') organisation
+          ,ISNULL(organization, '') organization
           ,is_active
         FROM departments        
         ORDER BY name ASC";
