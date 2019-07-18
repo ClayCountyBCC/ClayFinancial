@@ -8,4 +8,10 @@
 //    //Transaction.Department.GetDepartments();    
 //console.log('Start');    
 ReactDOM.render(React.createElement(Transact, null), document.getElementById("root"));
+//ReactDOM.render(
+//  <ol>{listItems}</ol>,
+//  document.getElementById('number')
+//);
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(React.createElement(NumberList, { numbers: numbers }), document.getElementById('number2'));
 //# sourceMappingURL=app.js.map

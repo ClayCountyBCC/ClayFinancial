@@ -16,11 +16,18 @@
 ReactDOM.render(<Transact />, document.getElementById("root"));
     
   
+//ReactDOM.render(
+//  <ol>{listItems}</ol>,
+//  document.getElementById('number')
+//);
 
 
 
-
-
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('number2')
+);
 
 
 

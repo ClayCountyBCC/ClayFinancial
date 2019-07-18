@@ -28,4 +28,4 @@ var Transaction;
     }
     Transaction.Department = Department;
 })(Transaction || (Transaction = {}));
-//# sourceMappingURL=department.js.map
+//# sourceMappingURL=Department.js.map
