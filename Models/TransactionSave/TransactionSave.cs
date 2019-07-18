@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace ClayFinancial.Models.Transaction
+namespace ClayFinancial.Models.TransactionSave
 {
   public class TransactionSave // temp name till I figure out more stuff
   {
@@ -15,13 +15,12 @@ namespace ClayFinancial.Models.Transaction
      *  - parent_transaction_id -- note: this is only true if one exists, other wise will be "";
      *  - department
      *    + name
-     *    + organization
      *    + is_active
      *    +department_control_data
      *      - control_id
      *      - value
      *      - is_active
-     *    + payment_type
+     *    + payment_type[]
      *        - tax_exempt
      *        - payment_type_controls[]
      *           + transaction_payment_type_id
