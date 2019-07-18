@@ -7,15 +7,15 @@ namespace ClayFinancial.Models.Transaction
 {
   public class ControlData
   {
-    // Read only class. this is data coming from the client.
-    public int control_id { get; }
-    public string label { get; }
-    public string value { get; }
+    // Read only class. this is control data coming from the client.
+    public string label { get; } = "";
+    public string value { get; } = "";
 
     public ControlData()
     {
       
     }
+
 
     
   }

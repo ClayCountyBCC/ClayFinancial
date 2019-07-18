@@ -34,9 +34,17 @@ namespace ClayFinancial.Models.Transaction
     public List<PaymentMethodData> payment_methods { get; set; }
 
 
+
     public PaymentTypeData Get()
     {
       return new PaymentTypeData();
+    }
+
+    public bool Validate()
+    {
+
+      return true;
+
     }
 
     public PaymentTypeData Save()
