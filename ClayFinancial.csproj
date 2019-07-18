@@ -1743,9 +1743,14 @@
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\myCache.cs" />
     <Compile Include="Models\Transaction\Control.cs" />
+    <Compile Include="Models\Transaction\ControlData.cs" />
     <Compile Include="Models\Transaction\Department.cs" />
+    <Compile Include="Models\Transaction\DepartmentData.cs" />
+    <Compile Include="Models\Transaction\PaymentMethodData.cs" />
     <Compile Include="Models\Transaction\PaymentType.cs" />
+    <Compile Include="Models\Transaction\PaymentTypeData.cs" />
     <Compile Include="Models\Transaction\Transaction.cs" />
+    <Compile Include="Models\Transaction\TransactionSave.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
