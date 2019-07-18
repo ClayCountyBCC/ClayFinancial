@@ -1,7 +1,7 @@
 //import * as React from '../../lib/react/umd/react.development';
 //import React = require('react');
-const Transact = () => {
-    return (React.createElement("div", null, "Hey there"));
+const Transact = (props) => {
+    return (React.createElement("div", null, props.count));
 };
 //const numbers = [1, 2, 4,3, 5];
 //numbers.sort();

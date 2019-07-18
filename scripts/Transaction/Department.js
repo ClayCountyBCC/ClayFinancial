@@ -20,9 +20,11 @@ var Transaction;
             Promise.resolve(Utilities.Get(path + "API/Transaction/Departments")
                 .then(function (departments) {
                 console.log("departments", departments);
-                //Transaction.departments = departments;
+                Transaction.departments = departments;
+                console.log('Transaction.departments', Transaction.departments);
             }, function (e) {
                 console.log('error getting departments', e);
+                Transaction.departments = [];
             }));
         }
     }
