@@ -20,12 +20,14 @@ var Transaction;
             Promise.resolve(Utilities.Get(path + "API/Transaction/Departments")
                 .then(function (departments) {
                 console.log("departments", departments);
-                //Transaction.departments = departments;
+                Transaction.departments = departments;
+                console.log('Transaction.departments', Transaction.departments);
             }, function (e) {
                 console.log('error getting departments', e);
+                Transaction.departments = [];
             }));
         }
     }
     Transaction.Department = Department;
 })(Transaction || (Transaction = {}));
-//# sourceMappingURL=department.js.map
+//# sourceMappingURL=Department.js.map

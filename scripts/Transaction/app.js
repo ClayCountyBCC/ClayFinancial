@@ -5,7 +5,10 @@
 //import React = require('react');
 //import ReactDOM = require('react-dom');
 //import * as Transact from './Transaction';
-//    //Transaction.Department.GetDepartments();    
-//console.log('Start');    
-ReactDOM.render(React.createElement(Transact, null), document.getElementById("root"));
+var Transaction;
+(function (Transaction) {
+    Transaction.departments = [];
+    Transaction.Department.GetDepartments();
+    ReactDOM.render(React.createElement(Transact, { count: Transaction.departments.length }), document.getElementById("root"));
+})(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

@@ -9,16 +9,19 @@
 //import * as Transact from './Transaction';
 
 
+namespace Transaction
+{
+  export let departments: Array<Department> = [];
 
-
-//    //Transaction.Department.GetDepartments();    
-//console.log('Start');    
-ReactDOM.render(<Transact />, document.getElementById("root"));
-    
   
+  Transaction.Department.GetDepartments();  
+  
+  ReactDOM.render(<Transact count={Transaction.departments.length} />, document.getElementById("root"));
 
 
 
+
+}
 
 
 
