@@ -1,14 +1,23 @@
-//declare var ReactDOM: any;
-//import * as React from '../../lib/react/umd/react.development';
-//import * as ReactDOM from '../../lib/react-dom/umd/react-dom.development';
-//import * as React from '../../lib/react/umd/react.development';
-//import React = require('react');
-//import ReactDOM = require('react-dom');
-//import * as Transact from './Transaction';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var Transaction;
 (function (Transaction) {
     Transaction.departments = [];
-    Transaction.Department.GetDepartments();
-    ReactDOM.render(React.createElement(Transact, { count: Transaction.departments.length }), document.getElementById("root"));
+    function Start() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield Transaction.Department.GetDepartments().then((d) => {
+                Transaction.departments = d;
+                console.log(d);
+            });
+            console.log('departments', Transaction.departments);
+        });
+    }
+    Transaction.Start = Start;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

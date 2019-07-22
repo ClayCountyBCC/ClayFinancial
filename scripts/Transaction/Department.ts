@@ -34,22 +34,23 @@
     }
 
 
-    public static GetDepartments(): void
+    public static GetDepartments(): Promise<Array<Department>>
     {
       let path = Department.GetPath();
-      Promise.resolve(Utilities.Get<Array<Department>>(path + "API/Transaction/Departments")
-        .then(function (departments: Array<Department>)
-        {
-          console.log("departments", departments);
-          Transaction.departments = departments;
-          console.log('Transaction.departments', Transaction.departments);          
+      return Utilities.Get<Array<Department>>(path + "API/Transaction/Departments");
+      //Promise.resolve(Utilities.Get<Array<Department>>(path + "API/Transaction/Departments")
+      //  .then(function (departments: Array<Department>)
+      //  {
+      //    console.log("departments", departments);
+      //    Transaction.departments = departments;
+      //    console.log('Transaction.departments', Transaction.departments);          
 
-        }, function (e: Error)
-          {
-            console.log('error getting departments', e);
-            Transaction.departments = [];
+      //  }, function (e: Error)
+      //    {
+      //      console.log('error getting departments', e);
+      //      Transaction.departments = [];
           
-          }));
+      //    }));
 
     }
 

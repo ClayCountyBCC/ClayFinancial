@@ -256,9 +256,32 @@ namespace Utilities
     }
   }
 
-  export function Get<T>(url: string): Promise<T>
+  // original Get Function
+  //export function Get<T>(url: string): Promise<T>
+  //{
+  //  return fetch(url,
+  //    {
+  //      method: "GET",
+  //      headers: {
+  //        "Content-Type": "application/json"//,"Upgrade-Insecure-Requests": "1"
+  //      },
+  //      cache: "no-cache",
+  //      credentials: "include"
+  //    }
+  //  )
+  //    .then(response =>
+  //    {
+  //      if (!response.ok)
+  //      {
+  //        throw new Error(response.statusText)
+  //      }
+  //      return response.json();
+  //    });
+  //}
+
+  export async function Get<T>(url: string): Promise<T>
   {
-    return fetch(url,
+    const response = await fetch(url,
       {
         method: "GET",
         headers: {
@@ -267,15 +290,12 @@ namespace Utilities
         cache: "no-cache",
         credentials: "include"
       }
-    )
-      .then(response =>
-      {
-        if (!response.ok)
-        {
-          throw new Error(response.statusText)
-        }
-        return response.json();
-      });
+    );
+    if (!response.ok)
+    {
+      throw new Error(response.statusText);
+    }
+    return await response.json();    
   }
 
   export function Post<T>(url: string, data: object): Promise<T>

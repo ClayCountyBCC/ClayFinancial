@@ -1,4 +1,12 @@
 /// <reference path="MenuItem.ts" />
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var Utilities;
 (function (Utilities) {
     function Hide(e) {
@@ -183,20 +191,42 @@ var Utilities;
         }
     }
     Utilities.Show_Hide_Selector = Show_Hide_Selector;
+    // original Get Function
+    //export function Get<T>(url: string): Promise<T>
+    //{
+    //  return fetch(url,
+    //    {
+    //      method: "GET",
+    //      headers: {
+    //        "Content-Type": "application/json"//,"Upgrade-Insecure-Requests": "1"
+    //      },
+    //      cache: "no-cache",
+    //      credentials: "include"
+    //    }
+    //  )
+    //    .then(response =>
+    //    {
+    //      if (!response.ok)
+    //      {
+    //        throw new Error(response.statusText)
+    //      }
+    //      return response.json();
+    //    });
+    //}
     function Get(url) {
-        return fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json" //,"Upgrade-Insecure-Requests": "1"
-            },
-            cache: "no-cache",
-            credentials: "include"
-        })
-            .then(response => {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json" //,"Upgrade-Insecure-Requests": "1"
+                },
+                cache: "no-cache",
+                credentials: "include"
+            });
             if (!response.ok) {
                 throw new Error(response.statusText);
             }
-            return response.json();
+            return yield response.json();
         });
     }
     Utilities.Get = Get;
