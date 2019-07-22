@@ -1732,7 +1732,6 @@
     <Compile Include="Models\Transaction\Control.cs" />
     <Compile Include="Models\Transaction\Data\ControlData.cs" />
     <Compile Include="Models\Transaction\Department.cs" />
-    <Compile Include="Models\Transaction\Data\DepartmentData.cs" />
     <Compile Include="Models\Transaction\Data\PaymentMethodData.cs" />
     <Compile Include="Models\Transaction\PaymentType.cs" />
     <Compile Include="Models\Transaction\Data\PaymentTypeData.cs" />
@@ -1886,11 +1885,10 @@
     <TypeScriptCompile Include="scripts\Transaction\app.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Control.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Data\ControlData.ts" />
-    <TypeScriptCompile Include="scripts\Transaction\Data\DepartmentData.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Data\PaymentTypeData.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Department.ts" />
     <TypeScriptCompile Include="scripts\Transaction\PaymentType.ts" />
-    <TypeScriptCompile Include="scripts\Transaction\Transaction.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\Data\ReceiptData.ts" />
     <TypeScriptCompile Include="scripts\Utilities.ts" />
   </ItemGroup>
   <ItemGroup>
