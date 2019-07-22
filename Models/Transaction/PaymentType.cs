@@ -13,7 +13,8 @@ namespace ClayFinancial.Models.Transaction
     public bool is_active { get; set; }
     public bool does_tax_exempt_apply { get; set; }
     public List<Control> controls { get; set; } = new List<Control>();
-    
+    public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
+
     public PaymentType() { }
 
     public static List<PaymentType> Get()
@@ -37,9 +38,14 @@ namespace ClayFinancial.Models.Transaction
 
       foreach(PaymentType pt in payment_types)
       {
-        pt.controls.AddRange((from c in controls
-                              where c.payment_type_id == pt.id
-                              select c).ToList());
+        var tmpControls = from c in controls
+                          where c.payment_type_id == pt.id
+                          select c;
+        foreach(Control c in tmpControls)
+        {
+          pt.controls.Add(c);
+          pt.controls_dict[c.id] = c;
+        }
       }
 
 

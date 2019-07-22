@@ -13,6 +13,8 @@ namespace ClayFinancial.Models.Transaction
     public string organization { get; set; }
     public List<PaymentType> payment_types { get; set; } = new List<PaymentType>();
     public List<Control> controls { get; set; } = new List<Control>();
+    public Dictionary<int, PaymentType> payment_types_dict { get; set; } = new Dictionary<int, PaymentType>();
+    public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
 
     public Department() { }
 
@@ -42,22 +44,53 @@ namespace ClayFinancial.Models.Transaction
 
       foreach(Department d in departments)
       {
-        d.controls.AddRange((from c in controls
-                             where c.department_id == d.id
-                             select c).ToList());
 
-        d.payment_types.AddRange((from pt in payment_types
-                                  where pt.department_id == d.id
-                                  select pt).ToList());
+        var tmpControls = from c in controls
+                          where c.department_id == d.id
+                          select c;
+        
+        foreach(Control c in tmpControls)
+        {
+          d.controls_dict[c.id] = c;
+          d.controls.Add(c);
+        }
+
+        var tmpPaymentTypes = from pt in payment_types
+                              where pt.department_id == d.id
+                              select pt;
+
+        
+        foreach(PaymentType pt in tmpPaymentTypes)
+        {
+          d.payment_types_dict[pt.id] = pt;
+          d.payment_types.Add(pt);
+        }
+
       }
 
 
       return departments;
     }
 
+    public static Dictionary<int, Department> Get_Dict()
+    {
+      var departments = Department.GetCached();
+      var d = new Dictionary<int, Department>();
+      foreach(Department dept in departments)
+      {
+        d[dept.id] = dept;
+      }
+      return d;
+    }
+
     public static List<Department> GetCached()
     {
       return (List<Department>)myCache.GetItem("departments");
+    }
+
+    public static Dictionary<int, Department> GetCachedDict()
+    {
+      return (Dictionary<int, Department>)myCache.GetItem("departments_dict");
     }
 
   }

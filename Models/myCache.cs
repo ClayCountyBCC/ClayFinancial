@@ -86,6 +86,9 @@ namespace ClayFinancial.Models
         case "departments":
           return Transaction.Department.Get();
 
+        case "departments_dict":
+          return Transaction.Department.Get_Dict();
+
         case "payment_types":
           return Transaction.PaymentType.Get();
 
