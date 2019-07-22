@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace ClayFinancial.Models.TransactionSave
+namespace ClayFinancial.Models.Transaction.Data
 {
   public class TransactionSave // temp name till I figure out more stuff
   {

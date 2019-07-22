@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace ClayFinancial.Models.TransactionSave
+namespace ClayFinancial.Models.Transaction.Data
 {
-  public class PaymentTypeData
+  public class DepartmentData
   {
 
     /*
      * 
-     * 
-     * 
-     *      + payment_type
+     *    +department_control_data
+     *      - control_id
+     *      - value
+     *      - is_active
+     *    + payment_type
      *        - tax_exempt
      *        - payment_type_controls[]
      *           + transaction_payment_type_id
@@ -26,30 +28,32 @@ namespace ClayFinancial.Models.TransactionSave
      *          + check_from
      *          + paying_for
      *          + is_active
-     * */
+     */
 
-    public string transaction_id { get; set; }
-    public bool tax_exempt { get; set; }
+
+    public int department_id { get; set; }
     public List<ControlData> controls { get; set; }
-    public List<PaymentMethodData> payment_methods { get; set; }
+    public List<PaymentTypeData> payment_types { get; set; }
 
 
-
-    public PaymentTypeData Get()
+    public DepartmentData()
     {
-      return new PaymentTypeData();
+
     }
+
 
     public bool Validate()
     {
 
       return true;
-
     }
 
-    public PaymentTypeData Save()
+    public DepartmentData Get()
     {
-      return new PaymentTypeData();
+
+      return new DepartmentData();
     }
+
   }
 }
+ 
