@@ -19,5 +19,11 @@ var Transaction;
         });
     }
     Transaction.Start = Start;
+    function NewReceipt() {
+    }
+    Transaction.NewReceipt = NewReceipt;
+    function NewDeposit() {
+    }
+    Transaction.NewDeposit = NewDeposit;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

@@ -32,8 +32,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
     public int department_id { get; set; }
-    public List<ControlData> controls { get; set; }
-    public List<PaymentTypeData> payment_types { get; set; }
+    public List<ControlData> control_data { get; set; }
+    public List<PaymentTypeData> payment_type_data { get; set; }
 
 
     public DepartmentData()

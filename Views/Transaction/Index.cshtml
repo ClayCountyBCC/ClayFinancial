@@ -4,14 +4,36 @@
   Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>This stuff is working gud</h2>
+<nav class="navbar hide-for-print" 
+     style="background-color: #5AB3FF;"
+     role="navigation" 
+     aria-label="page navigation">
+  <div class="container">
+    <div class="navbar-menu is-active">
+      <div class="navbar-start">
+      </div>
+      <div class="navbar-end">
+        <a onclick="Transaction.NewReceipt();"
+           class="navbar-item light-function">
+          New Receipt
+        </a>
+        <a onclick="Transaction.NewDeposit();"
+           class="navbar-item light-function is-light">
+          New Deposit
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
 
+<div class="container"
+     id="root">
 
-
+</div>
 
 <script src="~/scripts/Transaction/PaymentType.js"></script>
 <script src="~/scripts/Transaction/Control.js"></script>
-<script src="~/scripts/Transaction/Department.js"></script>  
+<script src="~/scripts/Transaction/Department.js"></script>
 <script src="~/scripts/Transaction/app.js"></script>
 
 

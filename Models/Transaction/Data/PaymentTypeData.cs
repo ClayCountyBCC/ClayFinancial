@@ -28,11 +28,9 @@ namespace ClayFinancial.Models.Transaction.Data
      *          + is_active
      * */
 
-    public string transaction_id { get; set; }
+    public long transaction_id { get; set; }
     public bool tax_exempt { get; set; }
-    public List<ControlData> controls { get; set; }
-    public List<PaymentMethodData> payment_methods { get; set; }
-
+    public List<ControlData> control_data { get; set; }    
 
 
     public PaymentTypeData Get()

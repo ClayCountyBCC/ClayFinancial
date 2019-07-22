@@ -1,6 +1,7 @@
 ﻿namespace Transaction
 {
   export let departments: Array<Department> = [];
+  export let currentTransaction: Transaction = null;
 
   export async function Start()
   {
@@ -12,5 +13,17 @@
     });
     console.log('departments', Transaction.departments);
   }
+
+
+  export function NewReceipt()
+  {
+    
+  }
+
+  export function NewDeposit()
+  {
+
+  }
+
 
 }

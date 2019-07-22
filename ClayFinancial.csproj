@@ -1885,8 +1885,12 @@
     <TypeScriptCompile Include="scripts\MenuItem.ts" />
     <TypeScriptCompile Include="scripts\Transaction\app.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Control.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\Data\ControlData.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\Data\DepartmentData.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\Data\PaymentTypeData.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Department.ts" />
     <TypeScriptCompile Include="scripts\Transaction\PaymentType.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\Transaction.ts" />
     <TypeScriptCompile Include="scripts\Utilities.ts" />
   </ItemGroup>
   <ItemGroup>
