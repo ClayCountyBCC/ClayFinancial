@@ -9,9 +9,6 @@ namespace ClayFinancial.Models.Transaction.Data
   {
 
     /*
-     * 
-     * 
-     * 
      *      + payment_type
      *        - tax_exempt
      *        - payment_type_controls[]
@@ -27,9 +24,11 @@ namespace ClayFinancial.Models.Transaction.Data
      *          + paying_for
      *          + is_active
      * */
-
+    public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
     public bool tax_exempt { get; set; }
+    public int payment_type_id { get; set; }
+    public int payment_type_counter { get; set; }
     public List<ControlData> control_data { get; set; }    
 
 
