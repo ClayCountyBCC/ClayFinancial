@@ -1,7 +1,7 @@
 ﻿namespace Transaction
 {
   export let departments: Array<Department> = [];
-  export let currentTransaction: Transaction = null;
+  //export let currentTransaction: Data.ReceiptData = null;
 
   export async function Start()
   {

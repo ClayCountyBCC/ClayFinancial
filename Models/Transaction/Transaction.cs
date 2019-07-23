@@ -19,5 +19,10 @@ namespace ClayFinancial.Models.Transaction
     public int department_id { get; set; }
     public string department { get; set; }
 
+
+    public Transaction() { }
+
+
+
   }
 }

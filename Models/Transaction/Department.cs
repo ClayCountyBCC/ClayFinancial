@@ -93,5 +93,11 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Department>)myCache.GetItem("departments_dict");
     }
 
+
+    private string Validate()
+    {
+
+      return "";
+    }
   }
 }

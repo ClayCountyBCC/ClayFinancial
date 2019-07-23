@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var Transaction;
 (function (Transaction) {
     Transaction.departments = [];
+    //export let currentTransaction: Data.ReceiptData = null;
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments().then((d) => {
