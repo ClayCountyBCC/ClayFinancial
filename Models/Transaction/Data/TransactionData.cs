@@ -5,14 +5,14 @@ using System.Web;
 
 namespace ClayFinancial.Models.Transaction.Data
 {
-  public class TransactionSave // temp name till I figure out more stuff
+  public class TransactionData // temp name till I figure out more stuff
   {
     /*  
      *  
      * 
      * Transaction has
      *  - id
-     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be "";
+     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be -1;
      *  - department
      *    + name
      *    + is_active
@@ -42,17 +42,17 @@ namespace ClayFinancial.Models.Transaction.Data
      *  
      * */
 
-    public int year { get; set; }
+    public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
     public long transaction_id { get; set; }
-    public long parent_transaction_id { get; set; }
+    public long parent_transaction_id { get; set; } = -1;
     public int department_id { get; set; }
     public List<ControlData> department_controls { get; set; }
 
 
-    public TransactionSave()
+    public TransactionData()
     {
       
     }
@@ -65,10 +65,10 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public TransactionSave Save()
+    public TransactionData Save()
     {
 
-      return new TransactionSave();
+      return new TransactionData();
     }
 
   }

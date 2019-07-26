@@ -7,7 +7,7 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Transaction
   {
-    public int year { get; set; }
+    public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }

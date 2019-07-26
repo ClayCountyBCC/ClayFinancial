@@ -26,6 +26,7 @@ namespace ClayFinancial.Models.Transaction.Data
      *          + check_from
      *          + paying_for
      *          + is_active
+     *          
      * */
     public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
@@ -40,15 +41,19 @@ namespace ClayFinancial.Models.Transaction.Data
       return new PaymentTypeData();
     }
 
-    public bool Validate()
+    public string Validate()
     {
 
-      return true;
-
+      return "";
     }
 
+    // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
+    // THAT WILL POPULATE THE DATATABLE AND RETURN THAT AFTER THE DATA IS VALIDATED. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
+    // ControlData.Save() AND PaymentMethodData.Save().
     public PaymentTypeData Save()
     {
+      var dt = CreatePaymentTypeDataTable();
+
       return new PaymentTypeData();
     }
 
@@ -59,19 +64,13 @@ namespace ClayFinancial.Models.Transaction.Data
         // Pass name of column and type for each column
       var dt = new DataTable("PaymentTypeData");
 
-      var transaction_payment_type_id = new DataColumn("transaction_payment_type_id", typeof(long));
-      var transaction_id = new DataColumn("transaction_id",typeof(long));
-      var payment_type_id = new DataColumn("payment_type_id", typeof(short));
-      var payment_type_index = new DataColumn("payment_type_index", typeof(short));
-      var tax_exempt = new DataColumn("tax_exempt", typeof(bool));
-
-      dt.Columns.Add(transaction_payment_type_id);
-      dt.Columns.Add(transaction_id);
-      dt.Columns.Add(payment_type_id);
-      dt.Columns.Add(payment_type_index);
-      dt.Columns.Add(tax_exempt);
+      dt.Columns.Add(new DataColumn("transaction_payment_type_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("payment_type_id", typeof(short)));
+      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
+      dt.Columns.Add(new DataColumn("tax_exempt", typeof(bool)));
 
       return dt;
     }
   }
-}
+}// get the next transaction id

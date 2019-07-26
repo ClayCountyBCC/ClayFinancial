@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
+
 
 namespace ClayFinancial.Models.Transaction.Data
 {
@@ -25,7 +29,53 @@ namespace ClayFinancial.Models.Transaction.Data
       
     }
 
-    
-    
+    public ControlData Get()
+    {
+
+      return new ControlData();
+    }
+
+    public string Validate()
+    {
+
+      return "";
+    }
+
+
+    // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
+    // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
+    // PaymentTypeData.Save() AND PaymentMethodData.Save().
+    public ControlData Save()
+    {
+
+      var dt = CreateControlDataTable();
+
+
+
+      return new ControlData();
+    }
+
+    private DataTable CreateControlDataTable()
+    {
+
+      var dt = new DataTable("ControlData");
+
+
+      dt.Columns.Add(new DataColumn("control_data_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("transaction_payment_type_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("department_id", typeof(short)));
+      dt.Columns.Add(new DataColumn("control_id", typeof(short)));
+      dt.Columns.Add(new DataColumn("value", typeof(string)));
+      dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
+      dt.Columns.Add(new DataColumn("created_on", typeof(DateTime)));
+      dt.Columns.Add(new DataColumn("created_by", typeof(string)));
+      dt.Columns.Add(new DataColumn("modified_on", typeof(DateTime)));
+      dt.Columns.Add(new DataColumn("modified_by", typeof(string)));
+
+
+      return dt;
+
+    }
   }
 }
