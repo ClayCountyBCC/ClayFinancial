@@ -45,26 +45,23 @@ namespace ClayFinancial.Models.Transaction.Data
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
     // PaymentTypeData.Save() AND PaymentMethodData.Save().
-    public ControlData Save()
+    public static DataTable GetControlDataTable()
     {
 
       var dt = CreateControlDataTable();
 
-
-
-      return new ControlData();
+      return dt;
     }
 
-    private DataTable CreateControlDataTable()
+    private static DataTable CreateControlDataTable()
     {
 
       var dt = new DataTable("ControlData");
 
 
       dt.Columns.Add(new DataColumn("control_data_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("transaction_payment_type_id", typeof(long)));
       dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("department_id", typeof(short)));
+      dt.Columns.Add(new DataColumn("department_id", typeof(short))); // all records will have the same department_id; this should be validated
       dt.Columns.Add(new DataColumn("control_id", typeof(short)));
       dt.Columns.Add(new DataColumn("value", typeof(string)));
       dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
@@ -72,6 +69,9 @@ namespace ClayFinancial.Models.Transaction.Data
       dt.Columns.Add(new DataColumn("created_by", typeof(string)));
       dt.Columns.Add(new DataColumn("modified_on", typeof(DateTime)));
       dt.Columns.Add(new DataColumn("modified_by", typeof(string)));
+      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long))); // only used if being populated as payment type control
+      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short))); // only used if being populated as payment type control
+
 
 
       return dt;

@@ -29,7 +29,7 @@ namespace ClayFinancial.Models
       ErrorMessage = message;
       ErrorStacktrace = stacktrace;
       ErrorSource = source;
-      Query = errorQuery;
+      Query = (Constants.UseProduction() ? "PRODUCTION" : "DEVELOPMENT") + errorQuery;
       SaveLog();
     }
 
@@ -39,7 +39,7 @@ namespace ClayFinancial.Models
       ErrorMessage = ex.Message;
       ErrorStacktrace = ex.StackTrace;
       ErrorSource = ex.Source;
-      Query = errorQuery;
+      Query = (Constants.UseProduction() ? "PRODUCTION" : "DEVELOPMENT") + errorQuery;
       SaveLog();
     }
 

@@ -33,8 +33,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool tax_exempt { get; set; }
     public int payment_type_id { get; set; }
     public int payment_type_index { get; set; }
-  
-
+    public List<PaymentMethodData> payment_methods { get; set; }
+    public List<ControlData> controls { get; set; }
 
     public PaymentTypeData Get()
     {
@@ -50,23 +50,9 @@ namespace ClayFinancial.Models.Transaction.Data
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT AFTER THE DATA IS VALIDATED. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentMethodData.Save().
-    public static DataTable GetPaymentTypeDataTable(List<PaymentTypeData> all_payment_type_data)
+    public static DataTable GetPaymentTypeDataTable()
     {
       var dt = CreatePaymentTypeDataTable();
-
-      if (all_payment_type_data == null || all_payment_type_data.Count() == 0) return dt;
-
-      foreach(var ptd in all_payment_type_data)
-      {
-        dt.Rows.Add
-        (
-          ptd.transaction_id,
-          ptd.tax_exempt,
-          ptd.payment_type_id,
-          ptd.payment_type_index
-        );
-      }
-
 
       return dt;
     }

@@ -1722,6 +1722,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\API\DepartmentController.cs" />
+    <Compile Include="Controllers\API\Transaction\Data\TransactionDataController.cs" />
     <Compile Include="Controllers\MVC\TransactionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
