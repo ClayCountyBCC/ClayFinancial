@@ -5,7 +5,7 @@ using System.Web;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
-using ClayFinancial.Models.Transaction;
+using ClayFinancial.Models;
 
 
 namespace ClayFinancial.Models.Transaction.Data
@@ -51,7 +51,9 @@ namespace ClayFinancial.Models.Transaction.Data
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
     public int created_by_employee_id { get; set; }
-    public int created_by_employee_ip_address { get; set; }
+    public string username { get; set; }
+    public string display_name { get; set; }
+    public string created_by_employee_ip_address { get; set; }
     public DateTime created_on { get; set; }
     public long parent_transaction_id { get; set; } = -1;
     public int department_id { get; set; }
@@ -110,13 +112,17 @@ namespace ClayFinancial.Models.Transaction.Data
       return td.First();
     }
 
-    public void SetUserProperties(/* UserAccess ua */)
+    public void SetUserProperties(UserAccess ua)
     {
-      // TODO: set values to user identifying properties here where UA is included in project
-      
+
+      // set all user properties here
+      created_by_employee_id = ua.employee_id;
+      username = ua.user_name;
+      display_name = ua.display_name;
+     
     }
 
-    public TransactionData Save(/* TODO: add UserAccess ua*/ )
+    public TransactionData Save()
     {
 
       var controlDataTable = ControlData.GetControlDataTable();
