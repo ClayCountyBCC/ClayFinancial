@@ -49,22 +49,37 @@ namespace ClayFinancial.Models.Transaction.Data
       return "";
     }
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
-    // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
+    // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS ALSO TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentTypeData.Save().
-    public PaymentMethodData Save()
+    public static DataTable GetPaymentMethodDataTable(List<PaymentMethodData> all_payment_method_data)
     {
       var dt = CreatePaymentMethodDataTable();
 
+      if (all_payment_method_data == null || all_payment_method_data.Count() == 0) return dt;
 
-      return new PaymentMethodData();
+      foreach (var pmd in all_payment_method_data)
+      {
+        dt.Rows.Add
+        (
+          pmd.transaction_payment_type_id,
+          pmd.transaction_id, 
+          pmd.cash_amount, 
+          pmd.check_amount, 
+          pmd.check_number, 
+          pmd.check_from, 
+          pmd.paying_for, 
+          pmd.is_active
+          
+        );
+      }
+
+      return dt;
     }
 
-    private DataTable CreatePaymentMethodDataTable()
+    private static DataTable CreatePaymentMethodDataTable()
     {
       var dt = new DataTable("PaymentMethodData");
 
-      dt.Columns.Add(new DataColumn("payment_method_data_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("transaction_payment_type_id", typeof(long)));
       dt.Columns.Add(new DataColumn("department_id", typeof(long)));
       dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
       dt.Columns.Add(new DataColumn("cash_amount", typeof(decimal)));
@@ -73,6 +88,8 @@ namespace ClayFinancial.Models.Transaction.Data
       dt.Columns.Add(new DataColumn("check_from", typeof(string)));
       dt.Columns.Add(new DataColumn("paying_for", typeof(string)));
       dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
+      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long));
+      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short));
 
       return dt;
     }

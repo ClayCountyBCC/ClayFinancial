@@ -41,15 +41,18 @@ namespace ClayFinancial.Models.Transaction.Data
      *  
      *  
      * */
-
+    public long transaction_id { get; set; }
     public int fiscal_year { get; set; }
-    public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
-    public long transaction_id { get; set; }
+    public int created_by_employee_id { get; set; }
+    public int created_by_employee_ip_address { get; set; }
+    public DateTime created_on { get; set; }
     public long parent_transaction_id { get; set; } = -1;
     public int department_id { get; set; }
     public List<ControlData> department_controls { get; set; }
+    public List<PaymentTypeData> payment_types { get; set; }
+
 
 
     public TransactionData()
@@ -60,10 +63,15 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool validate()
     {
-
+      
       return false;
     }
 
+    public List<TransactionData> Get()
+    {
+
+      return new List<TransactionData>();
+    }
 
     public TransactionData Save()
     {
