@@ -62,7 +62,6 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       var dt = new DataTable("PaymentMethodData");
 
-      dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
       dt.Columns.Add(new DataColumn("cash_amount", typeof(decimal)));
       dt.Columns.Add(new DataColumn("check_amount", typeof(decimal)));
       dt.Columns.Add(new DataColumn("check_number", typeof(string)));

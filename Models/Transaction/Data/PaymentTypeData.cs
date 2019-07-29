@@ -64,7 +64,6 @@ namespace ClayFinancial.Models.Transaction.Data
         // Pass name of column and type for each column
       var dt = new DataTable("PaymentTypeData");
 
-      dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
       dt.Columns.Add(new DataColumn("payment_type_id", typeof(short)));
       dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
       dt.Columns.Add(new DataColumn("tax_exempt", typeof(bool)));

@@ -158,7 +158,6 @@ namespace ClayFinancial.Models.Transaction.Data
           // add payment type data to its data table
           paymentTypeDataTable.Rows.Add
           (
-            ptd.transaction_id,
             ptd.tax_exempt,
             ptd.payment_type_id,
             ptd.payment_type_index
@@ -170,34 +169,42 @@ namespace ClayFinancial.Models.Transaction.Data
 
             paymentMethodDataTable.Rows.Add
             (
-              pmd.transaction_id,
               pmd.cash_amount,
               pmd.check_amount,
               pmd.check_number,
               pmd.check_from,
               pmd.paying_for,
-              pmd.is_active,
               ptd.payment_type_id,
               ptd.payment_type_index
-
             );
           }
 
-          // add control data to its data table
+          // add payment type control data to Control data table
           foreach (ControlData cd in ptd.controls)
           {
 
             controlDataTable.Rows.Add
             (
-              cd.transaction_id,
+              
+              cd.control_id,
+              cd.value,
+              cd.created_on,
+              cd.created_by,
+              ptd.payment_type_id,
+              ptd.payment_type_index
+            );
+          }
+
+          // add department control data
+          foreach(ControlData cd in department_controls)
+          {
+            controlDataTable.Rows.Add
+            (
               cd.department_id,
               cd.control_id,
               cd.value,
-              cd.is_active,
               cd.created_on,
               cd.created_by,
-              cd.modified_on,
-              cd.modified_by,
               ptd.payment_type_id,
               ptd.payment_type_index
 
@@ -211,9 +218,9 @@ namespace ClayFinancial.Models.Transaction.Data
          i = db.Execute(
                       query, 
                       new { 
-                           tbv_PaymentTypeData = paymentTypeDataTable.AsTableValuedParameter("tbv_PaymentTypeData"),
-                           tbv_controlData = controlDataTable.AsTableValuedParameter("tbv_ControlData"),
-                           tbv_PaymentMethodData = paymentMethodDataTable.AsTableValuedParameter("tbv_PaymentMethodData")
+                           PaymentTypeData = paymentTypeDataTable.AsTableValuedParameter("PaymentTypeData"),
+                           controlData = controlDataTable.AsTableValuedParameter("ControlData"),
+                           PaymentMethodData = paymentMethodDataTable.AsTableValuedParameter("PaymentMethodData")
 
           }, commandTimeout: 60); // I DID NOT CHANGE THIS FROM THE BORROWED CODE. THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS. SO 60 COULD STILL BE VALID AS A TIMEOUT
         }

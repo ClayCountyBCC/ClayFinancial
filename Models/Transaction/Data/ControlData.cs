@@ -60,7 +60,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       dt.Columns.Add(new DataColumn("control_data_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("transaction_id", typeof(long)));
       dt.Columns.Add(new DataColumn("department_id", typeof(short))); // all records will have the same department_id; this should be validated
       dt.Columns.Add(new DataColumn("control_id", typeof(short)));
       dt.Columns.Add(new DataColumn("value", typeof(string)));
