@@ -61,6 +61,7 @@ namespace ClayFinancial.Models.Transaction.Data
       {
         dt.Rows.Add
         (
+
           pmd.transaction_payment_type_id,
           pmd.transaction_id, 
           pmd.cash_amount, 
@@ -88,8 +89,8 @@ namespace ClayFinancial.Models.Transaction.Data
       dt.Columns.Add(new DataColumn("check_from", typeof(string)));
       dt.Columns.Add(new DataColumn("paying_for", typeof(string)));
       dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
-      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long));
-      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short));
+      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long)));
+      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
 
       return dt;
     }
