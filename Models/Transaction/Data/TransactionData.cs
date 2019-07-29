@@ -5,7 +5,7 @@ using System.Web;
 
 namespace ClayFinancial.Models.Transaction.Data
 {
-  public class TransactionSave // temp name till I figure out more stuff
+  public class TransactionData // temp name till I figure out more stuff
   {
     /*  
      *  
@@ -52,7 +52,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public List<ControlData> department_controls { get; set; }
     public List<PaymentTypeData> payment_types { get; set; }
 
-    public TransactionSave()
+    public TransactionData()
     {
       
     }
@@ -65,10 +65,10 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public TransactionSave Save()
+    public TransactionData Save()
     {
 
-      return new TransactionSave();
+      return new TransactionData();
     }
 
   }
