@@ -7,7 +7,7 @@
     department_sort_order: number;
     payment_type_id: number;
     payment_type_sort_order: number;
-    id: number;
+    control_id: number;
     label: string;
     value: string;
     data_type: string;
@@ -23,7 +23,7 @@
     public department_sort_order: number;
     public payment_type_id: number;
     public payment_type_sort_order: number;
-    public id: number;
+    public control_id: number;
     public label: string;
     public value: string;
     public data_type: string;

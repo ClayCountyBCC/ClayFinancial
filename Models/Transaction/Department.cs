@@ -7,7 +7,7 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Department
   {
-    public int id { get; set; }
+    public int department_id { get; set; }
     public string name { get; set; }
     public bool is_active { get; set; }
     public string organization { get; set; }
@@ -33,7 +33,7 @@ namespace ClayFinancial.Models.Transaction
 
       string sql = @"
         SELECT
-          id
+          department_id
           ,name
           ,ISNULL(organization, '') organization
           ,is_active
@@ -46,23 +46,23 @@ namespace ClayFinancial.Models.Transaction
       {
 
         var tmpControls = from c in controls
-                          where c.department_id == d.id
+                          where c.department_id == d.department_id
                           select c;
         
         foreach(Control c in tmpControls)
         {
-          d.controls_dict[c.id] = c;
+          d.controls_dict[c.control_id] = c;
           d.controls.Add(c);
         }
 
         var tmpPaymentTypes = from pt in payment_types
-                              where pt.department_id == d.id
+                              where pt.department_id == d.department_id
                               select pt;
 
         
         foreach(PaymentType pt in tmpPaymentTypes)
         {
-          d.payment_types_dict[pt.id] = pt;
+          d.payment_types_dict[pt.payment_type_id] = pt;
           d.payment_types.Add(pt);
         }
 
@@ -78,7 +78,7 @@ namespace ClayFinancial.Models.Transaction
       var d = new Dictionary<int, Department>();
       foreach(Department dept in departments)
       {
-        d[dept.id] = dept;
+        d[dept.department_id] = dept;
       }
       return d;
     }

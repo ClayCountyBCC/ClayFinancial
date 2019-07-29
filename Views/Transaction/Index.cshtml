@@ -4,23 +4,31 @@
   Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<nav class="navbar hide-for-print" 
-     style="background-color: #5AB3FF;"
-     role="navigation" 
+<nav class="navbar hide-for-print is-primary"
+     @*style="background-color: #5AB3FF;"*@
+     role="navigation"
      aria-label="page navigation">
   <div class="container">
     <div class="navbar-menu is-active">
       <div class="navbar-start">
+
       </div>
       <div class="navbar-end">
+        <a onclick=""
+           class="navbar-item">
+          View Transactions
+        </a>
         <a onclick="Transaction.NewReceipt();"
-           class="navbar-item light-function">
+           class="navbar-item">
           New Receipt
         </a>
         <a onclick="Transaction.NewDeposit();"
-           class="navbar-item light-function is-light">
+           class="navbar-item">
           New Deposit
         </a>
+        <div class="navbar-item">
+
+        </div>
       </div>
     </div>
   </div>
@@ -29,13 +37,41 @@
 <div class="container"
      id="root">
 
+  <p>Receipt list here</p>
+  <p>Filters for: </p>
+  <ol>
+    <li>Day</li>
+    <li>Deposited or not</li>
+    <li>Able to search by for control data</li>
+    <li>Deposits versus Receipts</li>
+    <li>By Person?</li>
+    <li>Have to figure out what has to be filtered on the backend versus frontend.</li>
+  </ol>
+
+  <hr />
+  <p>Let's make this receipt list the last N transactions, sorted newest to oldest.</p> 
+
+  <p>Columns</p>
+  <ol>
+    <li>Transaction Count By Day</li>
+    <li>mm / dd / yyyy hh:mm AMPM </li>
+    <li>Transaction Type </li>
+    <li>Department </li>
+    <li>Check Amount </li>
+    <li>Cash Amount</li>
+  </ol>
+
+  <p>Infinite scroll?</p>
 </div>
 
 <script src="~/scripts/Transaction/PaymentType.js"></script>
 <script src="~/scripts/Transaction/Control.js"></script>
 <script src="~/scripts/Transaction/Department.js"></script>
 <script src="~/scripts/Transaction/app.js"></script>
-
+<script src="~/scripts/Transaction/Data/ControlData.js"></script>
+<script src="~/scripts/Transaction/Data/PaymentTypeData.js"></script>
+<script src="~/scripts/Transaction/Receipt.js"></script>
+<script src="~/scripts/Transaction/Data/TransactionData.js"></script>
 
 <script type="text/javascript">
 

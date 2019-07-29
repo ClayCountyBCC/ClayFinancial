@@ -11,7 +11,7 @@ namespace ClayFinancial.Models.Transaction
     public int? department_sort_order { get; set; } 
     public int? payment_type_id { get; set; } 
     public int? payment_type_sort_order { get; set; } 
-    public int id { get; set; }
+    public int control_id { get; set; }
     public string label { get; set; }
     public string value { get; set; }    
     public string data_type { get; set; }
@@ -30,7 +30,7 @@ namespace ClayFinancial.Models.Transaction
           ,department_sort_order
           ,payment_type_id
           ,payment_type_sort_order
-          ,id
+          ,control_id
           ,label
           ,value
           ,group_by
