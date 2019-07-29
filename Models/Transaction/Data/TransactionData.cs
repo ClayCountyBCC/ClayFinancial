@@ -50,7 +50,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public long parent_transaction_id { get; set; }
     public int department_id { get; set; }
     public List<ControlData> department_controls { get; set; }
-
+    public List<PaymentTypeData> payment_types { get; set; }
 
     public TransactionSave()
     {

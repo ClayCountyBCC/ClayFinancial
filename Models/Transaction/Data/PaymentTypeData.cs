@@ -29,7 +29,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool tax_exempt { get; set; }
     public int payment_type_id { get; set; }
     public int payment_type_counter { get; set; }
-    public List<ControlData> control_data { get; set; }    
+    public List<ControlData> controls { get; set; }    
+    public List<PaymentMethodData> payment_methods { get; set; }
 
 
     public PaymentTypeData Get()
