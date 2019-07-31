@@ -123,34 +123,138 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
     public TransactionData Save()
-    {
+    { 
 
+      var param = new DynamicParameters();
+      param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
+      param.Add("@created_by_employee_id", created_by_employee_id);
+      param.Add("username", username);
+      param.Add("display_name", display_name);
+      param.Add("created_by_employee_ip_address", created_by_employee_ip_address);
+      param.Add("parent_transaction_id", parent_transaction_id);
+      param.Add("department_id", department_id);
+
+      var query = @"
+
+          USE ClayFinancial;
+
+          DECLARE @transaction_id BIGINT;
+          DECLARE @department_id INT;
+          DECLARE @created_by_employee_id INT;
+          DECLARE @parent_transaction_id INT = NULL;
+          DECLARE @created_by_username VARCHAR(50);
+          DECLARE @created_by_ip_address VARCHAR(50);
+          DECLARE @modified_on DATETIME = GETDATE();
+
+
+
+          BEGIN TRAN
+	          BEGIN TRY
+
+            -- SAVE TRANSACTION DATA
+              EXEC ClayFinancial.dbo.insert_new_transaction_data 
+                      @transaction_id OUTPUT, 
+                      @department_id, 
+                      @created_by_employee_id, 
+                      @parent_transaction_id, 
+                      @created_by_username, 
+                      @created_by_ip_address;
+    
+              -- INSERT PAYMENT TYPE DATA
+              INSERT INTO payment_type_data
+              (
+                transaction_id, 
+                payment_type_id, 
+                payment_type_index
+              )
+              SELECT
+                @transaction_id,
+                payment_type_id,
+                payment_type_index
+              FROM @PaymentTypeData
+    
+
+              -- INSERT PAYMENT METHOD DATA
+              -- INNER JOIN TO payment_type_data TO GET transaction_payment_type_id
+              INSERT INTO payment_method_data
+              (
+                transaction_payment_type_id, 
+                transaction_id, 
+                cash_amount, 
+                check_amount, 
+                check_number, 
+                check_from, 
+                paying_for, 
+                is_active
+              )
+              SELECT
+                PTD.transaction_payment_type_id, 
+                @transaction_id,
+                cash_amount,
+                check_amount, 
+                check_number, 
+                check_from, 
+                paying_for, 
+                1
+              FROM @PaymentMethodData PMD
+              INNER JOIN payment_type_data PTD ON 
+                PTD.transaction_id = @transaction_id AND 
+                PTD.payment_type_id = PMD.payment_type_id AND 
+                PTD.payment_type_index = PMD.payment_type_index
+
+
+
+              -- INSERT CONTROL DATA
+              -- OUTER JOIN TO payment_type_data TO GET transaction_payment_type_id FOR payment_type_controls
+              -- department_id WILL BE NULL FOR PAYMENT TYPE CONTROLS. THE VALUE IS NOT SET IN THE APPLICATION.
+              -- THE department_id WILL NOT BE NULL FOR DEPARTMENT CONTROLS. THE VALUE IS SET IN THE APPLICATION.
+              --    THE transaction_payment_type_id WILL BE NULL FOR DEPARTMENT CONTROLS.
+              INSERT INTO control_data
+              (
+                transaction_payment_type_id,
+                department_id,
+                transaction_id,
+                control_id,
+                value,
+                is_active,
+                created_by,
+                modified_on,
+                modified_by
+              )
+              SELECT
+                PTD.transaction_payment_type_id,
+                CD.department_id,
+                @transaction_id,
+                CD.control_id,
+                CD.value,
+                CD.1,
+                @created_by_username,
+                @modified_on, 
+                @created_by_username
+              FROM @ControlData CD
+              LEFT OUTER JOIN payment_type_data PTD ON 
+                PTD.transaction_id = @transaction_id AND 
+                PTD.payment_type_id = CD.payment_type_id AND 
+                PTD.payment_type_index = CD.payment_type_index
+
+		          COMMIT
+	          END TRY
+	          BEGIN CATCH
+              -- IF BROKE, DON'T FIX
+              ROLLBACK
+	          END CATCH
+
+          
+        
+        ";
+
+
+
+      // CREATE DATA TABLES
       var controlDataTable = ControlData.GetControlDataTable();
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
 
-      var param = new DynamicParameters();
-      param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
-
-      var query = @"
-          USE ClayFinancial;
-
-          BEGIN TRAN
-            BEGIN TRY
-
-
-
-
-              COMMIT
-            END TRY
-            BEGIN CATCH
-
-            END CATCH
-   
-          END TRAN
-          
-        
-        ";
       try
       {
         foreach (PaymentTypeData ptd in payment_types)
@@ -200,29 +304,28 @@ namespace ClayFinancial.Models.Transaction.Data
           {
             controlDataTable.Rows.Add
             (
-              cd.department_id,
               cd.control_id,
+              cd.department_id,
               cd.value,
               cd.created_on,
-              cd.created_by,
-              ptd.payment_type_id,
-              ptd.payment_type_index
-
+              cd.created_by
             );
           }
 
         }
         int i = -1;
+
+        // add tvp to parameter list
+        param.Add("@ControlData", controlDataTable.AsTableValuedParameter());
+        param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter());
+        param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter());
+
         using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
         {
-         i = db.Execute(
-                      query, 
-                      new { 
-                           PaymentTypeData = paymentTypeDataTable.AsTableValuedParameter("PaymentTypeData"),
-                           controlData = controlDataTable.AsTableValuedParameter("ControlData"),
-                           PaymentMethodData = paymentMethodDataTable.AsTableValuedParameter("PaymentMethodData")
-
-          }, commandTimeout: 60); // I DID NOT CHANGE THIS FROM THE BORROWED CODE. THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS. SO 60 COULD STILL BE VALID AS A TIMEOUT
+          i = db.Execute(
+                       query, 
+                       param, 
+                       commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
         }
 
 
