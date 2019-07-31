@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ClayFinancial.Models.Transaction.Data;
 
 namespace ClayFinancial.Controllers.MVC
 {
@@ -11,6 +12,10 @@ namespace ClayFinancial.Controllers.MVC
     // GET: Transaction
     public ActionResult Index()
     {
+      var transactionData = new TransactionData();
+
+      transactionData.Save();
+
       return View();
     }
   }

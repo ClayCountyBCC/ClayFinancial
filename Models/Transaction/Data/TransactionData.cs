@@ -128,30 +128,20 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
-      param.Add("username", username);
-      param.Add("display_name", display_name);
-      param.Add("created_by_employee_ip_address", created_by_employee_ip_address);
-      param.Add("parent_transaction_id", parent_transaction_id);
-      param.Add("department_id", department_id);
+      param.Add("@username", username);
+      param.Add("@display_name", display_name);
+      param.Add("@created_by_employee_ip_address", created_by_employee_ip_address);
+      param.Add("@parent_transaction_id", parent_transaction_id);
+      param.Add("@department_id", department_id);
 
       var query = @"
 
           USE ClayFinancial;
 
-          DECLARE @transaction_id BIGINT;
-          DECLARE @department_id INT;
-          DECLARE @created_by_employee_id INT;
-          DECLARE @parent_transaction_id INT = NULL;
-          DECLARE @created_by_username VARCHAR(50);
-          DECLARE @created_by_ip_address VARCHAR(50);
-          DECLARE @modified_on DATETIME = GETDATE();
-
-
-
           BEGIN TRAN
 	          BEGIN TRY
 
-            -- SAVE TRANSACTION DATA
+              -- SAVE TRANSACTION DATA
               EXEC ClayFinancial.dbo.insert_new_transaction_data 
                       @transaction_id OUTPUT, 
                       @department_id, 
@@ -165,27 +155,28 @@ namespace ClayFinancial.Models.Transaction.Data
               (
                 transaction_id, 
                 payment_type_id, 
-                payment_type_index
+                payment_type_index,
+                tax_exempt
               )
               SELECT
                 @transaction_id,
                 payment_type_id,
-                payment_type_index
-              FROM @PaymentTypeData
+                payment_type_index,
+                tax_exempt
+              FROM @PaymentTypeData;
     
 
               -- INSERT PAYMENT METHOD DATA
               -- INNER JOIN TO payment_type_data TO GET transaction_payment_type_id
               INSERT INTO payment_method_data
               (
-                transaction_payment_type_id, 
+                transaction_payment_type_id,
                 transaction_id, 
                 cash_amount, 
                 check_amount, 
                 check_number, 
                 check_from, 
                 paying_for, 
-                is_active
               )
               SELECT
                 PTD.transaction_payment_type_id, 
@@ -194,14 +185,12 @@ namespace ClayFinancial.Models.Transaction.Data
                 check_amount, 
                 check_number, 
                 check_from, 
-                paying_for, 
-                1
+                paying_for
               FROM @PaymentMethodData PMD
               INNER JOIN payment_type_data PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = PMD.payment_type_id AND 
-                PTD.payment_type_index = PMD.payment_type_index
-
+                PTD.payment_type_index = PMD.payment_type_index;
 
 
               -- INSERT CONTROL DATA
@@ -215,27 +204,19 @@ namespace ClayFinancial.Models.Transaction.Data
                 department_id,
                 transaction_id,
                 control_id,
-                value,
-                is_active,
-                created_by,
-                modified_on,
-                modified_by
+                value
               )
               SELECT
-                PTD.transaction_payment_type_id,
-                CD.department_id,
+                CASE WHEN PTD.transaction_payment_type_id = -1 THEN NULL ELSE PTD.transaction_payment_type_id END,
+                CASE WHEN CD.department_id = -1 THEN NULL ELSE CD.department_id END,
                 @transaction_id,
                 CD.control_id,
-                CD.value,
-                CD.1,
-                @created_by_username,
-                @modified_on, 
-                @created_by_username
+                CD.value
               FROM @ControlData CD
               LEFT OUTER JOIN payment_type_data PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = CD.payment_type_id AND 
-                PTD.payment_type_index = CD.payment_type_index
+                PTD.payment_type_index = CD.payment_type_index;
 
 		          COMMIT
 	          END TRY
@@ -257,62 +238,125 @@ namespace ClayFinancial.Models.Transaction.Data
 
       try
       {
-        foreach (PaymentTypeData ptd in payment_types)
-        {
-          // add payment type data to its data table
-          paymentTypeDataTable.Rows.Add
-          (
-            ptd.tax_exempt,
-            ptd.payment_type_id,
-            ptd.payment_type_index
-          );
 
-          // add payment method data to its data table
-          foreach (PaymentMethodData pmd in ptd.payment_methods)
-          {
+        PaymentTypeData ptd = new PaymentTypeData();
 
-            paymentMethodDataTable.Rows.Add
-            (
-              pmd.cash_amount,
-              pmd.check_amount,
-              pmd.check_number,
-              pmd.check_from,
-              pmd.paying_for,
-              ptd.payment_type_id,
-              ptd.payment_type_index
-            );
-          }
+        ptd.payment_type_id = 1;
+        ptd.payment_type_index = 0;
+        ptd.tax_exempt = false;
+        paymentTypeDataTable.Rows.Add
+        (
+          ptd.payment_type_index,
+          ptd.payment_type_id,
+          ptd.tax_exempt
+        );
 
-          // add payment type control data to Control data table
-          foreach (ControlData cd in ptd.controls)
-          {
+        PaymentMethodData pmd = new PaymentMethodData();
+        pmd.cash_amount = 2.00M;
+        pmd.check_amount = 0.00M;
+        pmd.check_number = "";
+        pmd.check_from = "";
+        pmd.paying_for = "";
+        ptd.payment_type_id = 1;
+        ptd.payment_type_index = 0;
 
-            controlDataTable.Rows.Add
-            (
-              
-              cd.control_id,
-              cd.value,
-              cd.created_on,
-              cd.created_by,
-              ptd.payment_type_id,
-              ptd.payment_type_index
-            );
-          }
+        paymentMethodDataTable.Rows.Add
+        (
+          pmd.cash_amount,
+          pmd.check_amount,
+          pmd.check_number,
+          pmd.check_from,
+          pmd.paying_for,
+          ptd.payment_type_id,
+          ptd.payment_type_index
+        );
 
-          // add department control data
-          foreach(ControlData cd in department_controls)
-          {
-            controlDataTable.Rows.Add
-            (
-              cd.control_id,
-              cd.department_id,
-              cd.value,
-              cd.created_on,
-              cd.created_by
-            );
-          }
+        ControlData cd = new ControlData();
 
-        }
+        short controlId = 1;
+        cd.department_id = 22;
+        
+        cd.control_id = controlId;
+        cd.value = "test value payment type control";
+
+        controlDataTable.Rows.Add
+        (
+
+          -1,
+          cd.control_id,
+          cd.value,
+          ptd.payment_type_id,
+          ptd.payment_type_index
+
+        );
+        controlId = 1;
+        cd.value = "test value department control";
+
+        controlDataTable.Rows.Add
+        (
+          cd.department_id,
+          controlId,
+          cd.value,
+          -1,
+          -1
+        );
+        
+
+        //foreach (PaymentTypeData ptd in payment_types)
+        //{
+        //  // add payment type data to its data table
+        //  paymentTypeDataTable.Rows.Add
+        //  (
+        //    ptd.tax_exempt,
+        //    ptd.payment_type_id,
+        //    ptd.payment_type_index,
+        //    ptd.tax_exempt
+        //  ); 
+
+        //  // add payment method data to its data table
+        //  foreach (PaymentMethodData pmd in ptd.payment_methods)
+        //  {
+
+        //    paymentMethodDataTable.Rows.Add
+        //    (
+        //      pmd.cash_amount,
+        //      pmd.check_amount,
+        //      pmd.check_number,
+        //      pmd.check_from,
+        //      pmd.paying_for,
+        //      ptd.payment_type_id,
+        //      ptd.payment_type_index
+        //    );
+        //  }
+
+        //  // add payment type control data to Control data table
+        //  foreach (ControlData cd in ptd.controls)
+        //  {
+
+        //    controlDataTable.Rows.Add
+        //    (
+        //      cd.control_id,
+        //      cd.department_id,
+        //      cd.value,
+        //      ptd.payment_type_id,
+        //      ptd.payment_type_index
+        //    );
+        //  }
+
+        //  // add department control data
+        //  foreach(ControlData cd in department_controls)
+        //  {
+        //    controlDataTable.Rows.Add
+        //    (
+        //      cd.department_id,
+        //      cd.control_id,
+        //      cd.value,
+        //      ptd.payment_type_id,
+        //      ptd.payment_type_index
+        //    );
+        //  }
+
+        //}
         int i = -1;
 
         // add tvp to parameter list

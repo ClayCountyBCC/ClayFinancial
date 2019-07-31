@@ -31,8 +31,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
     public bool tax_exempt { get; set; }
-    public int payment_type_id { get; set; }
-    public int payment_type_index { get; set; }
+    public short payment_type_id { get; set; } = -1;
+    public short payment_type_index { get; set; } = -1;
     public List<PaymentMethodData> payment_methods { get; set; }
     public List<ControlData> controls { get; set; }
 

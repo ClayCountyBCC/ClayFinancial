@@ -67,7 +67,6 @@ namespace ClayFinancial.Models.Transaction.Data
       dt.Columns.Add(new DataColumn("check_number", typeof(string)));
       dt.Columns.Add(new DataColumn("check_from", typeof(string)));
       dt.Columns.Add(new DataColumn("paying_for", typeof(string)));
-      dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
       dt.Columns.Add(new DataColumn("payment_type_id", typeof(long)));
       dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
 

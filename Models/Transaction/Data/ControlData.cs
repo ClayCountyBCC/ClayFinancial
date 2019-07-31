@@ -13,9 +13,9 @@ namespace ClayFinancial.Models.Transaction.Data
   {
     // Read only class. this is control data coming from the client.
     // control_id, department_id or payment_type_id
-    public int control_id { get; set; }
-    public int department_id { get; set; }
-    public long transaction_payment_type_id { get; set; }
+    public short control_id { get; set; }
+    public sbyte department_id { get; set; } = -1;
+    public long transaction_payment_type_id { get; set; } = -1;
     public long transaction_id { get; set; }
     public string value { get; set; } = "";
     public bool is_active { get; set; } = true;
@@ -59,15 +59,9 @@ namespace ClayFinancial.Models.Transaction.Data
       var dt = new DataTable("ControlData");
 
 
-      dt.Columns.Add(new DataColumn("control_data_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("department_id", typeof(short))); // all records will have the same department_id; this should be validated
+      dt.Columns.Add(new DataColumn("department_id", typeof(sbyte))); // all records will have the same department_id; this should be validated
       dt.Columns.Add(new DataColumn("control_id", typeof(short)));
       dt.Columns.Add(new DataColumn("value", typeof(string)));
-      dt.Columns.Add(new DataColumn("is_active", typeof(bool)));
-      dt.Columns.Add(new DataColumn("created_on", typeof(DateTime)));
-      dt.Columns.Add(new DataColumn("created_by", typeof(string)));
-      dt.Columns.Add(new DataColumn("modified_on", typeof(DateTime)));
-      dt.Columns.Add(new DataColumn("modified_by", typeof(string)));
       dt.Columns.Add(new DataColumn("payment_type_id", typeof(long))); // only used if being populated as payment type control
       dt.Columns.Add(new DataColumn("payment_type_index", typeof(short))); // only used if being populated as payment type control
 
