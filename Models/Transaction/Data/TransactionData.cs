@@ -137,9 +137,6 @@ namespace ClayFinancial.Models.Transaction.Data
       var query = @"
           USE ClayFinancial;
 
-          BEGIN TRAN
-	          BEGIN TRY
-
               -- SAVE TRANSACTION DATA
               EXEC ClayFinancial.dbo.insert_new_transaction_data 
                       @transaction_id OUTPUT, 
@@ -217,12 +214,6 @@ namespace ClayFinancial.Models.Transaction.Data
                 PTD.payment_type_id = CD.payment_type_id AND 
                 PTD.payment_type_index = CD.payment_type_index;
 
-		          COMMIT
-	          END TRY
-	          BEGIN CATCH
-              -- IF BROKE, DON'T FIX
-              ROLLBACK
-	          END CATCH
 
               
 
@@ -243,8 +234,8 @@ namespace ClayFinancial.Models.Transaction.Data
         /** TEST DATA IS ADDED HERE **/
         PaymentTypeData ptd = new PaymentTypeData();
 
-        ptd.payment_type_id = 1;
         ptd.payment_type_index = 0;
+        ptd.payment_type_id = 1;
         ptd.tax_exempt = false;
         paymentTypeDataTable.Rows.Add
         (

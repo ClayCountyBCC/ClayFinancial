@@ -59,23 +59,12 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var dt = new DataTable("ControlData");
 
-      var department_id = new DataColumn("department_id", typeof(short));
-      department_id.ReadOnly = true;
-      var control_id = new DataColumn("control_id", typeof(short));
-      control_id.ReadOnly = true;
-      var value = new DataColumn("value", typeof(string));
-      value.ReadOnly = true;
-      var payment_type_id = new DataColumn("payment_type_id", typeof(long));
-      payment_type_id.ReadOnly = true;
-      var payment_type_index = new DataColumn("payment_type_index", typeof(short));
-      payment_type_index.ReadOnly = true;
 
-
-      dt.Columns.Add(department_id); // all records will have the same department_id; this should be validated
-      dt.Columns.Add(control_id);
-      dt.Columns.Add(value);
-      dt.Columns.Add(payment_type_id); // only used if being populated as payment type control
-      dt.Columns.Add(payment_type_index); // only used if being populated as payment type control
+      dt.Columns.Add(new DataColumn("department_id", typeof(short))); // all records will have the same department_id; this should be validated
+      dt.Columns.Add(new DataColumn("control_id", typeof(short)));
+      dt.Columns.Add(new DataColumn("value", typeof(string)));
+      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long))); // only used if being populated as payment type control
+      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short))); // only used if being populated as payment type control
 
 
 
