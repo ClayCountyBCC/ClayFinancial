@@ -49,14 +49,14 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_id { get; set; }
     public int fiscal_year { get; set; }
     public int employee_transaction_count { get; set; }
-    public string transaction_number { get; set; }
-    public int created_by_employee_id { get; set; }
-    public string username { get; set; }
-    public string display_name { get; set; }
-    public string created_by_employee_ip_address { get; set; }
+    public string transaction_number { get; set; } = "";
+    public int created_by_employee_id { get; set; } = 2813;
+    public string username { get; set; } = "test user";
+    public string display_name { get; set; } = "test display user";
+    public string created_by_employee_ip_address { get; set; } = "0.0.0.0";
     public DateTime created_on { get; set; }
     public long parent_transaction_id { get; set; } = -1;
-    public int department_id { get; set; }
+    public short department_id { get; set; } = 21;
     public List<ControlData> department_controls { get; set; }
     public List<PaymentTypeData> payment_types { get; set; }
     public string error { get; set; } = "";
@@ -129,13 +129,12 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
       param.Add("@username", username);
+      param.Add("@department_id", department_id);
       param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_employee_ip_address);
       param.Add("@parent_transaction_id", parent_transaction_id);
-      param.Add("@department_id", department_id);
 
       var query = @"
-
           USE ClayFinancial;
 
           BEGIN TRAN
@@ -147,8 +146,8 @@ namespace ClayFinancial.Models.Transaction.Data
                       @department_id, 
                       @created_by_employee_id, 
                       @parent_transaction_id, 
-                      @created_by_username, 
-                      @created_by_ip_address;
+                      @username, 
+                      @created_by_employee_ip_address;
     
               -- INSERT PAYMENT TYPE DATA
               INSERT INTO payment_type_data
@@ -176,7 +175,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 check_amount, 
                 check_number, 
                 check_from, 
-                paying_for, 
+                paying_for
               )
               SELECT
                 PTD.transaction_payment_type_id, 
@@ -225,20 +224,23 @@ namespace ClayFinancial.Models.Transaction.Data
               ROLLBACK
 	          END CATCH
 
-          
-        
+              
+
         ";
 
 
 
       // CREATE DATA TABLES
-      var controlDataTable = ControlData.GetControlDataTable();
+      var controlDataTable =  ControlData.GetControlDataTable();
+      controlDataTable.SetTypeName("dbo.ControlData");
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
+      paymentTypeDataTable.SetTypeName("dbo.PaymentTypeData");
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
+      paymentMethodDataTable.SetTypeName("dbo.PaymentMethodData");
 
       try
       {
-
+        /** TEST DATA IS ADDED HERE **/
         PaymentTypeData ptd = new PaymentTypeData();
 
         ptd.payment_type_id = 1;
@@ -274,7 +276,6 @@ namespace ClayFinancial.Models.Transaction.Data
         ControlData cd = new ControlData();
 
         short controlId = 1;
-        cd.department_id = 22;
         
         cd.control_id = controlId;
         cd.value = "test value payment type control";
@@ -282,7 +283,7 @@ namespace ClayFinancial.Models.Transaction.Data
         controlDataTable.Rows.Add
         (
 
-          -1,
+          null,
           cd.control_id,
           cd.value,
           ptd.payment_type_id,
@@ -294,13 +295,13 @@ namespace ClayFinancial.Models.Transaction.Data
 
         controlDataTable.Rows.Add
         (
-          cd.department_id,
+          this.department_id,
           controlId,
           cd.value,
-          -1,
-          -1
+          null,
+          null
         );
-        
+
 
         //foreach (PaymentTypeData ptd in payment_types)
         //{
@@ -357,27 +358,25 @@ namespace ClayFinancial.Models.Transaction.Data
         //  }
 
         //}
-        int i = -1;
+
 
         // add tvp to parameter list
-        param.Add("@ControlData", controlDataTable.AsTableValuedParameter());
-        param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter());
+        param.Add("@ControlData", controlDataTable.AsTableValuedParameter()); 
+        param.Add("@PaymentMethodData",  paymentMethodDataTable.AsTableValuedParameter());
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter());
 
         using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
         {
-          i = db.Execute(
+         var i = db.ExecuteScalar(
                        query, 
                        param, 
                        commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
-        }
 
 
-        if(i < 1)
-        {
-          error = "There was an issue saving the transaction.";
-          return this;
         }
+
+        var transactionId = param.Get<long?>("@transaction_id");
+
 
         return GetTransactionData();
 
@@ -385,7 +384,7 @@ namespace ClayFinancial.Models.Transaction.Data
       catch (Exception ex)
       {
 
-        new ErrorLog("Error in TransactionData.Save()", "Error Saving The Transaction", ex.StackTrace, ex.Source, query);
+        new ErrorLog(ex, query);
         return null;
       }
     }

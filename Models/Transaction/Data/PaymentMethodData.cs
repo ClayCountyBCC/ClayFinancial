@@ -61,14 +61,28 @@ namespace ClayFinancial.Models.Transaction.Data
     private static DataTable CreatePaymentMethodDataTable()
     {
       var dt = new DataTable("PaymentMethodData");
+      var cash_amount = new DataColumn("cash_amount", typeof(decimal));
+      cash_amount.ReadOnly = true;
+      var check_amount = new DataColumn("check_amount", typeof(decimal));
+      check_amount.ReadOnly = true;
+      var check_number = new DataColumn("check_number", typeof(string));
+      check_number.ReadOnly = true;
+      var check_from = new DataColumn("check_from", typeof(string));
+      check_from.ReadOnly = true;
+      var paying_for = new DataColumn("paying_for", typeof(string));
+      paying_for.ReadOnly = true;
+      var payment_type_id = new DataColumn("payment_type_id", typeof(long));
+      payment_type_id.ReadOnly = true;
+      var payment_type_index = new DataColumn("payment_type_index", typeof(short));
+      payment_type_index.ReadOnly = true;
 
-      dt.Columns.Add(new DataColumn("cash_amount", typeof(decimal)));
-      dt.Columns.Add(new DataColumn("check_amount", typeof(decimal)));
-      dt.Columns.Add(new DataColumn("check_number", typeof(string)));
-      dt.Columns.Add(new DataColumn("check_from", typeof(string)));
-      dt.Columns.Add(new DataColumn("paying_for", typeof(string)));
-      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long)));
-      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
+      dt.Columns.Add(cash_amount);
+      dt.Columns.Add(check_amount);
+      dt.Columns.Add(check_number);
+      dt.Columns.Add(check_from);
+      dt.Columns.Add(paying_for);
+      dt.Columns.Add(payment_type_id);
+      dt.Columns.Add(payment_type_index);
 
       return dt;
     }

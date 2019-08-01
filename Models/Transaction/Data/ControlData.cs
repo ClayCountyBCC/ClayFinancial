@@ -14,9 +14,10 @@ namespace ClayFinancial.Models.Transaction.Data
     // Read only class. this is control data coming from the client.
     // control_id, department_id or payment_type_id
     public short control_id { get; set; }
-    public sbyte department_id { get; set; } = -1;
+    public short department_id { get; set; }
     public long transaction_payment_type_id { get; set; } = -1;
     public long transaction_id { get; set; }
+    public long prior_control_data_id { get; set; }
     public string value { get; set; } = "";
     public bool is_active { get; set; } = true;
     public DateTime created_on { get; set; } = DateTime.Now;
@@ -58,12 +59,23 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var dt = new DataTable("ControlData");
 
+      var department_id = new DataColumn("department_id", typeof(short));
+      department_id.ReadOnly = true;
+      var control_id = new DataColumn("control_id", typeof(short));
+      control_id.ReadOnly = true;
+      var value = new DataColumn("value", typeof(string));
+      value.ReadOnly = true;
+      var payment_type_id = new DataColumn("payment_type_id", typeof(long));
+      payment_type_id.ReadOnly = true;
+      var payment_type_index = new DataColumn("payment_type_index", typeof(short));
+      payment_type_index.ReadOnly = true;
 
-      dt.Columns.Add(new DataColumn("department_id", typeof(sbyte))); // all records will have the same department_id; this should be validated
-      dt.Columns.Add(new DataColumn("control_id", typeof(short)));
-      dt.Columns.Add(new DataColumn("value", typeof(string)));
-      dt.Columns.Add(new DataColumn("payment_type_id", typeof(long))); // only used if being populated as payment type control
-      dt.Columns.Add(new DataColumn("payment_type_index", typeof(short))); // only used if being populated as payment type control
+
+      dt.Columns.Add(department_id); // all records will have the same department_id; this should be validated
+      dt.Columns.Add(control_id);
+      dt.Columns.Add(value);
+      dt.Columns.Add(payment_type_id); // only used if being populated as payment type control
+      dt.Columns.Add(payment_type_index); // only used if being populated as payment type control
 
 
 
