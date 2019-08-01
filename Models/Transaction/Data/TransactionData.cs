@@ -223,11 +223,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
       // CREATE DATA TABLES
       var controlDataTable =  ControlData.GetControlDataTable();
-      controlDataTable.SetTypeName("dbo.ControlData");
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
-      paymentTypeDataTable.SetTypeName("dbo.PaymentTypeData");
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
-      paymentMethodDataTable.SetTypeName("dbo.PaymentMethodData");
 
       try
       {
@@ -352,9 +349,9 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
         // add tvp to parameter list
-        param.Add("@ControlData", controlDataTable.AsTableValuedParameter()); 
-        param.Add("@PaymentMethodData",  paymentMethodDataTable.AsTableValuedParameter());
-        param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter());
+        param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData")); 
+        param.Add("@PaymentMethodData",  paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
+        param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
 
         using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
         {
