@@ -46,17 +46,17 @@ namespace ClayFinancial.Models.Transaction.Data
      *  
      *  
      * */
-    public long transaction_id { get; set; }
-    public int fiscal_year { get; set; }
-    public int employee_transaction_count { get; set; }
+    public long transaction_id { get; set; } = -1;
+    public int fiscal_year { get; set; } = -1;
+    public int employee_transaction_count { get; set; } = -1;
     public string transaction_number { get; set; } = "";
-    public int created_by_employee_id { get; set; } = 2813;
-    public string username { get; set; } = "test user";
-    public string display_name { get; set; } = "test display user";
-    public string created_by_employee_ip_address { get; set; } = "0.0.0.0";
+    public int created_by_employee_id { get; set; } = -1;
+    public string username { get; set; } = "";
+    public string display_name { get; set; } = "";
+    public string created_by_employee_ip_address { get; set; } = "";
     public DateTime created_on { get; set; }
     public long parent_transaction_id { get; set; } = -1;
-    public short department_id { get; set; } = 21;
+    public short department_id { get; set; } = -1;
     public List<ControlData> department_controls { get; set; }
     public List<PaymentTypeData> payment_types { get; set; }
     public string error { get; set; } = "";
@@ -97,13 +97,13 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.created_by_username
           ,TD.created_on
         FROM ClayFinancial.dbo.transaction_data TD
-        WHERE transaction_id = @transaction_id
+        WHERE transaction_id = {this.transaction_id};
 
       ";
 
-      var td = Constants.Get_Data<TransactionData>(query, new DynamicParameters(transaction_id), Constants.ConnectionString.ClayFinancial);
+      var td = Constants.Get_Data<TransactionData>(query,  Constants.ConnectionString.ClayFinancial);
 
-      if(td.Count() == 0)
+      if(td == null || td.Count() == 0)
       {
         new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction after saving it.", "", "", query);
         return new TransactionData("There was an issue retrieving the transaction after saving it.");
@@ -228,124 +228,61 @@ namespace ClayFinancial.Models.Transaction.Data
 
       try
       {
-        /** TEST DATA IS ADDED HERE **/
-        PaymentTypeData ptd = new PaymentTypeData();
 
-        ptd.payment_type_index = 0;
-        ptd.payment_type_id = 1;
-        ptd.tax_exempt = false;
-        paymentTypeDataTable.Rows.Add
-        (
-          ptd.payment_type_index,
-          ptd.payment_type_id,
-          ptd.tax_exempt
-        );
+        foreach (PaymentTypeData ptd in payment_types)
+        {
+          // add payment type data to its data table
+          paymentTypeDataTable.Rows.Add
+          (
+            ptd.payment_type_id,
+            ptd.payment_type_index,
+            ptd.tax_exempt
+          );
 
-        PaymentMethodData pmd = new PaymentMethodData();
-        pmd.cash_amount = 2.00M;
-        pmd.check_amount = 0.00M;
-        pmd.check_number = "";
-        pmd.check_from = "";
-        pmd.paying_for = "";
-        ptd.payment_type_id = 1;
-        ptd.payment_type_index = 0;
+          // add payment method data to its data table
+          foreach (PaymentMethodData pmd in ptd.payment_methods)
+          {
 
-        paymentMethodDataTable.Rows.Add
-        (
-          pmd.cash_amount,
-          pmd.check_amount,
-          pmd.check_number,
-          pmd.check_from,
-          pmd.paying_for,
-          ptd.payment_type_id,
-          ptd.payment_type_index
-        );
+            paymentMethodDataTable.Rows.Add
+            (
+              pmd.cash_amount,
+              pmd.check_amount,
+              pmd.check_number,
+              pmd.check_from,
+              pmd.paying_for,
+              ptd.payment_type_id,
+              ptd.payment_type_index
+            );
+          }
 
-        ControlData cd = new ControlData();
+          // add payment type control data to Control data table
+          foreach (ControlData cd in ptd.controls)
+          {
 
-        short controlId = 1;
-        
-        cd.control_id = controlId;
-        cd.value = "test value payment type control";
+            controlDataTable.Rows.Add
+            (
+              null,
+              cd.control_id,
+              cd.value,
+              ptd.payment_type_id,
+              ptd.payment_type_index
+            );
+          }
 
-        controlDataTable.Rows.Add
-        (
+          // add department control data
+          foreach (ControlData cd in department_controls)
+          {
+            controlDataTable.Rows.Add
+            (
+              cd.department_id,
+              cd.control_id,
+              cd.value,
+              null,
+              null
+            );
+          }
 
-          null,
-          cd.control_id,
-          cd.value,
-          ptd.payment_type_id,
-          ptd.payment_type_index
-
-        );
-        controlId = 1;
-        cd.value = "test value department control";
-
-        controlDataTable.Rows.Add
-        (
-          this.department_id,
-          controlId,
-          cd.value,
-          null,
-          null
-        );
-
-
-        //foreach (PaymentTypeData ptd in payment_types)
-        //{
-        //  // add payment type data to its data table
-        //  paymentTypeDataTable.Rows.Add
-        //  (
-        //    ptd.tax_exempt,
-        //    ptd.payment_type_id,
-        //    ptd.payment_type_index,
-        //    ptd.tax_exempt
-        //  ); 
-
-        //  // add payment method data to its data table
-        //  foreach (PaymentMethodData pmd in ptd.payment_methods)
-        //  {
-
-        //    paymentMethodDataTable.Rows.Add
-        //    (
-        //      pmd.cash_amount,
-        //      pmd.check_amount,
-        //      pmd.check_number,
-        //      pmd.check_from,
-        //      pmd.paying_for,
-        //      ptd.payment_type_id,
-        //      ptd.payment_type_index
-        //    );
-        //  }
-
-        //  // add payment type control data to Control data table
-        //  foreach (ControlData cd in ptd.controls)
-        //  {
-
-        //    controlDataTable.Rows.Add
-        //    (
-        //      cd.control_id,
-        //      cd.department_id,
-        //      cd.value,
-        //      ptd.payment_type_id,
-        //      ptd.payment_type_index
-        //    );
-        //  }
-
-        //  // add department control data
-        //  foreach(ControlData cd in department_controls)
-        //  {
-        //    controlDataTable.Rows.Add
-        //    (
-        //      cd.department_id,
-        //      cd.control_id,
-        //      cd.value,
-        //      ptd.payment_type_id,
-        //      ptd.payment_type_index
-        //    );
-        //  }
-
-        //}
+        }
 
 
         // add tvp to parameter list
@@ -363,8 +300,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
         }
 
-        var transactionId = param.Get<long?>("@transaction_id");
-
+        transaction_id = param.Get<long>("@transaction_id");
 
         return GetTransactionData();
 
@@ -374,6 +310,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
         new ErrorLog(ex, query);
         return null;
+
       }
     }
 

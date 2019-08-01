@@ -28,10 +28,10 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_payment_type_id { get; set; }
     public decimal cash_amount { get; set; }
     public decimal check_amount { get; set; }
-    public string check_number { get; set; }
-    public string paying_for { get; set; }
-    public string check_from { get; set; }
-    public bool is_active { get; set; }
+    public string check_number { get; set; } = "";
+    public string paying_for { get; set; } = "";
+    public string check_from { get; set; } = "";
+    public bool is_active { get; set; } = true;
 
     public PaymentMethodData()
     {

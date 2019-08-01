@@ -30,7 +30,7 @@ namespace ClayFinancial.Models.Transaction.Data
      * */
     public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
-    public bool tax_exempt { get; set; }
+    public bool tax_exempt { get; set; } = false;
     public short payment_type_id { get; set; }
     public short payment_type_index { get; set; }
     public List<PaymentMethodData> payment_methods { get; set; }
