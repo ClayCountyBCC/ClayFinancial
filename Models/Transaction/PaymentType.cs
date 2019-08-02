@@ -28,7 +28,7 @@ namespace ClayFinancial.Models.Transaction
       string sql = @"
         SELECT
           department_id
-          ,id
+          ,payment_type_id id
           ,name
           ,does_tax_exempt_apply
           ,is_active
@@ -57,6 +57,22 @@ namespace ClayFinancial.Models.Transaction
     {
       return (List<PaymentType>)myCache.GetItem("payment_types");
     }
+
+    public static Dictionary<int, PaymentType> Get_Dict()
+    {
+      var paymentTypes = PaymentType.GetCached();
+      var d = new Dictionary<int, PaymentType>();
+      foreach (PaymentType pt in paymentTypes)
+      {
+        d[pt.id] = pt;
+      }
+      return d;
+    }
+    public static Dictionary<int, PaymentType> GetCachedDict()
+    {
+      return (Dictionary<int, PaymentType>)myCache.GetItem("payment_type_dict");
+    }
+
 
   }
 }

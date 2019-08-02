@@ -75,6 +75,9 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool validate()
     {
+      
+
+      ControlData.Validate(department_controls);
 
       return false;
     }

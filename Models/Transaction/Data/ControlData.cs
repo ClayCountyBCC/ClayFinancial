@@ -36,10 +36,21 @@ namespace ClayFinancial.Models.Transaction.Data
       return new ControlData();
     }
 
-    public string Validate()
+    public static List<int> Validate(List<ControlData> control_data_list)
     {
+      var control_dictionary = Control.GetCachedDict();
+      List<int> bad_index = new List<int>();
+      foreach (var c in control_data_list)
+      {
+        var keys = control_dictionary.Where(
+          item => item.Value.id.Equals(c.control_id)
+        
+        
+        )
+                       .Select(item => item.Key);
 
-      return "";
+      }
+      return bad_index;
     }
 
 

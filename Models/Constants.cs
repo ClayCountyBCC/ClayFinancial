@@ -6,6 +6,7 @@ using Dapper;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
+using ClayFinancial.Models.Transaction;
 
 namespace ClayFinancial.Models
 {
@@ -128,6 +129,44 @@ namespace ClayFinancial.Models
           return false;
       }
     }
+
+
+    //public static Dictionary<T, T2> Get_Dict<T, T2>(string dictionary_name)
+    //{
+
+    //  var dictionary = new Dictionary<T, T2>();
+    //  var cd = new Dictionary<int,Control>();
+    //  var dd = new Dictionary<int,Department>();
+    //  var pd = new Dictionary<int,PaymentType>();
+      
+    //  switch (dictionary_name)
+    //  {
+    //    case "Control":
+    //     var cl =  Control.GetCached();
+    //      foreach (var c in cl)
+    //      {
+    //        cd[c.id] = c;
+    //      }
+    //      break;
+    //    case "Department":
+    //      var dl = Department.GetCached();
+    //      foreach (var d in dl)
+    //      {
+    //        dd[d.id] = d;
+    //      }
+    //      break;
+    //    case "PaymentTYpe":
+    //      var pl = PaymentType.GetCached();
+    //      foreach (var p in pl)
+    //      {
+    //        pd[p.id] = p;
+    //      }
+    //      break;
+    //  }
+    //  if (cd.Any())  return cd;
+    //}
+
+   
 
   }
 }

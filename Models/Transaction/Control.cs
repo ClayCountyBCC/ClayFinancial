@@ -30,7 +30,7 @@ namespace ClayFinancial.Models.Transaction
           ,department_sort_order
           ,payment_type_id
           ,payment_type_sort_order
-          ,id
+          ,control_id id
           ,label
           ,value
           ,group_by
@@ -56,5 +56,25 @@ namespace ClayFinancial.Models.Transaction
       return (List<Control>)myCache.GetItem("controls");
     }
 
+    public static Dictionary<int, Control> Get_Dict()
+    {
+      var list = Control.GetCached();
+      var d = new Dictionary<int, Control>();
+      foreach (Control l in list)
+      {
+        d[l.id] = l;
+      }
+      return d;
+    }
+    public static Dictionary<int, Control> GetCachedDict()
+    {
+      return (Dictionary<int, Control>)myCache.GetItem("control_dict");
+    }
+
+    public string Validate()
+    {
+
+      return "";
+    }
   }
 }
