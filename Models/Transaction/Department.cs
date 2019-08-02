@@ -30,7 +30,6 @@ namespace ClayFinancial.Models.Transaction
                       c.department_id.HasValue
                       select c).ToList();
 
-
       string sql = @"
         SELECT
           department_id
@@ -41,10 +40,8 @@ namespace ClayFinancial.Models.Transaction
         ORDER BY name ASC";
       var departments = Constants.Get_Data<Department>(sql, Constants.ConnectionString.ClayFinancial);
 
-
       foreach(Department d in departments)
       {
-
         var tmpControls = from c in controls
                           where c.department_id == d.department_id
                           select c;
@@ -58,7 +55,6 @@ namespace ClayFinancial.Models.Transaction
         var tmpPaymentTypes = from pt in payment_types
                               where pt.department_id == d.department_id
                               select pt;
-
         
         foreach(PaymentType pt in tmpPaymentTypes)
         {
@@ -67,7 +63,6 @@ namespace ClayFinancial.Models.Transaction
         }
 
       }
-
 
       return departments;
     }

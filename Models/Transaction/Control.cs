@@ -13,12 +13,15 @@ namespace ClayFinancial.Models.Transaction
     public int? payment_type_sort_order { get; set; } 
     public int control_id { get; set; }
     public string label { get; set; }
-    public string value { get; set; }    
-    public string data_type { get; set; }
-    public bool is_active { get; set; }
-    public bool required { get; set; }
-    public int max_length { get; set; }
-    public string validation_regex { get; set; }
+    public string value { get; set; }
+    public string group_by { get; set; } = "";
+    public string data_type { get; set; } = "";
+    public bool is_active { get; set; } = true;
+    public bool required { get; set; } = false;
+    public int max_length { get; set; } = 500;
+    public string validation_regex { get; set; } = "";
+    public string render_hints { get; set; } = "";
+    public bool is_printed { get; set; } = true;
 
     public Control() { }
 
@@ -39,6 +42,8 @@ namespace ClayFinancial.Models.Transaction
           ,required
           ,max_length
           ,validation_regex
+          ,render_hints
+          ,is_printed
         FROM vw_controls
         WHERE 
           (department_id IS NOT NULL

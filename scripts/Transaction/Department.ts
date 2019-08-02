@@ -91,21 +91,22 @@
 
     public static CreateDepartmentElementField(department: HTMLSelectElement): HTMLElement
     {
-      let field = document.createElement("div");
-      field.classList.add("field");
-      let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
-      label.appendChild(document.createTextNode("Department"));
-      field.appendChild(label);
-      let control = document.createElement("div");
-      control.classList.add("control");
+      return Control.CreateSelectFieldContainer(department, "Department");
+      //let field = document.createElement("div");
+      //field.classList.add("field");
+      //let label = document.createElement("label");
+      //label.classList.add("label", "is-medium");
+      //label.appendChild(document.createTextNode("Department"));
+      //field.appendChild(label);
+      //let control = document.createElement("div");
+      //control.classList.add("control");
 
-      let selectContainer = document.createElement("div");
-      selectContainer.classList.add("select", "is-medium");
-      selectContainer.appendChild(department);
-      control.appendChild(selectContainer);
-      field.appendChild(control);
-      return field;
+      //let selectContainer = document.createElement("div");
+      //selectContainer.classList.add("select", "is-medium");
+      //selectContainer.appendChild(department);
+      //control.appendChild(selectContainer);
+      //field.appendChild(control);
+      //return field;
     }
 
     public static FindDepartment(department_id: number): Department

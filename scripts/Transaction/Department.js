@@ -59,20 +59,21 @@ var Transaction;
             return level;
         }
         static CreateDepartmentElementField(department) {
-            let field = document.createElement("div");
-            field.classList.add("field");
-            let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
-            label.appendChild(document.createTextNode("Department"));
-            field.appendChild(label);
-            let control = document.createElement("div");
-            control.classList.add("control");
-            let selectContainer = document.createElement("div");
-            selectContainer.classList.add("select", "is-medium");
-            selectContainer.appendChild(department);
-            control.appendChild(selectContainer);
-            field.appendChild(control);
-            return field;
+            return Transaction.Control.CreateSelectFieldContainer(department, "Department");
+            //let field = document.createElement("div");
+            //field.classList.add("field");
+            //let label = document.createElement("label");
+            //label.classList.add("label", "is-medium");
+            //label.appendChild(document.createTextNode("Department"));
+            //field.appendChild(label);
+            //let control = document.createElement("div");
+            //control.classList.add("control");
+            //let selectContainer = document.createElement("div");
+            //selectContainer.classList.add("select", "is-medium");
+            //selectContainer.appendChild(department);
+            //control.appendChild(selectContainer);
+            //field.appendChild(control);
+            //return field;
         }
         static FindDepartment(department_id) {
             let filtered = Transaction.departments.filter((d) => d.department_id === department_id);

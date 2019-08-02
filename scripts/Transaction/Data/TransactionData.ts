@@ -17,6 +17,7 @@
     private base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private payment_type_target: string = 'payment_type_container';
+    private selected_department: Department = null;
 
 
     constructor()
@@ -41,7 +42,8 @@
     {
       this.department_element.onchange = (event: Event) =>
       {
-        this.department_id = parseInt((<HTMLSelectElement>event.target).value);
+        this.department_id = parseInt((<HTMLSelectElement>event.target).value);        
+        this.selected_department = Department.FindDepartment(this.department_id);
         this.RenderDepartmentControls();
         this.RenderPaymentTypes();
 
@@ -68,36 +70,31 @@
       }
 
       Utilities.Clear_Element(paymentTypeContainer);
-      if (this.department_id === -1) return;
-      let department = Department.FindDepartment(this.department_id);
+      if (this.department_id === -1 || this.selected_department === null) return;
+      
       let ol = document.createElement("ol");
       ol.classList.add("payment_type");
-      //ol.style.width = "100%";
-      //ol.style.textDecoration = "none";      
-      for (let pt of department.payment_types)
+
+      for (let pt of this.selected_department.payment_types)
       {
         let li = document.createElement("li");
         li.classList.add("light-function", "is-size-3", "has-background-link");
         li.style.cursor = "pointer";        
-        //li.style.marginTop = ".25em";
-        //li.style.marginBottom = ".25em";
-        //li.style.paddingTop = ".25em";
-        //li.style.paddingBottom = ".25em";
+        li.setAttribute("payment_type_id", pt.payment_type_id.toString());
         let name = document.createElement("span");
-        //name.style.paddingLeft = "1em";
-
+        name.classList.add("name");
         name.appendChild(document.createTextNode(pt.name));
         li.appendChild(name);
 
-
+        let totals = document.createElement("span");
+        totals.classList.add("totals");
+        li.appendChild(totals);
 
         ol.appendChild(li);
+        
         let controls = document.createElement("ol");
         controls.classList.add("control", "hide");
 
-        //let testli = document.createElement("li");
-        //testli.appendChild(document.createTextNode("Donkey Juice!"));
-        //test.appendChild(testli);
         ol.appendChild(controls);
 
         li.onclick = (event:Event) =>
@@ -105,12 +102,19 @@
           controls.classList.toggle("hide");
           if (!controls.classList.contains("hide"))
           {
-            let li = document.createElement("li");
-            li.appendChild(document.createTextNode(controls.childElementCount.toString()));
-            controls.appendChild(li);
+            if (controls.childElementCount === 0) // there is no payment type data created yet.
+            {
+              let ptd = new PaymentTypeData(controls, pt.does_tax_exempt_apply, pt.payment_type_id, pt.controls);
+
+
+              this.payment_types.push(ptd);
+            }
+            //let li = document.createElement("li");
+            //li.appendChild(document.createTextNode(.toString()));
+            //controls.appendChild(li);
           }
 
-
+          console.log('this transaction', this);
         }
 
 

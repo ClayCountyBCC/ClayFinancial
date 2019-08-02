@@ -4,7 +4,8 @@
   width: 100%;
   margin: 0 0 0 0;
   padding: 0 0 0 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 
@@ -32,18 +33,20 @@
 
     li
     {
+      display: flex;
       margin-top: .25em;
       margin-bottom: 0;
       padding-top: .25em;
       padding-bottom: .25em;
+      justify-content: space-between;
 
-      span
+      span.name
       {
         padding-left: 1em;
         user-select: none;
       }
 
-      button.add
+      span.totals
       {
         padding-right: 1em;
       }
@@ -64,5 +67,10 @@
   }
 }
 
-
+div.columns
+{
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+}
 

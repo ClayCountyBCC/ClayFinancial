@@ -11,6 +11,7 @@ var Transaction;
                 this.base_container = 'root';
                 this.department_element = null;
                 this.payment_type_target = 'payment_type_container';
+                this.selected_department = null;
                 let targetContainer = document.getElementById(this.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
@@ -27,6 +28,7 @@ var Transaction;
             RenderDepartmentSelection(target) {
                 this.department_element.onchange = (event) => {
                     this.department_id = parseInt(event.target.value);
+                    this.selected_department = Transaction.Department.FindDepartment(this.department_id);
                     this.RenderDepartmentControls();
                     this.RenderPaymentTypes();
                 };
@@ -45,39 +47,39 @@ var Transaction;
                     document.getElementById(this.base_container).appendChild(paymentTypeContainer);
                 }
                 Utilities.Clear_Element(paymentTypeContainer);
-                if (this.department_id === -1)
+                if (this.department_id === -1 || this.selected_department === null)
                     return;
-                let department = Transaction.Department.FindDepartment(this.department_id);
                 let ol = document.createElement("ol");
                 ol.classList.add("payment_type");
-                //ol.style.width = "100%";
-                //ol.style.textDecoration = "none";      
-                for (let pt of department.payment_types) {
+                for (let pt of this.selected_department.payment_types) {
                     let li = document.createElement("li");
                     li.classList.add("light-function", "is-size-3", "has-background-link");
                     li.style.cursor = "pointer";
-                    //li.style.marginTop = ".25em";
-                    //li.style.marginBottom = ".25em";
-                    //li.style.paddingTop = ".25em";
-                    //li.style.paddingBottom = ".25em";
+                    li.setAttribute("payment_type_id", pt.payment_type_id.toString());
                     let name = document.createElement("span");
-                    //name.style.paddingLeft = "1em";
+                    name.classList.add("name");
                     name.appendChild(document.createTextNode(pt.name));
                     li.appendChild(name);
+                    let totals = document.createElement("span");
+                    totals.classList.add("totals");
+                    li.appendChild(totals);
                     ol.appendChild(li);
                     let controls = document.createElement("ol");
                     controls.classList.add("control", "hide");
-                    //let testli = document.createElement("li");
-                    //testli.appendChild(document.createTextNode("Donkey Juice!"));
-                    //test.appendChild(testli);
                     ol.appendChild(controls);
                     li.onclick = (event) => {
                         controls.classList.toggle("hide");
                         if (!controls.classList.contains("hide")) {
-                            let li = document.createElement("li");
-                            li.appendChild(document.createTextNode(controls.childElementCount.toString()));
-                            controls.appendChild(li);
+                            if (controls.childElementCount === 0) // there is no payment type data created yet.
+                             {
+                                let ptd = new Data.PaymentTypeData(controls, pt.does_tax_exempt_apply, pt.payment_type_id, pt.controls);
+                                this.payment_types.push(ptd);
+                            }
+                            //let li = document.createElement("li");
+                            //li.appendChild(document.createTextNode(.toString()));
+                            //controls.appendChild(li);
                         }
+                        console.log('this transaction', this);
                     };
                 }
                 paymentTypeContainer.appendChild(ol);

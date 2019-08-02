@@ -20,7 +20,8 @@ namespace ClayFinancial.Models.Transaction.Data
      *    + is_active
      *
      */
-
+    public long payment_method_data_id { get; set; }
+    public long prior_payment_method_data_id { get; set; }
     public long transaction_id { get; set; }
     public decimal cash_amount { get; set; }
     public decimal check_amount { get; set; }
