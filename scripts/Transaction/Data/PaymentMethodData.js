@@ -9,6 +9,7 @@ var Transaction;
                 this.payment_type_id = -1;
                 this.prior_payment_method_data_id = -1;
                 this.transaction_id = -1;
+                this.error_text = "";
                 this.cash_amount = 0;
                 this.cash_amount_input_element = null;
                 this.check_amount = 0;

@@ -12,6 +12,7 @@
     is_active: boolean;
     modified_by: string;
     modified_on: Date;
+    error_text: string;
   }
 
   export class ControlData implements IControlData
@@ -30,6 +31,7 @@
     public is_active: boolean = true;
     public modified_by: string = "";
     public modified_on: Date;
+    public error_text: string = "";
 
     constructor(control: Control, payment_type_id: number, hints: Array<string>)
     {

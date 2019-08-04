@@ -6,7 +6,7 @@
     department_id: number;
     department_controls: Array<ControlData>;
     payment_types: Array<PaymentTypeData>;
-
+    error_text: string;
   }
   export class TransactionData implements ITransactionData
   {
@@ -18,7 +18,7 @@
     private department_element: HTMLSelectElement = null;
     private payment_type_target: string = 'payment_type_container';
     private selected_department: Department = null;
-
+    public error_text: string = "";
 
     constructor()
     {

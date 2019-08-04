@@ -10,6 +10,7 @@
     does_tax_exempt_apply: boolean;
     control_data: Array<ControlData>;
     payment_methods: Array<PaymentMethodData>;
+    error_text: string;
   }
 
   export class PaymentTypeData implements IPaymentTypeData
@@ -25,7 +26,7 @@
     public payment_type_element: HTMLElement = null;
     public controls: Array<Control> = [];
     public payment_methods: Array<PaymentMethodData> = [];   
-
+    public error_text: string = "";
 
     constructor(target_container: HTMLElement,
       does_tax_exempt_apply: boolean,

@@ -19,6 +19,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool is_active { get; set; } = true;
     public string modified_by { get; set; } = "";
     public DateTime modified_on { get; set; } = DateTime.MinValue;
+    public string error_text { get; set; } = "";
 
     public ControlData()
     {

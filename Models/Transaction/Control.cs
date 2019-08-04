@@ -61,5 +61,24 @@ namespace ClayFinancial.Models.Transaction
       return (List<Control>)myCache.GetItem("controls");
     }
 
+
+    public bool ValidateControlData(Data.ControlData controlData)
+    {
+      // Here we use this class' properties to validate our controldata
+      if(controlData.value.Length > max_length)
+      {
+        controlData.error_text = "Data is too long.";
+        return false;
+      }
+
+      // validate data type + value here
+
+      // if validation_regex has value, use it to perform some validation.
+
+
+      return true;
+
+    }
+
   }
 }

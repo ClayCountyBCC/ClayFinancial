@@ -29,6 +29,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string paying_for { get; set; }
     public string check_from { get; set; }
     public bool is_active { get; set; }
+    public string error_text { get; set; } = "";
 
     public PaymentMethodData()
     {

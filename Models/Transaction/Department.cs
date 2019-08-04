@@ -88,5 +88,86 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Department>)myCache.GetItem("departments_dict");
     }
 
+
+    public Data.TransactionData ValidateTransactionData(Data.TransactionData transactionData)
+    {
+      // We treat the Data.TransactionData class as a department class because it has all of the
+      // departmental data we'll need to validate
+
+      // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
+      // data to be saved
+
+      if (!is_active)
+      {
+        transactionData.error_text = "Department is no longer active.";
+        return transactionData;
+      }
+
+      // let's make sure the department controls are valid
+      if (!ValidateDepartmentControls(transactionData)) return transactionData;
+
+      if (!ValidatePaymentTypes(transactionData)) return transactionData;
+
+
+      return transactionData;
+    }
+
+    private bool ValidateDepartmentControls(Data.TransactionData transactionData)
+    {
+      // things to validate here:
+      // department controls are all required.
+      // every control in controls_dict for this class needs to be present
+      // every control in controls must have a valid value.
+      var controlids = (from c in transactionData.department_controls
+                        select c.control_id).ToList();
+
+      // let's make sure every department control is present in department_controls
+      foreach (int key in controls_dict.Keys)
+      {
+        if (!controlids.Contains(key))
+        {
+          transactionData.error_text = "Department is missing a piece of department information.";
+          return false;
+        }
+      }
+
+      // now we validate each department control
+      foreach (Data.ControlData cd in transactionData.department_controls)
+      {
+        // if one of our department controls isn't found in our controls_dict object,
+        // it means that the client has an extra control
+        if (!controls_dict.ContainsKey(cd.control_id))
+        {
+          transactionData.error_text = "Invalid Department information found.";
+          return false;
+        }
+
+        var control = controls_dict[cd.control_id];
+
+        if (!control.ValidateControlData(cd))
+        {
+          transactionData.error_text = "There was a problem with some of the data entered.";
+          return false;
+        }
+
+      }
+      return true;
+    }
+
+
+    private bool ValidatePaymentTypes(Data.TransactionData transactionData)
+    {
+      // everything we did for the department controls, we need to do here.
+      // except that not every payment type should be filled out
+      // but if a payment type is in our transactionData, we should be validating it.
+
+      // Validate paymentTypeControlDatas
+
+      // Validate paymentMethodData
+
+      return false;
+
+    }
+
   }
 }

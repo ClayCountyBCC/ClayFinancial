@@ -17,6 +17,7 @@ var Transaction;
                 this.group_element = null;
                 this.is_active = true;
                 this.modified_by = "";
+                this.error_text = "";
                 this.control_id = control.control_id;
                 this.input_element = Transaction.Control.CreateControl(control);
                 this.payment_type_id = payment_type_id;

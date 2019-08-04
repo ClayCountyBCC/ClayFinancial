@@ -10,6 +10,7 @@
     check_number: string;
     paying_for: string;
     check_from: string;
+    error_text: string;
   }
 
   export class PaymentMethodData implements IPaymentMethodData
@@ -19,6 +20,7 @@
     public payment_type_id: number = -1;
     public prior_payment_method_data_id: number = -1;
     public transaction_id: number = -1;
+    public error_text: string = "";
 
     public cash_amount: number = 0;
     private cash_amount_input_element: HTMLInputElement = null;

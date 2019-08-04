@@ -31,7 +31,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int payment_type_counter { get; set; }
     public List<ControlData> controls { get; set; }    
     public List<PaymentMethodData> payment_methods { get; set; }
-
+    public string error_text { get; set; } = "";
 
     public PaymentTypeData Get()
     {

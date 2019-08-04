@@ -15,6 +15,7 @@ var Transaction;
                 this.payment_type_element = null;
                 this.controls = [];
                 this.payment_methods = [];
+                this.error_text = "";
                 this.payment_type_container = target_container;
                 this.payment_type_id = payment_type_id;
                 this.controls = controls;

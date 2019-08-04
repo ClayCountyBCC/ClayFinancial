@@ -12,6 +12,7 @@ var Transaction;
                 this.department_element = null;
                 this.payment_type_target = 'payment_type_container';
                 this.selected_department = null;
+                this.error_text = "";
                 let targetContainer = document.getElementById(this.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
