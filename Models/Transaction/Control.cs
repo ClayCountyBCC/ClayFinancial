@@ -7,18 +7,21 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Control
   {
-    public int? department_id { get; set; } 
-    public int? department_sort_order { get; set; } 
-    public int? payment_type_id { get; set; } 
-    public int? payment_type_sort_order { get; set; } 
-    public int id { get; set; }
+    public int? department_id { get; set; }
+    public int? department_sort_order { get; set; }
+    public int? payment_type_id { get; set; }
+    public int? payment_type_sort_order { get; set; }
+    public int control_id { get; set; }
     public string label { get; set; }
-    public string value { get; set; }    
-    public string data_type { get; set; }
-    public bool is_active { get; set; }
-    public bool required { get; set; }
-    public int max_length { get; set; }
-    public string validation_regex { get; set; }
+    public string value { get; set; }
+    public string group_by { get; set; } = "";
+    public string data_type { get; set; } = "";
+    public bool is_active { get; set; } = true;
+    public bool required { get; set; } = false;
+    public int max_length { get; set; } = 500;
+    public string validation_regex { get; set; } = "";
+    public string render_hints { get; set; } = "";
+    public bool is_printed { get; set; } = true;
 
     public Control() { }
 
@@ -30,7 +33,7 @@ namespace ClayFinancial.Models.Transaction
           ,department_sort_order
           ,payment_type_id
           ,payment_type_sort_order
-          ,control_id id
+          ,control_id
           ,label
           ,value
           ,group_by
@@ -39,6 +42,8 @@ namespace ClayFinancial.Models.Transaction
           ,required
           ,max_length
           ,validation_regex
+          ,render_hints
+          ,is_printed
         FROM vw_controls
         WHERE 
           (department_id IS NOT NULL
@@ -56,25 +61,37 @@ namespace ClayFinancial.Models.Transaction
       return (List<Control>)myCache.GetItem("controls");
     }
 
-    public static Dictionary<int, Control> Get_Dict()
+
+    public bool ValidateControlData(Data.ControlData controlData)
     {
-      var list = Control.GetCached();
-      var d = new Dictionary<int, Control>();
-      foreach (Control l in list)
+      // Here we use this class' properties to validate our controldata
+      
+      if (controlData.value.Length > max_length)
       {
-        d[l.id] = l;
+        controlData.error_text = "Data is too long.";
+        return false;
       }
-      return d;
-    }
-    public static Dictionary<int, Control> GetCachedDict()
-    {
-      return (Dictionary<int, Control>)myCache.GetItem("control_dict");
+
+      switch(data_type)
+      {
+        case "text":
+          
+          break;
+        case "date":
+          break;
+        case "dropdown":
+          break;
+        case "bigtext":
+          break;
+      }
+      // validate data type + value here
+
+      // if validation_regex has value, use it to perform some validation.
+
+
+      return true;
+
     }
 
-    public string Validate()
-    {
-
-      return "";
-    }
   }
 }

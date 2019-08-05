@@ -59,7 +59,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public short department_id { get; set; } = -1;
     public List<ControlData> department_controls { get; set; }
     public List<PaymentTypeData> payment_types { get; set; }
-    public string error { get; set; } = "";
+    public string error_text { get; set; } = "";
 
 
 
@@ -69,15 +69,17 @@ namespace ClayFinancial.Models.Transaction.Data
     }
     public TransactionData(string er)
     {
-      error = er;
+      error_text = er;
     }
 
 
-    public bool validate()
+    public TransactionData validate()
     {
-      
+      // get cached dept dictionary
+      // look for department_id in keys
 
-      ControlData.Validate(department_controls);
+      if(ControlData.Validate(department_controls)) return this;
+      if (!ValidatePaymentTypes(payment_types)) return this;
 
       return false;
     }

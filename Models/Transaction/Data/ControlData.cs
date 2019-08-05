@@ -24,7 +24,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by { get; set; } = "";
     public DateTime? modified_on { get; set; }
     public string modified_by { get; set; } = "";
-    public string error { get; set; } = "";
+    public string error_text { get; set; } = "";
     public ControlData()
     {
       
@@ -36,21 +36,43 @@ namespace ClayFinancial.Models.Transaction.Data
       return new ControlData();
     }
 
-    public static List<int> Validate(List<ControlData> control_data_list)
+    public ControlData Validate(List<ControlData> control_data_list)
     {
-      var control_dictionary = Control.GetCachedDict();
+      var control_dictionary = Control.GetCached();
       List<int> bad_index = new List<int>();
+
       foreach (var c in control_data_list)
       {
-        var keys = control_dictionary.Where(
-          item => item.Value.id.Equals(c.control_id)
-        
-        
-        )
-                       .Select(item => item.Key);
+        if(c.department_id > 0 && control_dictionary.ContainsKey())
+        { 
+          
+        }
+
+        if (c.value.Length > control_dictionary[c.control_id].max_length)
+        {
+          c.error_text = $@"{control_dictionary[c.control_id].label} value exeeds max length of {control_dictionary[c.control_id].max_length}";
+          return this;
+        }
+
+        switch (control_dictionary[c.control_id].data_type)
+        {
+          case "text":
+          case "bigtext":
+            break;
+          case "date":
+            if (!DateTime.TryParse(c.value, out DateTime dateTime)) 
+            {
+              c.error_text = $@"Entered value ""{c.value}"" is not a valid {control_dictionary[c.control_id].label}";
+            }
+            break;
+          case "dropdown":
+            
+            break;
+
+        }
 
       }
-      return bad_index;
+      return this;
     }
 
 
@@ -81,6 +103,72 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return dt;
 
+    }
+
+    public TransactionData ValidateTransactionData(TransactionData transactionData)
+    {
+      // We treat the Data.TransactionData class as a department class because it has all of the
+      // departmental data we'll need to validate
+
+      // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
+      // data to be saved
+
+      if (!is_active)
+      {
+        transactionData.error_text = "Department is no longer active.";
+        return transactionData;
+      }
+
+      // let's make sure the department controls are valid
+      if (!ValidateDepartmentControls(transactionData)) return transactionData;
+
+
+
+
+      return transactionData;
+    }
+
+    private bool ValidateDepartmentControls(Data.TransactionData transactionData)
+    {
+      // things to validate here:
+      // department controls are all required.
+      // every control in controls_dict for this class needs to be present
+      // every control in controls must have a valid value.
+      var controlids = (from c in transactionData.department_controls
+                        select c.control_id).ToList();
+
+      // let's make sure every department control is present in department_controls
+      foreach (int key in controls_dict.Keys)
+      {
+        if (!controlids.Contains((short)key))
+        {
+
+          transactionData.error_text = "Missing department information: " + controls_dict[key].label;
+          return false;
+        }
+      }
+
+      // now we validate each department control
+      foreach (Data.ControlData cd in transactionData.department_controls)
+      {
+        // if one of our department controls isn't found in our controls_dict object,
+        // it means that the client has an extra control
+        if (!controls_dict.ContainsKey(cd.control_id))
+        {
+          transactionData.error_text = "Invalid Department information found.";
+          return false;
+        }
+
+        var control = controls_dict[cd.control_id];
+
+        if (!control.ValidateControlData(cd))
+        {
+          transactionData.error_text = "There was a problem with some of the data entered.";
+          return false;
+        }
+
+      }
+      return true;
     }
   }
 }

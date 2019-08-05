@@ -8,7 +8,7 @@ namespace ClayFinancial.Models.Transaction
   public class PaymentType
   {
     public int department_id { get; set; }
-    public int id { get; set; }
+    public int payment_type_id { get; set; }
     public string name { get; set; }
     public bool is_active { get; set; }
     public bool does_tax_exempt_apply { get; set; }

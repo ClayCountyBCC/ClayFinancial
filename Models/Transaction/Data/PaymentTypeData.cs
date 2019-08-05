@@ -72,5 +72,20 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return dt;
     }
+
+
+    private bool ValidatePaymentTypes(Data.TransactionData transactionData)
+    {
+      // everything we did for the department controls, we need to do here.
+      // except that not every payment type should be filled out
+      // but if a payment type is in our transactionData, we should be validating it.
+
+      // Validate paymentTypeControlDatas
+
+      // Validate paymentMethodData
+
+      return false;
+
+    }
   }
 }// get the next transaction id
