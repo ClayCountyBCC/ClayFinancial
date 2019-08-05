@@ -35,6 +35,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public short payment_type_index { get; set; }
     public List<PaymentMethodData> payment_methods { get; set; }
     public List<ControlData> controls { get; set; }
+    public string error { get; set; } = "";
 
     public PaymentTypeData Get()
     {

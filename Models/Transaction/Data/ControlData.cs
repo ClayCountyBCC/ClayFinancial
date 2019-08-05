@@ -24,7 +24,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by { get; set; } = "";
     public DateTime? modified_on { get; set; }
     public string modified_by { get; set; } = "";
-
+    public string error { get; set; } = "";
     public ControlData()
     {
       
