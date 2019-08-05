@@ -114,6 +114,45 @@
       return field;
     }
 
+    public static CreateButtonlistFieldContainer(inputs: Array<HTMLElement>, field_label: string, add_column: boolean = false, class_to_add: string = ""): HTMLElement
+    {
+      let field = document.createElement("div");
+      field.classList.add("field");
+      let label = document.createElement("label");
+      label.classList.add("label", "is-medium");
+      if (field_label.length > 0)
+      {
+        label.appendChild(document.createTextNode(field_label));
+      }
+      else
+      {
+        label.innerHTML = "&nbsp;";
+      }
+
+      field.appendChild(label);
+      let control = document.createElement("div");
+      control.classList.add("control");
+      let buttonlist = document.createElement("div");
+      buttonlist.classList.add("buttons");
+      for(let input of inputs)
+      {
+        buttonlist.appendChild(input);
+
+      }
+      control.appendChild(buttonlist);
+      field.appendChild(control);
+      if (add_column)
+      {
+        let column = document.createElement("div");
+        column.classList.add("column");
+        if (class_to_add.length > 0) column.classList.add(class_to_add);
+        column.appendChild(field);
+        return column;
+      }
+      if (class_to_add.length > 0) field.classList.add(class_to_add);
+      return field;
+    }
+
     public static CreateSelectFieldContainer(select: HTMLSelectElement, field_label: string): HTMLElement
     {    
     

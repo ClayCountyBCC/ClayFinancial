@@ -16,6 +16,7 @@ var Transaction;
                 this.controls = [];
                 this.payment_methods = [];
                 this.error_text = "";
+                this.next_payment_method_id = 0;
                 this.payment_type_container = target_container;
                 this.payment_type_id = payment_type_id;
                 this.controls = controls;
@@ -49,7 +50,6 @@ var Transaction;
             }
             RenderPaymentMethods(target_container) {
                 let fieldset = document.createElement("fieldset");
-                //fieldset.style.width = "100%";
                 let legend = document.createElement("legend");
                 legend.classList.add("label");
                 legend.appendChild(document.createTextNode("Payment Methods"));
@@ -58,21 +58,26 @@ var Transaction;
                 this.AddCheckPaymentMethod(fieldset);
                 target_container.appendChild(fieldset);
             }
-            AddCheckPaymentMethod(target_container) {
-                let check = new Data.PaymentMethodData(false, this.payment_type_id);
-                for (let e of check.controls_to_render) {
-                    target_container.appendChild(e);
-                }
+            AddCheckPaymentMethod(target_container, show_cancel = false) {
+                let check = new Data.PaymentMethodData(false, this.payment_type_id, show_cancel, this.next_payment_method_id++);
+                target_container.appendChild(check.control_to_render);
                 this.payment_methods.push(check);
                 check.add_check_button_element.onclick = (event) => {
-                    this.AddCheckPaymentMethod(target_container);
+                    this.AddCheckPaymentMethod(target_container, true);
                 };
+                if (show_cancel) {
+                    check.cancel_check_button_element.onclick = (event) => {
+                        target_container.removeChild(check.control_to_render);
+                        let indextoremove = this.payment_methods.findIndex(function (j) { return j.payment_method_data_id === check.payment_method_data_id; });
+                        if (indextoremove > -1)
+                            this.payment_methods.splice(indextoremove, 1);
+                        check = null;
+                    };
+                }
             }
             AddCashPaymentMethod(target_container) {
-                let cash = new Data.PaymentMethodData(true, this.payment_type_id);
-                for (let e of cash.controls_to_render) {
-                    target_container.appendChild(e);
-                }
+                let cash = new Data.PaymentMethodData(true, this.payment_type_id, false, this.next_payment_method_id++);
+                target_container.appendChild(cash.control_to_render);
                 this.payment_methods.push(cash);
             }
         }

@@ -27,6 +27,7 @@
     public controls: Array<Control> = [];
     public payment_methods: Array<PaymentMethodData> = [];   
     public error_text: string = "";
+    private next_payment_method_id: number = 0;
 
     constructor(target_container: HTMLElement,
       does_tax_exempt_apply: boolean,
@@ -83,7 +84,6 @@
     {
 
       let fieldset = document.createElement("fieldset");
-      //fieldset.style.width = "100%";
       let legend = document.createElement("legend");
       legend.classList.add("label");
       legend.appendChild(document.createTextNode("Payment Methods"));
@@ -94,28 +94,33 @@
       target_container.appendChild(fieldset);
     }
 
-    private AddCheckPaymentMethod(target_container: HTMLElement):void
+    private AddCheckPaymentMethod(target_container: HTMLElement, show_cancel: boolean = false): void
     {
-      let check = new PaymentMethodData(false, this.payment_type_id);
-      for (let e of check.controls_to_render)
-      {
-        target_container.appendChild(e)
-      }
+      let check = new PaymentMethodData(false, this.payment_type_id, show_cancel, this.next_payment_method_id++);
+      target_container.appendChild(check.control_to_render)
       this.payment_methods.push(check);
       check.add_check_button_element.onclick = (event: Event) =>
       {
-        this.AddCheckPaymentMethod(target_container);
+        this.AddCheckPaymentMethod(target_container, true);
+      }
+      if (show_cancel)
+      {
+        check.cancel_check_button_element.onclick = (event: Event) =>
+        {
+          target_container.removeChild(check.control_to_render);
+          let indextoremove = this.payment_methods.findIndex(function (j) { return j.payment_method_data_id === check.payment_method_data_id });
+          if (indextoremove > -1) this.payment_methods.splice(indextoremove, 1);
+          check = null;
+        }
       }
     }
 
-    private AddCashPaymentMethod(target_container: HTMLElement):void
+    private AddCashPaymentMethod(target_container: HTMLElement): void
     {
-      let cash = new PaymentMethodData(true, this.payment_type_id);
-      for (let e of cash.controls_to_render)
-      {
-        target_container.appendChild(e);
-      }
+      let cash = new PaymentMethodData(true, this.payment_type_id, false, this.next_payment_method_id++);
+      target_container.appendChild(cash.control_to_render);
       this.payment_methods.push(cash);
     }
+
   }
 }

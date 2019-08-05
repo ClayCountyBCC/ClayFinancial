@@ -67,10 +67,15 @@
   }
 }
 
-div.columns
+div.columns, div.columns:last-child
 {
   margin-left: 0;
   margin-right: 0;
   margin-top: 0;
+  margin-bottom: 0;
 }
 
+fieldset div.check:nth-of-type(2n)
+{
+  background-color: hsl(0, 0%, 86%);
+}
