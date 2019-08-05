@@ -1,7 +1,10 @@
 ﻿namespace Transaction
 {
   export let departments: Array<Department> = [];
-  //export let currentTransaction: Data.ReceiptData = null;
+  export let currentReceipt: Receipt = null;
+  export let currentTransactionData: Transaction.Data.TransactionData = null;
+  export let DepartmentControl: HTMLSelectElement = null;
+  export let DepartmentControlContainer: HTMLElement = null;
 
   export async function Start()
   {
@@ -10,14 +13,17 @@
     {
       Transaction.departments = d;
       console.log(d);
+      Transaction.DepartmentControl = Department.CreateDepartmentElement(Transaction.departments);
+      
     });
+
     console.log('departments', Transaction.departments);
   }
 
 
   export function NewReceipt()
   {
-    
+    Transaction.currentReceipt = new Receipt();
   }
 
   export function NewDeposit()

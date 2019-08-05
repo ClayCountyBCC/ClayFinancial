@@ -9,18 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var Transaction;
 (function (Transaction) {
     Transaction.departments = [];
-    //export let currentTransaction: Data.ReceiptData = null;
+    Transaction.currentReceipt = null;
+    Transaction.currentTransactionData = null;
+    Transaction.DepartmentControl = null;
+    Transaction.DepartmentControlContainer = null;
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments().then((d) => {
                 Transaction.departments = d;
                 console.log(d);
+                Transaction.DepartmentControl = Transaction.Department.CreateDepartmentElement(Transaction.departments);
             });
             console.log('departments', Transaction.departments);
         });
     }
     Transaction.Start = Start;
     function NewReceipt() {
+        Transaction.currentReceipt = new Transaction.Receipt();
     }
     Transaction.NewReceipt = NewReceipt;
     function NewDeposit() {

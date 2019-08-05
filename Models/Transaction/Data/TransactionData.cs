@@ -61,8 +61,6 @@ namespace ClayFinancial.Models.Transaction.Data
     public List<PaymentTypeData> payment_types { get; set; }
     public string error_text { get; set; } = "";
 
-
-
     public TransactionData()
     {
 

@@ -4,11 +4,78 @@
   width: 100%;
   margin: 0 0 0 0;
   padding: 0 0 0 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 
 .light-function
 {
   color: white;
+}
+
+#root
+{
+  padding-top: 1em;
+  height: calc(100% - 3em);
+  //background-color: lightcoral;
+}
+
+#payment_type_container
+{
+  width: 100%;
+  overflow-y: auto;
+
+  ol.payment_type
+  {
+    width: 100%;
+    text-decoration: none;
+
+    li
+    {
+      display: flex;
+      margin-top: .25em;
+      margin-bottom: 0;
+      padding-top: .25em;
+      padding-bottom: .25em;
+      justify-content: space-between;
+
+      span.name
+      {
+        padding-left: 1em;
+        user-select: none;
+      }
+
+      span.totals
+      {
+        padding-right: 1em;
+      }
+    }
+
+    ol.control
+    {
+      border: 3px solid #2780e3;
+      border-bottom-right-radius: 6px;
+      border-bottom-left-radius: 6px;
+      padding: .25em .25em .25em .25em;
+
+      li:nth-of-type(2n)
+      {
+        background-color: hsl(0, 0%, 86%);
+      }
+    }
+  }
+}
+
+div.columns, div.columns:last-child
+{
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+fieldset div.check:nth-of-type(2n)
+{
+  background-color: hsl(0, 0%, 86%);
 }

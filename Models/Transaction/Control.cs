@@ -7,10 +7,10 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Control
   {
-    public int? department_id { get; set; }
-    public int? department_sort_order { get; set; }
-    public int? payment_type_id { get; set; }
-    public int? payment_type_sort_order { get; set; }
+    public int? department_id { get; set; } 
+    public int? department_sort_order { get; set; } 
+    public int? payment_type_id { get; set; } 
+    public int? payment_type_sort_order { get; set; } 
     public int control_id { get; set; }
     public string label { get; set; }
     public string value { get; set; }
@@ -65,25 +65,12 @@ namespace ClayFinancial.Models.Transaction
     public bool ValidateControlData(Data.ControlData controlData)
     {
       // Here we use this class' properties to validate our controldata
-      
-      if (controlData.value.Length > max_length)
+      if(controlData.value.Length > max_length)
       {
         controlData.error_text = "Data is too long.";
         return false;
       }
 
-      switch(data_type)
-      {
-        case "text":
-          
-          break;
-        case "date":
-          break;
-        case "dropdown":
-          break;
-        case "bigtext":
-          break;
-      }
       // validate data type + value here
 
       // if validation_regex has value, use it to perform some validation.
