@@ -52,6 +52,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public List<ControlData> department_controls { get; set; }
     public List<PaymentTypeData> payment_types { get; set; }
     public string error_text { get; set; } = "";
+    public string received_from { get; set; } = "";
 
     public TransactionData()
     {

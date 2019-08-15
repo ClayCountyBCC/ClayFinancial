@@ -11,7 +11,6 @@
     controls: Array<Control>;
     controls_dict: object;
     payment_types_dict: object;
-    payment_type_element: HTMLElement;
   }
 
   export class Department implements IDepartment
@@ -24,8 +23,7 @@
     public controls: Array<Control> = [];
     public controls_dict: object;
     public payment_types_dict: object;
-    public payment_type_element: HTMLElement = null;
-    public control_elements: Array<HTMLElement> = [];
+    public control_groups: Array<ControlGroup> = [];
 
     Constructor() { }
 
@@ -39,7 +37,6 @@
       }
       return path;
     }
-
 
     public static GetDepartments(): Promise<Array<Department>>
     {
@@ -66,6 +63,7 @@
       return select;
 
     }
+
     public static CreateDepartmentElementLevel(department: HTMLSelectElement): HTMLElement
     {
       let level = document.createElement("div");
@@ -91,7 +89,7 @@
 
     public static CreateDepartmentElementField(department: HTMLSelectElement): HTMLElement
     {
-      return Control.CreateSelectFieldContainer(department, "Department");
+      return ControlGroup.CreateSelectFieldContainer(department, "Department");
       //let field = document.createElement("div");
       //field.classList.add("field");
       //let label = document.createElement("label");
@@ -115,6 +113,7 @@
       return (filtered.length === 1) ? filtered[0] : null;
     }
 
+    
 
   }
 

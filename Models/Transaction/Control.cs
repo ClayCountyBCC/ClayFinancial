@@ -80,5 +80,15 @@ namespace ClayFinancial.Models.Transaction
 
     }
 
+    public bool ValidateDropdown(string group_by, string data_type, string value_to_find)
+    {
+      var controlvalues = (from c in Control.GetCached()
+                           where c.is_active &&
+                           c.group_by == group_by &&
+                           c.data_type == data_type
+                           select c.label).ToList();
+      return controlvalues.Contains(value_to_find);
+    }
+
   }
 }

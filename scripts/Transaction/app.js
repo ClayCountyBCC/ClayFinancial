@@ -15,10 +15,17 @@ var Transaction;
     Transaction.DepartmentControlContainer = null;
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield Transaction.Department.GetDepartments().then((d) => {
+            yield Transaction.Department.GetDepartments()
+                .then((d) => {
                 Transaction.departments = d;
                 console.log(d);
                 Transaction.DepartmentControl = Transaction.Department.CreateDepartmentElement(Transaction.departments);
+                for (let department of Transaction.departments) {
+                    department.control_groups = Transaction.ControlGroup.CreateControlGroups(department.controls);
+                    for (let paymentType of department.payment_types) {
+                        paymentType.control_groups = Transaction.ControlGroup.CreateControlGroups(paymentType.controls);
+                    }
+                }
             });
             console.log('departments', Transaction.departments);
         });

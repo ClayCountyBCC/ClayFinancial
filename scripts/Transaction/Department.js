@@ -5,8 +5,7 @@ var Transaction;
             this.organization = "";
             this.payment_types = [];
             this.controls = [];
-            this.payment_type_element = null;
-            this.control_elements = [];
+            this.control_groups = [];
         }
         Constructor() { }
         static GetPath() {
@@ -59,7 +58,7 @@ var Transaction;
             return level;
         }
         static CreateDepartmentElementField(department) {
-            return Transaction.Control.CreateSelectFieldContainer(department, "Department");
+            return Transaction.ControlGroup.CreateSelectFieldContainer(department, "Department");
             //let field = document.createElement("div");
             //field.classList.add("field");
             //let label = document.createElement("label");

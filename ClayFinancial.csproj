@@ -1881,9 +1881,11 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="node_modules\csstype\index.d.ts" />
+    <TypeScriptCompile Include="scripts\LevelItem.ts" />
     <TypeScriptCompile Include="scripts\MenuItem.ts" />
     <TypeScriptCompile Include="scripts\Transaction\app.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Control.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\ControlGroup.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Data\ControlData.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Data\PaymentMethodData.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Data\PaymentTypeData.ts" />

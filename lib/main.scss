@@ -52,7 +52,7 @@
       }
     }
 
-    ol.control
+    ol.control_container
     {
       border: 3px solid #2780e3;
       border-bottom-right-radius: 6px;
@@ -67,7 +67,7 @@
   }
 }
 
-div.columns, div.columns:last-child
+div.columns, div.columns:last-child, #department_controls_container div.columns
 {
   margin-left: 0;
   margin-right: 0;
@@ -75,7 +75,15 @@ div.columns, div.columns:last-child
   margin-bottom: 0;
 }
 
-fieldset div.check:nth-of-type(2n)
+.level
+{
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: .5em;
+  padding-bottom: .5em;
+}
+
+/*fieldset div.check:nth-of-type(2n)
 {
   background-color: hsl(0, 0%, 86%);
-}
+}*/

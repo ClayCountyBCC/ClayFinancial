@@ -8,14 +8,28 @@
 
   export async function Start()
   {
-    
-    await Department.GetDepartments().then((d) =>
-    {
-      Transaction.departments = d;
-      console.log(d);
-      Transaction.DepartmentControl = Department.CreateDepartmentElement(Transaction.departments);
-      
-    });
+
+    await Department.GetDepartments()
+      .then((d) =>
+      {
+        Transaction.departments = d;
+        console.log(d);
+        Transaction.DepartmentControl = Department.CreateDepartmentElement(Transaction.departments);
+
+        for (let department of Transaction.departments)
+        {
+
+          department.control_groups = ControlGroup.CreateControlGroups(department.controls);
+
+          for (let paymentType of department.payment_types)
+          {
+
+            paymentType.control_groups = ControlGroup.CreateControlGroups(paymentType.controls);
+
+          }
+        }
+
+      });
 
     console.log('departments', Transaction.departments);
   }
