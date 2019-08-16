@@ -53,6 +53,10 @@
       control_element.classList.add("control");
       control_element.appendChild(input);
       field.appendChild(control_element);
+
+      let error_element = document.createElement("p");
+      error_element.classList.add("help", "is-danger")
+      field.appendChild(error_element);
       if (add_column)
       {
         let column = document.createElement("div");
@@ -62,6 +66,7 @@
         return column;
       }
       if (class_to_add.length > 0) field.classList.add(class_to_add);
+
       return field;
     }
 
@@ -129,6 +134,10 @@
       selectContainer.appendChild(select);
       control_element.appendChild(selectContainer);
       field.appendChild(control_element);
+
+      let error_element = document.createElement("p");
+      error_element.classList.add("help", "is-danger")
+      field.appendChild(error_element);
       return field;
     }
 
@@ -176,6 +185,37 @@
       input.required = is_required;
       input.value = "";
       return input;
+    }
+
+    public static UpdateSelectError(container: HTMLElement, error_text: string = ""):void
+    {
+      let error_element = <HTMLElement>container.querySelector("p.help");
+      let select_element = <HTMLElement>container.querySelector("div.select");
+      if (error_text.length === 0)
+      {
+        Utilities.Clear_Element(error_element);
+        select_element.classList.remove("is-danger");
+      }
+      else
+      {
+        Utilities.Simple_Error_Show(error_element, error_text);
+        select_element.classList.add("is-danger");
+      }
+    }
+
+    public static UpdateInputError(input: HTMLElement, container: HTMLElement, error_text: string = ""):void
+    {
+      let error_element = <HTMLElement>container.querySelector("p.help");      
+      if (error_text.length === 0)
+      {
+        Utilities.Clear_Element(error_element);
+        input.classList.remove("is-danger");
+      }
+      else
+      {
+        Utilities.Simple_Error_Show(error_element, error_text);
+        input.classList.add("is-danger");
+      }
     }
 
   }

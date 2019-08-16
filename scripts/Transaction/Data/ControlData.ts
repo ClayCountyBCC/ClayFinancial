@@ -52,6 +52,11 @@
       }
     }
 
+    public Validate():boolean
+    {
+      return false;
+    }
+
 
   }
 }

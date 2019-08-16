@@ -34,6 +34,9 @@ var Transaction;
             control_element.classList.add("control");
             control_element.appendChild(input);
             field.appendChild(control_element);
+            let error_element = document.createElement("p");
+            error_element.classList.add("help", "is-danger");
+            field.appendChild(error_element);
             if (add_column) {
                 let column = document.createElement("div");
                 column.classList.add("column");
@@ -101,6 +104,9 @@ var Transaction;
             selectContainer.appendChild(select);
             control_element.appendChild(selectContainer);
             field.appendChild(control_element);
+            let error_element = document.createElement("p");
+            error_element.classList.add("help", "is-danger");
+            field.appendChild(error_element);
             return field;
         }
         static GetPercent(render_hints) {
@@ -136,6 +142,29 @@ var Transaction;
             input.required = is_required;
             input.value = "";
             return input;
+        }
+        static UpdateSelectError(container, error_text = "") {
+            let error_element = container.querySelector("p.help");
+            let select_element = container.querySelector("div.select");
+            if (error_text.length === 0) {
+                Utilities.Clear_Element(error_element);
+                select_element.classList.remove("is-danger");
+            }
+            else {
+                Utilities.Simple_Error_Show(error_element, error_text);
+                select_element.classList.add("is-danger");
+            }
+        }
+        static UpdateInputError(input, container, error_text = "") {
+            let error_element = container.querySelector("p.help");
+            if (error_text.length === 0) {
+                Utilities.Clear_Element(error_element);
+                input.classList.remove("is-danger");
+            }
+            else {
+                Utilities.Simple_Error_Show(error_element, error_text);
+                input.classList.add("is-danger");
+            }
         }
     }
     Transaction.ControlGroup = ControlGroup;

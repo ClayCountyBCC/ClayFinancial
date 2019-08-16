@@ -17,7 +17,7 @@ var Transaction;
                 this.selected_payment_type = null;
                 this.cancel_payment_type_button = null;
                 this.add_another_payment_type_button = null;
-                this.ready_to_save_button = null;
+                this.save_button = null;
                 this.total_cash_element = null;
                 this.total_checks_element = null;
                 this.total_number_checks_element = null;
@@ -27,7 +27,6 @@ var Transaction;
                 this.payment_type_parent_container = target_container;
                 this.payment_type_id = payment_type.payment_type_id;
                 this.payment_type_index = payment_type_index;
-                //this.controls = payment_type.controls;
                 this.does_tax_exempt_apply = payment_type.does_tax_exempt_apply;
                 let li = document.createElement("li");
                 li.style.display = "block";
@@ -36,6 +35,20 @@ var Transaction;
                 this.RenderPaymentMethods(li);
                 this.RenderPaymentTypeFooter(li);
                 this.payment_type_parent_container.appendChild(li);
+            }
+            Validate() {
+                let is_valid = true;
+                for (let ct of this.control_data) {
+                    let v = ct.Validate();
+                    if (!v && is_valid)
+                        is_valid = false;
+                }
+                for (let pmt of this.payment_methods) {
+                    let v = pmt.Validate();
+                    if (!v && is_valid)
+                        is_valid = false;
+                }
+                return is_valid;
             }
             RenderPaymentTypeControls(target_container) {
                 for (let group of this.selected_payment_type.control_groups) {
@@ -66,12 +79,12 @@ var Transaction;
                 items.push(new Utilities.LevelItem("# Checks", "", this.total_number_checks_element, "has-text-centered"));
                 this.add_another_payment_type_button = this.CreateHeaderButton("Add", "is-info");
                 this.cancel_payment_type_button = this.CreateHeaderButton("Cancel", "is-warning");
-                this.ready_to_save_button = this.CreateHeaderButton("Ready to Save", "is-success");
+                this.save_button = this.CreateHeaderButton("Ready to Save", "is-success");
                 let buttons = document.createElement("div");
                 buttons.classList.add("buttons");
                 buttons.appendChild(this.add_another_payment_type_button);
                 buttons.appendChild(this.cancel_payment_type_button);
-                buttons.appendChild(this.ready_to_save_button);
+                buttons.appendChild(this.save_button);
                 let right = [];
                 right.push(new Utilities.LevelItem("", "", buttons, "has-text-centered"));
                 let heading = Utilities.Create_Centered_Level(items, [], right);

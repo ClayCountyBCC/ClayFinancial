@@ -55,12 +55,17 @@
       
     }
 
+    public Validate():boolean
+    {
+      return false;
+    }
+
     private RenderCashControls()
     {
       let columns = document.createElement("div");
       columns.classList.add("columns");
 
-      this.cash_amount_input_element = PaymentMethodData.CreateInput("tel", 15, true, "0");
+      this.cash_amount_input_element = ControlGroup.CreateInput("tel", 15, true, "0");
       this.cash_amount_input_element.oninput = (event) =>
       {
         this.cash_amount = parseFloat((<HTMLInputElement>event.target).value.replace("$", ""));
@@ -76,7 +81,7 @@
       let columns = document.createElement("div");
       columns.classList.add("columns", "is-multiline", "check");
 
-      this.check_amount_input_element = PaymentMethodData.CreateInput("tel", 15, true, "0");
+      this.check_amount_input_element = ControlGroup.CreateInput("tel", 15, true, "0");
       this.check_amount_input_element.oninput = (event) =>
       {
         this.check_amount = 0;
@@ -92,19 +97,19 @@
         this.payment_method_change();
       }
 
-      this.check_number_input_element = PaymentMethodData.CreateInput("text", 50, false, "Check Number");
+      this.check_number_input_element = ControlGroup.CreateInput("text", 50, false, "Check Number");
       this.check_number_input_element.oninput = (event) =>
       {
         this.check_number = (<HTMLInputElement>event.target).value;
       }
 
-      this.paying_for_input_element = PaymentMethodData.CreateInput("text", 500, false, "Check Paying For");
+      this.paying_for_input_element = ControlGroup.CreateInput("text", 500, false, "Check Paying For");
       this.paying_for_input_element.oninput = (event) =>
       {
         this.paying_for = (<HTMLInputElement>event.target).value;
       }
 
-      this.check_from_input_element = PaymentMethodData.CreateInput("text", 500, false, "Check From");
+      this.check_from_input_element = ControlGroup.CreateInput("text", 500, false, "Check From");
       this.check_from_input_element.oninput = (event) =>
       {
         this.check_from = (<HTMLInputElement>event.target).value;

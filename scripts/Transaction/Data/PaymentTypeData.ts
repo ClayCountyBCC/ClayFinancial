@@ -28,7 +28,7 @@
     public selected_payment_type: PaymentType = null;
     public cancel_payment_type_button: HTMLElement = null;
     public add_another_payment_type_button: HTMLElement = null;
-    public ready_to_save_button: HTMLElement = null;
+    public save_button: HTMLElement = null;
     public total_cash_element: HTMLElement = null;
     public total_checks_element: HTMLElement = null;
     public total_number_checks_element: HTMLElement = null;
@@ -44,7 +44,6 @@
       this.payment_type_parent_container = target_container;
       this.payment_type_id = payment_type.payment_type_id;      
       this.payment_type_index = payment_type_index;
-      //this.controls = payment_type.controls;
       this.does_tax_exempt_apply = payment_type.does_tax_exempt_apply;
 
       let li = document.createElement("li");
@@ -56,6 +55,24 @@
       this.RenderPaymentMethods(li);
       this.RenderPaymentTypeFooter(li);
       this.payment_type_parent_container.appendChild(li);
+    }
+
+    public Validate(): boolean
+    {
+      let is_valid = true;
+      for (let ct of this.control_data)
+      {
+        let v = ct.Validate();
+        if (!v && is_valid) is_valid = false;
+      }
+      for (let pmt of this.payment_methods)
+      {
+        let v = pmt.Validate();
+        if (!v && is_valid) is_valid = false;
+      }
+
+
+      return is_valid;
     }
 
     private RenderPaymentTypeControls(target_container: HTMLLIElement)
@@ -97,13 +114,13 @@
 
       this.add_another_payment_type_button = this.CreateHeaderButton("Add", "is-info");
       this.cancel_payment_type_button = this.CreateHeaderButton("Cancel", "is-warning");
-      this.ready_to_save_button = this.CreateHeaderButton("Ready to Save", "is-success");
+      this.save_button = this.CreateHeaderButton("Ready to Save", "is-success");
 
       let buttons = document.createElement("div");
       buttons.classList.add("buttons");
       buttons.appendChild(this.add_another_payment_type_button);
       buttons.appendChild(this.cancel_payment_type_button);
-      buttons.appendChild(this.ready_to_save_button);
+      buttons.appendChild(this.save_button);
       let right: Array<Utilities.LevelItem> = [];
 
       right.push(new Utilities.LevelItem("", "", buttons, "has-text-centered"));

@@ -131,6 +131,12 @@ namespace Utilities
     }
   }
 
+  export function Simple_Error_Show(e: Element, errorText: string): void
+  {
+    Clear_Element(<HTMLElement>e);
+    e.appendChild(document.createTextNode(errorText));
+  }
+
   export function Clear_Element(node: HTMLElement): void
   { // this function just emptys an element of all its child nodes.
     if (node === null || node === undefined) return;

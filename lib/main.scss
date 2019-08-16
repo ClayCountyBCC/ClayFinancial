@@ -83,6 +83,17 @@ div.columns, div.columns:last-child, #department_controls_container div.columns
   padding-bottom: .5em;
 }
 
+#transaction_controls.columns, #transaction_controls.columns .column
+{
+  margin-bottom: 0;
+}
+
+p.help.is-danger
+{
+  padding-left: 1em;
+  font-size: 1rem;
+}
+
 /*fieldset div.check:nth-of-type(2n)
 {
   background-color: hsl(0, 0%, 86%);

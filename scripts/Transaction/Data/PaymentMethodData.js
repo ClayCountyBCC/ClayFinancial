@@ -33,10 +33,13 @@ var Transaction;
                 this.payment_method_change = payment_method_amount_change;
                 is_cash ? this.RenderCashControls() : this.RenderCheckControls();
             }
+            Validate() {
+                return false;
+            }
             RenderCashControls() {
                 let columns = document.createElement("div");
                 columns.classList.add("columns");
-                this.cash_amount_input_element = PaymentMethodData.CreateInput("tel", 15, true, "0");
+                this.cash_amount_input_element = Transaction.ControlGroup.CreateInput("tel", 15, true, "0");
                 this.cash_amount_input_element.oninput = (event) => {
                     this.cash_amount = parseFloat(event.target.value.replace("$", ""));
                     this.payment_method_change();
@@ -47,7 +50,7 @@ var Transaction;
             RenderCheckControls() {
                 let columns = document.createElement("div");
                 columns.classList.add("columns", "is-multiline", "check");
-                this.check_amount_input_element = PaymentMethodData.CreateInput("tel", 15, true, "0");
+                this.check_amount_input_element = Transaction.ControlGroup.CreateInput("tel", 15, true, "0");
                 this.check_amount_input_element.oninput = (event) => {
                     this.check_amount = 0;
                     let input = event.target;
@@ -59,15 +62,15 @@ var Transaction;
                     }
                     this.payment_method_change();
                 };
-                this.check_number_input_element = PaymentMethodData.CreateInput("text", 50, false, "Check Number");
+                this.check_number_input_element = Transaction.ControlGroup.CreateInput("text", 50, false, "Check Number");
                 this.check_number_input_element.oninput = (event) => {
                     this.check_number = event.target.value;
                 };
-                this.paying_for_input_element = PaymentMethodData.CreateInput("text", 500, false, "Check Paying For");
+                this.paying_for_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check Paying For");
                 this.paying_for_input_element.oninput = (event) => {
                     this.paying_for = event.target.value;
                 };
-                this.check_from_input_element = PaymentMethodData.CreateInput("text", 500, false, "Check From");
+                this.check_from_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check From");
                 this.check_from_input_element.oninput = (event) => {
                     this.check_from = event.target.value;
                 };
@@ -91,16 +94,6 @@ var Transaction;
                 columns.appendChild(Transaction.ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half"));
                 columns.appendChild(Transaction.ControlGroup.CreateInputFieldContainer(this.check_from_input_element, "Check From", true, "is-half"));
                 this.control_to_render = columns;
-            }
-            static CreateInput(input_type, input_length, is_required, placeholder) {
-                let input = document.createElement("input");
-                input.type = input_type;
-                input.maxLength = input_length;
-                input.classList.add("input", "is-medium");
-                input.placeholder = placeholder;
-                input.required = is_required;
-                input.value = "";
-                return input;
             }
         }
         Data.PaymentMethodData = PaymentMethodData;

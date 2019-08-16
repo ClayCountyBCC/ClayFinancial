@@ -89,7 +89,7 @@
 
     public static CreateDepartmentElementField(department: HTMLSelectElement): HTMLElement
     {
-      return ControlGroup.CreateSelectFieldContainer(department, "Department");
+      return ControlGroup.CreateSelectFieldContainer(department, "Department", true, "is-one-half");
       //let field = document.createElement("div");
       //field.classList.add("field");
       //let label = document.createElement("label");

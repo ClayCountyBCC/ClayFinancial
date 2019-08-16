@@ -98,6 +98,11 @@ var Utilities;
         }
     }
     Utilities.Error_Show = Error_Show;
+    function Simple_Error_Show(e, errorText) {
+        Clear_Element(e);
+        e.appendChild(document.createTextNode(errorText));
+    }
+    Utilities.Simple_Error_Show = Simple_Error_Show;
     function Clear_Element(node) {
         if (node === null || node === undefined)
             return;

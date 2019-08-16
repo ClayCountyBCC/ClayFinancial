@@ -11,11 +11,14 @@
   export class TransactionData implements ITransactionData
   {
     public transaction_id: number = -1;
-    public department_id: number = null;
+    public department_id: number = -1;
     public department_control_data: Array<ControlData> = [];
     public payment_types: Array<PaymentTypeData> = [];
     private base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
+    private department_element_container: HTMLElement = null;
+    private received_from_element: HTMLElement = null;
+    private received_from_element_container: HTMLElement = null;
     private department_controls_target: string = 'department_controls_container';
     private payment_type_target: string = 'payment_type_container';
     private selected_department: Department = null;
@@ -28,8 +31,13 @@
       let targetContainer = document.getElementById(this.base_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer);
+      let control_container = document.createElement("div");
+      control_container.id = "transaction_controls";
+      control_container.classList.add("columns");
+      targetContainer.appendChild(control_container);
       this.department_element = <HTMLSelectElement>Transaction.DepartmentControl.cloneNode(true);
-      this.RenderDepartmentSelection(targetContainer);
+      this.RenderDepartmentSelection(control_container);
+      this.RenderReceivedFromInput(control_container);
     }
 
     private CreateReceiptTitle(target:HTMLElement)
@@ -47,10 +55,10 @@
         this.department_id = parseInt((<HTMLSelectElement>event.target).value);        
         this.selected_department = Department.FindDepartment(this.department_id);
         this.RenderDepartmentControls();
-        this.RenderPaymentTypes();
-
+        this.RenderPaymentTypes();        
       }
-      target.appendChild(Department.CreateDepartmentElementField(this.department_element));
+      this.department_element_container = Department.CreateDepartmentElementField(this.department_element);
+      target.appendChild(this.department_element_container);
     }
 
     private RenderDepartmentControls()
@@ -133,6 +141,20 @@
 
     }
 
+    private RenderReceivedFromInput(target_container: HTMLElement): void
+    {
+      this.received_from_element = ControlGroup.CreateInput("text", 500, true, "Received From");
+      this.received_from_element.oninput = (event: Event) =>
+      {
+        let e = (<HTMLInputElement>event.target);
+        e.value = e.value.trim();
+        this.received_from = e.value;
+        this.IsValid();
+      }
+      this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
+      target_container.appendChild(this.received_from_element_container);
+    }
+
     private AddPaymentType(payment_type: PaymentType, container: HTMLElement): void
     {
       let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_id++);
@@ -152,7 +174,7 @@
         if (container.childElementCount === 0) container.classList.add("hide");
       }
 
-      ptd.ready_to_save_button.onclick = (event: Event) =>
+      ptd.save_button.onclick = (event: Event) =>
       {
         this.ValidateTransaction();
       }
@@ -161,9 +183,50 @@
 
     private ValidateTransaction(): boolean
     {
-      return false;
+      let is_valid = true;
+
+      is_valid = this.IsValid();
+
+      for (let ct of this.department_control_data)
+      {
+        let v = ct.Validate();
+        if (!v && is_valid) is_valid = false;
+      }
+
+      for (let pt of this.payment_types)
+      {
+        let v = pt.Validate();
+        if (!v && is_valid) is_valid = false;
+      }
+
+
+      return is_valid;
     }
 
+    private IsValid(): boolean
+    {
+      this.ResetErrorElements();
+
+      let is_valid = true;
+
+      if (this.department_id === -1)
+      {
+        ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
+        is_valid = false;
+      }
+      if (this.received_from.length === 0)
+      {
+        ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "Bad Input");
+        is_valid = false;
+      }
+      return is_valid;
+    }
+
+    private ResetErrorElements()
+    {
+      ControlGroup.UpdateSelectError(this.department_element_container, "");
+      ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
+    }
   }
 
 

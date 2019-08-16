@@ -58,7 +58,7 @@ var Transaction;
             return level;
         }
         static CreateDepartmentElementField(department) {
-            return Transaction.ControlGroup.CreateSelectFieldContainer(department, "Department");
+            return Transaction.ControlGroup.CreateSelectFieldContainer(department, "Department", true, "is-one-half");
             //let field = document.createElement("div");
             //field.classList.add("field");
             //let label = document.createElement("label");

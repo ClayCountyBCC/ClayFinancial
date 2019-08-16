@@ -31,6 +31,9 @@ var Transaction;
                     this.container_element = Transaction.ControlGroup.CreateInputFieldContainerByControl(control, this.input_element, true);
                 }
             }
+            Validate() {
+                return false;
+            }
         }
         Data.ControlData = ControlData;
     })(Data = Transaction.Data || (Transaction.Data = {}));

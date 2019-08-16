@@ -5,11 +5,14 @@ var Transaction;
         class TransactionData {
             constructor() {
                 this.transaction_id = -1;
-                this.department_id = null;
+                this.department_id = -1;
                 this.department_control_data = [];
                 this.payment_types = [];
                 this.base_container = 'root';
                 this.department_element = null;
+                this.department_element_container = null;
+                this.received_from_element = null;
+                this.received_from_element_container = null;
                 this.department_controls_target = 'department_controls_container';
                 this.payment_type_target = 'payment_type_container';
                 this.selected_department = null;
@@ -19,8 +22,13 @@ var Transaction;
                 let targetContainer = document.getElementById(this.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
+                let control_container = document.createElement("div");
+                control_container.id = "transaction_controls";
+                control_container.classList.add("columns");
+                targetContainer.appendChild(control_container);
                 this.department_element = Transaction.DepartmentControl.cloneNode(true);
-                this.RenderDepartmentSelection(targetContainer);
+                this.RenderDepartmentSelection(control_container);
+                this.RenderReceivedFromInput(control_container);
             }
             CreateReceiptTitle(target) {
                 let title = document.createElement("h2");
@@ -35,7 +43,8 @@ var Transaction;
                     this.RenderDepartmentControls();
                     this.RenderPaymentTypes();
                 };
-                target.appendChild(Transaction.Department.CreateDepartmentElementField(this.department_element));
+                this.department_element_container = Transaction.Department.CreateDepartmentElementField(this.department_element);
+                target.appendChild(this.department_element_container);
             }
             RenderDepartmentControls() {
                 this.department_control_data = [];
@@ -97,6 +106,17 @@ var Transaction;
                 }
                 paymentTypeContainer.appendChild(ol);
             }
+            RenderReceivedFromInput(target_container) {
+                this.received_from_element = Transaction.ControlGroup.CreateInput("text", 500, true, "Received From");
+                this.received_from_element.oninput = (event) => {
+                    let e = event.target;
+                    e.value = e.value.trim();
+                    this.received_from = e.value;
+                    this.IsValid();
+                };
+                this.received_from_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
+                target_container.appendChild(this.received_from_element_container);
+            }
             AddPaymentType(payment_type, container) {
                 let ptd = new Data.PaymentTypeData(payment_type, container, this.next_payment_type_id++);
                 this.payment_types.push(ptd);
@@ -112,12 +132,41 @@ var Transaction;
                     if (container.childElementCount === 0)
                         container.classList.add("hide");
                 };
-                ptd.ready_to_save_button.onclick = (event) => {
+                ptd.save_button.onclick = (event) => {
                     this.ValidateTransaction();
                 };
             }
             ValidateTransaction() {
-                return false;
+                let is_valid = true;
+                is_valid = this.IsValid();
+                for (let ct of this.department_control_data) {
+                    let v = ct.Validate();
+                    if (!v && is_valid)
+                        is_valid = false;
+                }
+                for (let pt of this.payment_types) {
+                    let v = pt.Validate();
+                    if (!v && is_valid)
+                        is_valid = false;
+                }
+                return is_valid;
+            }
+            IsValid() {
+                this.ResetErrorElements();
+                let is_valid = true;
+                if (this.department_id === -1) {
+                    Transaction.ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
+                    is_valid = false;
+                }
+                if (this.received_from.length === 0) {
+                    Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "Bad Input");
+                    is_valid = false;
+                }
+                return is_valid;
+            }
+            ResetErrorElements() {
+                Transaction.ControlGroup.UpdateSelectError(this.department_element_container, "");
+                Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
             }
         }
         Data.TransactionData = TransactionData;
