@@ -8,64 +8,33 @@ namespace ClayFinancial.Models.Transaction.Data
   public class TransactionData // temp name till I figure out more stuff
   {
     /*  
-     *  
-     * 
-     * Transaction has
-     *  - id
-     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be "";
-     *  - department
-     *    + name
-     *    + is_active
-     *    +department_control_data
-     *      - control_id
-     *      - value
-     *      - is_active
-     *    + payment_type[]
-     *        - tax_exempt
-     *        - payment_type_controls[]
-     *           + transaction_payment_type_id
-     *           + control_id
-     *           + value
-     *           + is_active
-     *        - payment_methods[]
-     *          + cash_amount
-     *          + check_amount
-     *          + check_number
-     *          + check_from
-     *          + paying_for
-     *          + is_active
-     * 
-     * 
-     * The above heirarchy does not show all data in the tables. This is solely the data necessary to save.
-     * All tables storing transaction data will also have the transaction_id saved.
-     *  
+     * Removed big comment as it was outdated.  The ERD in the database will suffice for this. 
      *  
      * */
 
-    public int year { get; set; }
+    public long transaction_id { get; set; }
+    public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
-    public string transaction_number { get; set; }
-    public long transaction_id { get; set; }
+    public string transaction_number { get; set; }    
     public long parent_transaction_id { get; set; }
     public int department_id { get; set; }
-    public List<ControlData> department_controls { get; set; }
-    public List<PaymentTypeData> payment_types { get; set; }
+    public List<ControlData> department_control_data { get; set; }
+    public List<PaymentTypeData> payment_type_data { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
+    public DateTime created_on { get; set; } = DateTime.MinValue;
+    public string created_by_username { get; set; } = "";
+    public string created_by_ip_address { get; set; } = "";
 
     public TransactionData()
     {
-      
     }
-
 
     public bool validate()
     {
-
       return false;
     }
-
 
     public TransactionData Save()
     {

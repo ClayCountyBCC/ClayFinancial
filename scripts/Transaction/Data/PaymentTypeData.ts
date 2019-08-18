@@ -7,32 +7,34 @@
     payment_type_index: number
     transaction_id: number;
     tax_exempt: boolean;
-    does_tax_exempt_apply: boolean;
     control_data: Array<ControlData>;
-    payment_methods: Array<PaymentMethodData>;
+    payment_method_data: Array<PaymentMethodData>;
     error_text: string;
+    added_after_save: boolean;
   }
 
   export class PaymentTypeData implements IPaymentTypeData
   {
     public transaction_payment_type_id: number = -1;
+    public transaction_id: number = -1;
     public payment_type_id: number = -1;
     public payment_type_index: number = -1;
-    public transaction_id: number = -1;
-    public does_tax_exempt_apply: boolean = false;
     public tax_exempt: boolean = false;
     public control_data: Array<ControlData> = [];
-    public payment_type_parent_container: HTMLElement = null;
+    public added_after_save: boolean = false;
+    public error_text: string = "";
+    public payment_method_data: Array<PaymentMethodData> = [];
+
+    //clientside controls
+    private payment_type_parent_container: HTMLElement = null;
     public payment_type_container: HTMLElement = null;    
-    public payment_methods: Array<PaymentMethodData> = [];
-    public selected_payment_type: PaymentType = null;
+    private selected_payment_type: PaymentType = null;
     public cancel_payment_type_button: HTMLElement = null;
     public add_another_payment_type_button: HTMLElement = null;
     public save_button: HTMLElement = null;
-    public total_cash_element: HTMLElement = null;
-    public total_checks_element: HTMLElement = null;
-    public total_number_checks_element: HTMLElement = null;
-    public error_text: string = "";
+    private total_cash_element: HTMLElement = null;
+    private total_checks_element: HTMLElement = null;
+    private total_number_checks_element: HTMLElement = null;
     private next_payment_method_id: number = 0;
 
     constructor(
@@ -44,7 +46,7 @@
       this.payment_type_parent_container = target_container;
       this.payment_type_id = payment_type.payment_type_id;      
       this.payment_type_index = payment_type_index;
-      this.does_tax_exempt_apply = payment_type.does_tax_exempt_apply;
+      this.tax_exempt = payment_type.does_tax_exempt_apply;
 
       let li = document.createElement("li");
       li.style.display = "block";
@@ -65,12 +67,11 @@
         let v = ct.Validate();
         if (!v && is_valid) is_valid = false;
       }
-      for (let pmt of this.payment_methods)
+      for (let pmt of this.payment_method_data)
       {
         let v = pmt.Validate();
         if (!v && is_valid) is_valid = false;
       }
-
 
       return is_valid;
     }
@@ -114,7 +115,7 @@
 
       this.add_another_payment_type_button = this.CreateHeaderButton("Add", "is-info");
       this.cancel_payment_type_button = this.CreateHeaderButton("Cancel", "is-warning");
-      this.save_button = this.CreateHeaderButton("Ready to Save", "is-success");
+      this.save_button = this.CreateHeaderButton("Preview & Save", "is-success");
 
       let buttons = document.createElement("div");
       buttons.classList.add("buttons");
@@ -146,9 +147,9 @@
 
     private AddCheckPaymentMethod(target_container: HTMLElement, show_cancel: boolean = false): void
     {
-      let check = new PaymentMethodData(false, this.payment_type_id, show_cancel, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
+      let check = new PaymentMethodData(false, show_cancel, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
       target_container.appendChild(check.control_to_render)
-      this.payment_methods.push(check);
+      this.payment_method_data.push(check);
       check.add_check_button_element.onclick = (event: Event) =>
       {
         this.AddCheckPaymentMethod(target_container, true);
@@ -158,8 +159,8 @@
         check.cancel_check_button_element.onclick = (event: Event) =>
         {
           target_container.removeChild(check.control_to_render);
-          let indextoremove = this.payment_methods.findIndex(function (j) { return j.payment_method_data_id === check.payment_method_data_id });
-          if (indextoremove > -1) this.payment_methods.splice(indextoremove, 1);
+          let indextoremove = this.payment_method_data.findIndex(function (j) { return j.payment_method_data_id === check.payment_method_data_id });
+          if (indextoremove > -1) this.payment_method_data.splice(indextoremove, 1);
           check = null;
           this.PaymentMethodDataChanged();
         }
@@ -168,9 +169,9 @@
 
     private AddCashPaymentMethod(target_container: HTMLElement): void
     {
-      let cash = new PaymentMethodData(true, this.payment_type_id, false, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
+      let cash = new PaymentMethodData(true, false, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
       target_container.appendChild(cash.control_to_render);
-      this.payment_methods.push(cash);
+      this.payment_method_data.push(cash);
     }
 
     private PaymentMethodDataChanged():void
@@ -178,7 +179,7 @@
       let cash = 0;
       let checks = 0;
       let number_checks = 0;
-      for (let pmt of this.payment_methods)
+      for (let pmt of this.payment_method_data)
       {
         cash += pmt.cash_amount;
         checks += pmt.check_amount;

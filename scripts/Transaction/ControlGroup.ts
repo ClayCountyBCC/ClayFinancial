@@ -181,6 +181,11 @@
       input.type = input_type;
       input.maxLength = input_length;
       input.classList.add("input", "is-medium");
+      if (input.type === "number")
+      {
+        input.step = "0.01";
+        input.min = "0";
+      }
       input.placeholder = placeholder;
       input.required = is_required;
       input.value = "";

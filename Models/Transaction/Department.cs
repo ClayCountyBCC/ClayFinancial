@@ -118,7 +118,7 @@ namespace ClayFinancial.Models.Transaction
       // department controls are all required.
       // every control in controls_dict for this class needs to be present
       // every control in controls must have a valid value.
-      var controlids = (from c in transactionData.department_controls
+      var controlids = (from c in transactionData.department_control_data
                         select c.control_id).ToList();
 
       // let's make sure every department control is present in department_controls
@@ -132,7 +132,7 @@ namespace ClayFinancial.Models.Transaction
       }
 
       // now we validate each department control
-      foreach (Data.ControlData cd in transactionData.department_controls)
+      foreach (Data.ControlData cd in transactionData.department_control_data)
       {
         // if one of our department controls isn't found in our controls_dict object,
         // it means that the client has an extra control

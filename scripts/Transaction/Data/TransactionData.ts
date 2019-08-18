@@ -3,17 +3,37 @@
   interface ITransactionData
   {
     transaction_id: number;
+    parent_transaction_id: number;
     department_id: number;
+    fiscal_year: number;
+    created_by_employee_id: number;
+    transaction_number: string;
+    employee_transaction_count: number;
     department_control_data: Array<ControlData>;
-    payment_types: Array<PaymentTypeData>;
+    payment_type_data: Array<PaymentTypeData>;
     error_text: string;
+    received_from: string;
+    created_on: any;
+    created_by_username: string;
+    created_by_ip_address: string;
   }
   export class TransactionData implements ITransactionData
   {
     public transaction_id: number = -1;
+    public fiscal_year: number = -1;
+    public created_by_employee_id: number = -1;
+    public employee_transaction_count: number = -1;
+    public transaction_number: string = "";
+    public parent_transaction_id: number = -1;
     public department_id: number = -1;
     public department_control_data: Array<ControlData> = [];
-    public payment_types: Array<PaymentTypeData> = [];
+    public payment_type_data: Array<PaymentTypeData> = [];
+    public error_text: string = "";
+    public received_from: string = "";
+    public created_on: any = new Date();
+    public created_by_username: string = "";
+    public created_by_ip_address: string = "";
+    // client side only stuff
     private base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private department_element_container: HTMLElement = null;
@@ -22,9 +42,7 @@
     private department_controls_target: string = 'department_controls_container';
     private payment_type_target: string = 'payment_type_container';
     private selected_department: Department = null;
-    public next_payment_type_id: number = 0;
-    public error_text: string = "";
-    public received_from: string = "";
+    private next_payment_type_index: number = 0;
 
     constructor()
     {
@@ -85,7 +103,7 @@
 
     private RenderPaymentTypes()
     {
-      this.payment_types = [];
+      this.payment_type_data = [];
       let paymentTypeContainer = document.getElementById(this.payment_type_target);
       // if we can't find it, create it.
       if (paymentTypeContainer === null)
@@ -157,8 +175,8 @@
 
     private AddPaymentType(payment_type: PaymentType, container: HTMLElement): void
     {
-      let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_id++);
-      this.payment_types.push(ptd);
+      let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_index++);
+      this.payment_type_data.push(ptd);
 
       ptd.add_another_payment_type_button.onclick = (event: Event) =>
       {
@@ -168,19 +186,29 @@
       ptd.cancel_payment_type_button.onclick = (event: Event) =>
       {
         container.removeChild(ptd.payment_type_container);
-        let indextoremove = this.payment_types.findIndex((j) => { return j.payment_type_index === ptd.payment_type_index; });
-        if (indextoremove > -1) this.payment_types.splice(indextoremove, 1);
+        let indextoremove = this.payment_type_data.findIndex((j) => { return j.payment_type_index === ptd.payment_type_index; });
+        if (indextoremove > -1) this.payment_type_data.splice(indextoremove, 1);
         ptd = null;
         if (container.childElementCount === 0) container.classList.add("hide");
       }
 
       ptd.save_button.onclick = (event: Event) =>
       {
-        this.ValidateTransaction();
+        let button = <HTMLButtonElement>event.target;
+        Utilities.Toggle_Loading_Button(button, true);
+
+        if (this.ValidateTransaction())
+        {
+          this.SaveTransactionData();
+        }
+        else
+        {
+          Utilities.Toggle_Loading_Button(button, false);
+        }
       }
 
     }
-
+       
     private ValidateTransaction(): boolean
     {
       let is_valid = true;
@@ -193,7 +221,7 @@
         if (!v && is_valid) is_valid = false;
       }
 
-      for (let pt of this.payment_types)
+      for (let pt of this.payment_type_data)
       {
         let v = pt.Validate();
         if (!v && is_valid) is_valid = false;
@@ -216,7 +244,7 @@
       }
       if (this.received_from.length === 0)
       {
-        ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "Bad Input");
+        ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "This field is required.");
         is_valid = false;
       }
       return is_valid;
@@ -227,6 +255,14 @@
       ControlGroup.UpdateSelectError(this.department_element_container, "");
       ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
     }
+
+    private SaveTransactionData():void
+    {
+      // first let's reorder all of the payment_type_index fields
+      // by reorder I mean make them representative
+      // of the actual index that element is in the array.
+    }
+
   }
 
 

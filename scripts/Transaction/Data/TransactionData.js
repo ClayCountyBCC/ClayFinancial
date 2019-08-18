@@ -5,9 +5,20 @@ var Transaction;
         class TransactionData {
             constructor() {
                 this.transaction_id = -1;
+                this.fiscal_year = -1;
+                this.created_by_employee_id = -1;
+                this.employee_transaction_count = -1;
+                this.transaction_number = "";
+                this.parent_transaction_id = -1;
                 this.department_id = -1;
                 this.department_control_data = [];
-                this.payment_types = [];
+                this.payment_type_data = [];
+                this.error_text = "";
+                this.received_from = "";
+                this.created_on = new Date();
+                this.created_by_username = "";
+                this.created_by_ip_address = "";
+                // client side only stuff
                 this.base_container = 'root';
                 this.department_element = null;
                 this.department_element_container = null;
@@ -16,9 +27,7 @@ var Transaction;
                 this.department_controls_target = 'department_controls_container';
                 this.payment_type_target = 'payment_type_container';
                 this.selected_department = null;
-                this.next_payment_type_id = 0;
-                this.error_text = "";
-                this.received_from = "";
+                this.next_payment_type_index = 0;
                 let targetContainer = document.getElementById(this.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
@@ -64,7 +73,7 @@ var Transaction;
                 }
             }
             RenderPaymentTypes() {
-                this.payment_types = [];
+                this.payment_type_data = [];
                 let paymentTypeContainer = document.getElementById(this.payment_type_target);
                 // if we can't find it, create it.
                 if (paymentTypeContainer === null) {
@@ -118,22 +127,29 @@ var Transaction;
                 target_container.appendChild(this.received_from_element_container);
             }
             AddPaymentType(payment_type, container) {
-                let ptd = new Data.PaymentTypeData(payment_type, container, this.next_payment_type_id++);
-                this.payment_types.push(ptd);
+                let ptd = new Data.PaymentTypeData(payment_type, container, this.next_payment_type_index++);
+                this.payment_type_data.push(ptd);
                 ptd.add_another_payment_type_button.onclick = (event) => {
                     this.AddPaymentType(payment_type, container);
                 };
                 ptd.cancel_payment_type_button.onclick = (event) => {
                     container.removeChild(ptd.payment_type_container);
-                    let indextoremove = this.payment_types.findIndex((j) => { return j.payment_type_index === ptd.payment_type_index; });
+                    let indextoremove = this.payment_type_data.findIndex((j) => { return j.payment_type_index === ptd.payment_type_index; });
                     if (indextoremove > -1)
-                        this.payment_types.splice(indextoremove, 1);
+                        this.payment_type_data.splice(indextoremove, 1);
                     ptd = null;
                     if (container.childElementCount === 0)
                         container.classList.add("hide");
                 };
                 ptd.save_button.onclick = (event) => {
-                    this.ValidateTransaction();
+                    let button = event.target;
+                    Utilities.Toggle_Loading_Button(button, true);
+                    if (this.ValidateTransaction()) {
+                        this.SaveTransactionData();
+                    }
+                    else {
+                        Utilities.Toggle_Loading_Button(button, false);
+                    }
                 };
             }
             ValidateTransaction() {
@@ -144,7 +160,7 @@ var Transaction;
                     if (!v && is_valid)
                         is_valid = false;
                 }
-                for (let pt of this.payment_types) {
+                for (let pt of this.payment_type_data) {
                     let v = pt.Validate();
                     if (!v && is_valid)
                         is_valid = false;
@@ -159,7 +175,7 @@ var Transaction;
                     is_valid = false;
                 }
                 if (this.received_from.length === 0) {
-                    Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "Bad Input");
+                    Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "This field is required.");
                     is_valid = false;
                 }
                 return is_valid;
@@ -167,6 +183,11 @@ var Transaction;
             ResetErrorElements() {
                 Transaction.ControlGroup.UpdateSelectError(this.department_element_container, "");
                 Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
+            }
+            SaveTransactionData() {
+                // first let's reorder all of the payment_type_index fields
+                // by reorder I mean make them representative
+                // of the actual index that element is in the array.
             }
         }
         Data.TransactionData = TransactionData;

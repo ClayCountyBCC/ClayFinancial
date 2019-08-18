@@ -8,20 +8,9 @@ namespace ClayFinancial.Models.Transaction.Data
   public class PaymentMethodData
   {
 
-    /*
-     * 
-     * 
-     *  - payment_methods[]
-     *    + cash_amount
-     *    + check_amount
-     *    + check_number
-     *    + check_from
-     *    + paying_for
-     *    + is_active
-     *
-     */
     public long payment_method_data_id { get; set; }
     public long prior_payment_method_data_id { get; set; }
+    public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
     public decimal cash_amount { get; set; }
     public decimal check_amount { get; set; }
@@ -29,11 +18,14 @@ namespace ClayFinancial.Models.Transaction.Data
     public string paying_for { get; set; }
     public string check_from { get; set; }
     public bool is_active { get; set; }
+    public bool added_after_save { get; set; } = false;
+    public string modified_by { get; set; } = "";
+    public DateTime modified_on { get; set; } = DateTime.MinValue;
+    public string reason_for_change { get; set; } = "";
     public string error_text { get; set; } = "";
 
     public PaymentMethodData()
     {
-
     }
 
     public PaymentMethodData Get()
