@@ -9,6 +9,7 @@
     does_tax_exempt_apply: boolean;
     controls: Array<Control>;
     controls_dict: object;
+    control_groups: Array<ControlGroup>;
   }
 
   export class PaymentType implements IPaymentType
@@ -20,6 +21,8 @@
     public does_tax_exempt_apply: boolean;
     public controls: Array<Control>;
     public controls_dict: object;
+    public control_groups: Array<ControlGroup> = [];
+
 
     Constructor() { }
 

@@ -131,6 +131,12 @@ namespace Utilities
     }
   }
 
+  export function Simple_Error_Show(e: Element, errorText: string): void
+  {
+    Clear_Element(<HTMLElement>e);
+    e.appendChild(document.createTextNode(errorText));
+  }
+
   export function Clear_Element(node: HTMLElement): void
   { // this function just emptys an element of all its child nodes.
     if (node === null || node === undefined) return;
@@ -496,6 +502,71 @@ namespace Utilities
       path = appName + "/";
     }
     return path;
+  }
+
+  export function Create_Centered_Level(level_items: Array<LevelItem>, left: Array<LevelItem> = [], right: Array<LevelItem> = []): HTMLElement
+  {
+    let level = document.createElement("div");
+    level.classList.add("level");
+
+    for (let li of level_items)
+    {
+      level.appendChild(Create_Level_Item(li));
+    }
+    if (left.length > 0)
+    {
+      let leftcontainer = document.createElement("div");
+      leftcontainer.classList.add("level-left");
+      level.appendChild(leftcontainer);
+
+      for (let li of left)
+      {
+        leftcontainer.appendChild(Create_Level_Item(li));
+      }
+    }
+    if (right.length > 0)
+    {
+      let rightcontainer = document.createElement("div");
+      rightcontainer.classList.add("level-right");
+      level.appendChild(rightcontainer);
+
+      for (let li of right)
+      {
+        rightcontainer.appendChild(Create_Level_Item(li));
+      }
+    }
+
+    return level;
+  }
+
+  function Create_Level_Item(level_item: LevelItem): HTMLElement
+  {
+    let levelitem = document.createElement("div");
+    levelitem.classList.add("level-item", ...level_item.classes);
+    let container = document.createElement("div");
+    levelitem.appendChild(container);
+    if (level_item.heading.length > 0)
+    {
+      let heading = document.createElement("p");
+      heading.classList.add("heading");
+      heading.appendChild(document.createTextNode(level_item.heading));
+      container.appendChild(heading);
+    }
+    if (level_item.title_text.length > 0)
+    {
+      let title = document.createElement("p");
+      title.classList.add("title");
+      title.appendChild(document.createTextNode(level_item.title_text));
+      container.appendChild(title);
+    }
+    else
+    {
+      if (level_item.title !== null)
+      {
+        container.appendChild(level_item.title);
+      }
+    }
+    return levelitem;
   }
 
 }

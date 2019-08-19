@@ -1,16 +1,23 @@
 var Transaction;
 (function (Transaction) {
     class Control {
+        constructor() {
+            this.rendered_input_element = null;
+            this.valid_values = [];
+        }
         Constructor() { }
         static CreateControl(control) {
             switch (control.data_type) {
                 case "date":
                 case "text":
                     return Control.CreateInput(control);
+                case "number":
+                case "money":
+                    return Control.CreateNumericInput(control);
                 case "bigtext":
                     return Control.CreateTextArea(control);
                 case "dropdown":
-                    return null;
+                    return Control.CreateSelect(control);
             }
             return null;
         }
@@ -21,6 +28,18 @@ var Transaction;
             input.classList.add("input", "is-medium");
             input.placeholder = control.label;
             input.required = control.required;
+            input.value = "";
+            input.setAttribute("control_id", control.control_id.toString());
+            return input;
+        }
+        static CreateNumericInput(control) {
+            let input = document.createElement("input");
+            input.type = "number";
+            input.maxLength = control.max_length;
+            input.classList.add("input", "is-medium");
+            input.placeholder = "0";
+            input.required = control.required;
+            input.step = "any";
             input.value = "";
             input.setAttribute("control_id", control.control_id.toString());
             return input;
@@ -36,92 +55,14 @@ var Transaction;
             textarea.setAttribute("control_id", control.control_id.toString());
             return textarea;
         }
-        static CreateInputFieldContainer(input, field_label, add_column = false, class_to_add = "") {
-            let field = document.createElement("div");
-            field.classList.add("field");
-            let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
-            if (field_label.length > 0) {
-                label.appendChild(document.createTextNode(field_label));
-            }
-            else {
-                label.innerHTML = "&nbsp;";
-            }
-            field.appendChild(label);
-            let control = document.createElement("div");
-            control.classList.add("control");
-            control.appendChild(input);
-            field.appendChild(control);
-            if (add_column) {
-                let column = document.createElement("div");
-                column.classList.add("column");
-                if (class_to_add.length > 0)
-                    column.classList.add(class_to_add);
-                column.appendChild(field);
-                return column;
-            }
-            if (class_to_add.length > 0)
-                field.classList.add(class_to_add);
-            return field;
-        }
-        static CreateButtonlistFieldContainer(inputs, field_label, add_column = false, class_to_add = "") {
-            let field = document.createElement("div");
-            field.classList.add("field");
-            let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
-            if (field_label.length > 0) {
-                label.appendChild(document.createTextNode(field_label));
-            }
-            else {
-                label.innerHTML = "&nbsp;";
-            }
-            field.appendChild(label);
-            let control = document.createElement("div");
-            control.classList.add("control");
-            let buttonlist = document.createElement("div");
-            buttonlist.classList.add("buttons");
-            for (let input of inputs) {
-                buttonlist.appendChild(input);
-            }
-            control.appendChild(buttonlist);
-            field.appendChild(control);
-            if (add_column) {
-                let column = document.createElement("div");
-                column.classList.add("column");
-                if (class_to_add.length > 0)
-                    column.classList.add(class_to_add);
-                column.appendChild(field);
-                return column;
-            }
-            if (class_to_add.length > 0)
-                field.classList.add(class_to_add);
-            return field;
-        }
-        static CreateSelectFieldContainer(select, field_label) {
-            let field = document.createElement("div");
-            field.classList.add("field");
-            let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
-            label.appendChild(document.createTextNode(field_label));
-            field.appendChild(label);
-            let control = document.createElement("div");
-            control.classList.add("control");
-            let selectContainer = document.createElement("div");
-            selectContainer.classList.add("select", "is-medium");
-            selectContainer.appendChild(select);
-            control.appendChild(selectContainer);
-            field.appendChild(control);
-            return field;
-        }
-        static CreateSelect(controls) {
+        static CreateSelect(control) {
+            control.valid_values = control.value.split("|");
             let select = document.createElement("select");
-            for (let control of controls) {
-                let option = document.createElement("option");
-                option.appendChild(document.createTextNode(control.label));
-                option.value = control.value;
-                select.appendChild(option);
+            select.required = control.required;
+            select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, true));
+            for (let value of control.valid_values) {
+                select.appendChild(Utilities.Create_Option(value, value, false));
             }
-            select.selectedIndex = -1;
             return select;
         }
     }

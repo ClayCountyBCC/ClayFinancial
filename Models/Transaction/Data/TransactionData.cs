@@ -17,7 +17,7 @@ namespace ClayFinancial.Models.Transaction.Data
      * 
      * Transaction has
      *  - id
-     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be -1;
+     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be "";
      *  - department
      *    + name
      *    + is_active
@@ -46,20 +46,21 @@ namespace ClayFinancial.Models.Transaction.Data
      *  
      *  
      * */
-    public long transaction_id { get; set; } = -1;
-    public int fiscal_year { get; set; } = -1;
-    public int employee_transaction_count { get; set; } = -1;
-    public string transaction_number { get; set; } = "";
-    public int created_by_employee_id { get; set; } = -1;
-    public string username { get; set; } = "";
-    public string display_name { get; set; } = "";
-    public string created_by_employee_ip_address { get; set; } = "";
-    public DateTime created_on { get; set; }
-    public long parent_transaction_id { get; set; } = -1;
-    public short department_id { get; set; } = -1;
-    public List<ControlData> department_controls { get; set; }
-    public List<PaymentTypeData> payment_types { get; set; }
+
+    public long transaction_id { get; set; }
+    public int fiscal_year { get; set; }
+    public int created_by_employee_id { get; set; }
+    public int employee_transaction_count { get; set; }
+    public string transaction_number { get; set; }    
+    public long parent_transaction_id { get; set; }
+    public int department_id { get; set; }
+    public List<ControlData> department_control_data { get; set; }
+    public List<PaymentTypeData> payment_type_data { get; set; }
     public string error_text { get; set; } = "";
+    public string received_from { get; set; } = "";
+    public DateTime created_on { get; set; } = DateTime.MinValue;
+    public string created_by_username { get; set; } = "";
+    public string created_by_ip_address { get; set; } = "";
 
     public TransactionData()
     {

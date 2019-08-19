@@ -35,6 +35,8 @@
     public max_length: number;
     public validation_regex: string;
     public render_hints: string;
+    public rendered_input_element: HTMLElement = null;
+    public valid_values: Array<string> = [];
 
     Constructor() { }
 
@@ -46,12 +48,16 @@
         case "date":          
         case "text":
           return Control.CreateInput(control);
+
+        case "number":
+        case "money":
+          return Control.CreateNumericInput(control);
           
         case "bigtext":
           return Control.CreateTextArea(control);
           
         case "dropdown":
-          return null;
+          return Control.CreateSelect(control);
       }
       return null;
     }
@@ -61,9 +67,23 @@
       let input = document.createElement("input");
       input.type = control.data_type;
       input.maxLength = control.max_length;
-      input.classList.add("input", "is-medium");
+      input.classList.add("input", "is-medium");      
       input.placeholder = control.label;
       input.required = control.required;
+      input.value = "";
+      input.setAttribute("control_id", control.control_id.toString());
+      return input;
+    }
+
+    private static CreateNumericInput(control: Control): HTMLInputElement
+    {
+      let input = document.createElement("input");
+      input.type = "number";
+      input.maxLength = control.max_length;
+      input.classList.add("input", "is-medium");
+      input.placeholder = "0";
+      input.required = control.required;
+      input.step = "any";
       input.value = "";
       input.setAttribute("control_id", control.control_id.toString());
       return input;
@@ -82,108 +102,17 @@
       return textarea;
     }
 
-    public static CreateInputFieldContainer(input: HTMLElement, field_label: string, add_column: boolean = false, class_to_add: string = ""): HTMLElement
+    public static CreateSelect(control: Control):HTMLSelectElement
     {
-      let field = document.createElement("div");
-      field.classList.add("field");
-      let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
-      if (field_label.length > 0)
-      {
-        label.appendChild(document.createTextNode(field_label));
-      }
-      else
-      {
-        label.innerHTML = "&nbsp;";
-      }
+      control.valid_values = control.value.split("|");
 
-      field.appendChild(label);
-      let control = document.createElement("div");
-      control.classList.add("control");
-      control.appendChild(input);
-      field.appendChild(control);
-      if (add_column)
-      {
-        let column = document.createElement("div");
-        column.classList.add("column");
-        if (class_to_add.length > 0) column.classList.add(class_to_add);
-        column.appendChild(field);
-        return column;
-      }
-      if (class_to_add.length > 0) field.classList.add(class_to_add);
-      return field;
-    }
-
-    public static CreateButtonlistFieldContainer(inputs: Array<HTMLElement>, field_label: string, add_column: boolean = false, class_to_add: string = ""): HTMLElement
-    {
-      let field = document.createElement("div");
-      field.classList.add("field");
-      let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
-      if (field_label.length > 0)
-      {
-        label.appendChild(document.createTextNode(field_label));
-      }
-      else
-      {
-        label.innerHTML = "&nbsp;";
-      }
-
-      field.appendChild(label);
-      let control = document.createElement("div");
-      control.classList.add("control");
-      let buttonlist = document.createElement("div");
-      buttonlist.classList.add("buttons");
-      for(let input of inputs)
-      {
-        buttonlist.appendChild(input);
-
-      }
-      control.appendChild(buttonlist);
-      field.appendChild(control);
-      if (add_column)
-      {
-        let column = document.createElement("div");
-        column.classList.add("column");
-        if (class_to_add.length > 0) column.classList.add(class_to_add);
-        column.appendChild(field);
-        return column;
-      }
-      if (class_to_add.length > 0) field.classList.add(class_to_add);
-      return field;
-    }
-
-    public static CreateSelectFieldContainer(select: HTMLSelectElement, field_label: string): HTMLElement
-    {    
-    
-      let field = document.createElement("div");
-      field.classList.add("field");
-      let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
-      label.appendChild(document.createTextNode(field_label));
-      field.appendChild(label);
-      let control = document.createElement("div");
-      control.classList.add("control");
-      let selectContainer = document.createElement("div");
-      selectContainer.classList.add("select", "is-medium");
-      selectContainer.appendChild(select);
-      control.appendChild(selectContainer);
-      field.appendChild(control);
-      return field;
-    }
-
-
-    public static CreateSelect(controls: Array<Control>):HTMLSelectElement
-    {
       let select = document.createElement("select");
-      for (let control of controls)
+      select.required = control.required;
+      select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, true));
+      for (let value of control.valid_values)
       {
-        let option = document.createElement("option");
-        option.appendChild(document.createTextNode(control.label));
-        option.value = control.value;
-        select.appendChild(option);
-      }
-      select.selectedIndex = -1;
+        select.appendChild(Utilities.Create_Option(value, value, false));
+      }      
       return select;
     }
 

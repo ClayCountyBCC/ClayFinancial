@@ -98,6 +98,11 @@ var Utilities;
         }
     }
     Utilities.Error_Show = Error_Show;
+    function Simple_Error_Show(e, errorText) {
+        Clear_Element(e);
+        e.appendChild(document.createTextNode(errorText));
+    }
+    Utilities.Simple_Error_Show = Simple_Error_Show;
     function Clear_Element(node) {
         if (node === null || node === undefined)
             return;
@@ -385,5 +390,54 @@ var Utilities;
         return path;
     }
     Utilities.Get_Path = Get_Path;
+    function Create_Centered_Level(level_items, left = [], right = []) {
+        let level = document.createElement("div");
+        level.classList.add("level");
+        for (let li of level_items) {
+            level.appendChild(Create_Level_Item(li));
+        }
+        if (left.length > 0) {
+            let leftcontainer = document.createElement("div");
+            leftcontainer.classList.add("level-left");
+            level.appendChild(leftcontainer);
+            for (let li of left) {
+                leftcontainer.appendChild(Create_Level_Item(li));
+            }
+        }
+        if (right.length > 0) {
+            let rightcontainer = document.createElement("div");
+            rightcontainer.classList.add("level-right");
+            level.appendChild(rightcontainer);
+            for (let li of right) {
+                rightcontainer.appendChild(Create_Level_Item(li));
+            }
+        }
+        return level;
+    }
+    Utilities.Create_Centered_Level = Create_Centered_Level;
+    function Create_Level_Item(level_item) {
+        let levelitem = document.createElement("div");
+        levelitem.classList.add("level-item", ...level_item.classes);
+        let container = document.createElement("div");
+        levelitem.appendChild(container);
+        if (level_item.heading.length > 0) {
+            let heading = document.createElement("p");
+            heading.classList.add("heading");
+            heading.appendChild(document.createTextNode(level_item.heading));
+            container.appendChild(heading);
+        }
+        if (level_item.title_text.length > 0) {
+            let title = document.createElement("p");
+            title.classList.add("title");
+            title.appendChild(document.createTextNode(level_item.title_text));
+            container.appendChild(title);
+        }
+        else {
+            if (level_item.title !== null) {
+                container.appendChild(level_item.title);
+            }
+        }
+        return levelitem;
+    }
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
