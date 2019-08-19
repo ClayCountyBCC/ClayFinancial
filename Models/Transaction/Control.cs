@@ -90,5 +90,21 @@ namespace ClayFinancial.Models.Transaction
       return controlvalues.Contains(value_to_find);
     }
 
+    public static Dictionary<int, Control> Get_Dict()
+    {
+      var controls = Control.GetCached();
+      var d = new Dictionary<int, Control>();
+      foreach (Control control in controls)
+      {
+        d[control.control_id] = control;
+      }
+      return d;
+    }
+
+    public static Dictionary<int, Control> Get_Cached_Dict()
+    {
+      return (Dictionary<int, Control>)myCache.GetItem("control_dict");
+    }
+
   }
 }

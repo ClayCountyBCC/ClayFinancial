@@ -23,7 +23,7 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      transaction.created_by_employee_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      transaction.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       transaction.SetUserProperties(ua);
       TransactionData td = transaction.Save(/* ua */);
 

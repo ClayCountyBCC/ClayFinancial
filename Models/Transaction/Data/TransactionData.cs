@@ -10,42 +10,8 @@ using ClayFinancial.Models;
 
 namespace ClayFinancial.Models.Transaction.Data
 {
-  public class TransactionData // temp name till I figure out more stuff
+  public class TransactionData
   {
-    /*  
-     *  
-     * 
-     * Transaction has
-     *  - id
-     *  - parent_transaction_id -- note: this is only true if one exists, other wise will be "";
-     *  - department
-     *    + name
-     *    + is_active
-     *    +department_control_data
-     *      - control_id
-     *      - value
-     *      - is_active
-     *    + payment_type[]
-     *        - tax_exempt
-     *        - payment_type_controls[]
-     *           + transaction_payment_type_id
-     *           + control_id
-     *           + value
-     *           + is_active
-     *        - payment_methods[]
-     *          + cash_amount
-     *          + check_amount
-     *          + check_number
-     *          + check_from
-     *          + paying_for
-     *          + is_active
-     * 
-     * 
-     * The above heirarchy does not show all data in the tables. This is solely the data necessary to save.
-     * All tables storing transaction data will also have the transaction_id saved.
-     *  
-     *  
-     * */
 
     public long transaction_id { get; set; }
     public int fiscal_year { get; set; }
@@ -77,10 +43,10 @@ namespace ClayFinancial.Models.Transaction.Data
       // get cached dept dictionary
       // look for department_id in keys
 
-      if(ControlData.Validate(department_controls)) return this;
-      if (!ValidatePaymentTypes(payment_types)) return this;
+      //if(ControlData.Validate(department_control_data)) return this;
+      //if (!ValidatePaymentTypes(payment_type_data)) return this;
 
-      return false;
+      return this;
     }
 
     public List<TransactionData> Get()
@@ -121,8 +87,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
       // set all user properties here
       created_by_employee_id = ua.employee_id;
-      username = ua.user_name;
-      display_name = ua.display_name;
+      created_by_username = ua.user_name;
+      //display_name = ua.display_name;
      
     }
 
@@ -132,10 +98,10 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
-      param.Add("@username", username);
+      param.Add("@username", created_by_username);
       param.Add("@department_id", department_id);
-      param.Add("@display_name", display_name);
-      param.Add("@created_by_employee_ip_address", created_by_employee_ip_address);
+      //param.Add("@display_name", display_name);
+      param.Add("@created_by_employee_ip_address", created_by_ip_address);
       param.Add("@parent_transaction_id", parent_transaction_id);
 
       var query = @"
@@ -233,7 +199,7 @@ namespace ClayFinancial.Models.Transaction.Data
       try
       {
 
-        foreach (PaymentTypeData ptd in payment_types)
+        foreach (PaymentTypeData ptd in payment_type_data)
         {
           // add payment type data to its data table
           paymentTypeDataTable.Rows.Add
@@ -244,7 +210,7 @@ namespace ClayFinancial.Models.Transaction.Data
           );
 
           // add payment method data to its data table
-          foreach (PaymentMethodData pmd in ptd.payment_methods)
+          foreach (PaymentMethodData pmd in ptd.payment_method_data)
           {
 
             paymentMethodDataTable.Rows.Add
@@ -260,7 +226,7 @@ namespace ClayFinancial.Models.Transaction.Data
           }
 
           // add payment type control data to Control data table
-          foreach (ControlData cd in ptd.controls)
+          foreach (ControlData cd in ptd.control_data)
           {
 
             controlDataTable.Rows.Add
@@ -274,7 +240,7 @@ namespace ClayFinancial.Models.Transaction.Data
           }
 
           // add department control data
-          foreach (ControlData cd in department_controls)
+          foreach (ControlData cd in department_control_data)
           {
             controlDataTable.Rows.Add
             (

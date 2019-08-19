@@ -64,10 +64,11 @@ namespace ClayFinancial.Models.Transaction
       var d = new Dictionary<int, PaymentType>();
       foreach (PaymentType pt in paymentTypes)
       {
-        d[pt.id] = pt;
+        d[pt.payment_type_id] = pt;
       }
       return d;
     }
+
     public static Dictionary<int, PaymentType> GetCachedDict()
     {
       return (Dictionary<int, PaymentType>)myCache.GetItem("payment_type_dict");

@@ -1747,10 +1747,6 @@
   <ItemGroup>
     <Content Include="Views\web.config" />
     <Content Include="libman.json" />
-    <Content Include="node_modules\csstype\index.js.flow" />
-    <Content Include="node_modules\csstype\LICENSE" />
-    <Content Include="node_modules\csstype\package.json" />
-    <Content Include="node_modules\csstype\README.md" />
     <Content Include="ConnectionStrings.config" />
     <Content Include="node_modules\bulma\bulma.sass" />
     <Content Include="node_modules\bulma\CHANGELOG.md" />
@@ -1885,7 +1881,6 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="node_modules\csstype\index.d.ts" />
     <TypeScriptCompile Include="scripts\LevelItem.ts" />
     <TypeScriptCompile Include="scripts\MenuItem.ts" />
     <TypeScriptCompile Include="scripts\Transaction\app.ts" />

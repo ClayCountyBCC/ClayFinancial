@@ -37,12 +37,12 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public ControlData Validate(List<ControlData> control_data_list)
     {
-      var control_dictionary = Control.GetCached();
+      var control_dictionary = Control.Get_Cached_Dict();
       List<int> bad_index = new List<int>();
 
       foreach (var c in control_data_list)
       {
-        if(c.department_id > 0 && control_dictionary.ContainsKey())
+        if(c.department_id > 0 && control_dictionary.ContainsKey(c.control_id))
         { 
           
         }
@@ -133,40 +133,40 @@ namespace ClayFinancial.Models.Transaction.Data
       // department controls are all required.
       // every control in controls_dict for this class needs to be present
       // every control in controls must have a valid value.
-      var controlids = (from c in transactionData.department_controls
+      var controlids = (from c in transactionData.department_control_data
                         select c.control_id).ToList();
 
       // let's make sure every department control is present in department_controls
-      foreach (int key in controls_dict.Keys)
-      {
-        if (!controlids.Contains((short)key))
-        {
+      //foreach (int key in controls_dict.Keys)
+      //{
+      //  if (!controlids.Contains((short)key))
+      //  {
 
-          transactionData.error_text = "Missing department information: " + controls_dict[key].label;
-          return false;
-        }
-      }
+      //    transactionData.error_text = "Missing department information: " + controls_dict[key].label;
+      //    return false;
+      //  }
+      //}
 
       // now we validate each department control
-      foreach (Data.ControlData cd in transactionData.department_controls)
-      {
-        // if one of our department controls isn't found in our controls_dict object,
-        // it means that the client has an extra control
-        if (!controls_dict.ContainsKey(cd.control_id))
-        {
-          transactionData.error_text = "Invalid Department information found.";
-          return false;
-        }
+      //foreach (Data.ControlData cd in transactionData.department_controls)
+      //{
+      //  // if one of our department controls isn't found in our controls_dict object,
+      //  // it means that the client has an extra control
+      //  if (!controls_dict.ContainsKey(cd.control_id))
+      //  {
+      //    transactionData.error_text = "Invalid Department information found.";
+      //    return false;
+      //  }
 
-        var control = controls_dict[cd.control_id];
+      //  var control = controls_dict[cd.control_id];
 
-        if (!control.ValidateControlData(cd))
-        {
-          transactionData.error_text = "There was a problem with some of the data entered.";
-          return false;
-        }
+      //  if (!control.ValidateControlData(cd))
+      //  {
+      //    transactionData.error_text = "There was a problem with some of the data entered.";
+      //    return false;
+      //  }
 
-      }
+      //}
       return true;
     }
   }
