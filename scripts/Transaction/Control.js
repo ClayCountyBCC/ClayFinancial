@@ -11,6 +11,9 @@ var Transaction;
                 case "date":
                 case "text":
                     return Control.CreateInput(control);
+                case "number":
+                case "money":
+                    return Control.CreateNumericInput(control);
                 case "bigtext":
                     return Control.CreateTextArea(control);
                 case "dropdown":
@@ -25,6 +28,18 @@ var Transaction;
             input.classList.add("input", "is-medium");
             input.placeholder = control.label;
             input.required = control.required;
+            input.value = "";
+            input.setAttribute("control_id", control.control_id.toString());
+            return input;
+        }
+        static CreateNumericInput(control) {
+            let input = document.createElement("input");
+            input.type = "number";
+            input.maxLength = control.max_length;
+            input.classList.add("input", "is-medium");
+            input.placeholder = "0";
+            input.required = control.required;
+            input.step = "any";
             input.value = "";
             input.setAttribute("control_id", control.control_id.toString());
             return input;

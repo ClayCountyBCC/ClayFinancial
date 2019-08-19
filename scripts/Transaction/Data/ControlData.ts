@@ -51,14 +51,35 @@
       this.input_element.oninput = (event: Event) =>
       {
         let input = (<HTMLInputElement>event.target);
-        if (control.data_type === "date")
+        switch (control.data_type)
         {
-          let v = input.valueAsDate;
-          this.value = v !== null ? Utilities.Format_Date(v) : "";
-        }
-        else
-        {
-          this.value = input.value;
+          case "date":
+            if (this.ValidateDate())
+            {
+              let v = input.valueAsDate;
+              this.value = v !== null ? Utilities.Format_Date(v) : "";
+            }
+
+            break;
+
+          case "number":
+            if (this.ValidateNumber())
+            {
+              this.value = input.valueAsNumber.toString();
+            }
+            break;
+
+          case "money":
+            if (this.ValidateMoney())
+            {
+              this.value = input.valueAsNumber.toString();
+            }
+            break;
+
+          default:
+            this.value = input.value;
+            break;
+
         }
 
       }
@@ -81,8 +102,13 @@
           return this.ValidateDropdown();
 
         case "date":
-
           return this.ValidateDate();
+
+        case "number":
+          return this.ValidateNumber();
+
+        case "money":
+          return this.ValidateMoney();
 
         case "text":
         case "bigtext":
@@ -123,6 +149,7 @@
 
     private ValidateText(): boolean
     {
+      let e = "";
       ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
       this.value = this.value.trim();
 
@@ -141,6 +168,59 @@
       }
       return true;
 
+    }
+
+    private ValidateNumber(): boolean
+    {
+      let e: string = "";
+      let input = <HTMLInputElement>this.input_element;
+
+      if (input.value.length === 0)
+      {
+        e = "You must enter a number. (No commas or $ allowed).";
+      }
+
+      if (input.valueAsNumber === NaN && e.length === 0)
+      {
+        e = "Please enter Numbers and Decimal points only.";
+      }
+
+      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+
+      return e.length === 0;
+    }
+
+    private ValidateMoney(): boolean
+    {
+      let e: string = "";
+      let input = <HTMLInputElement>this.input_element;
+
+      if (input.value.length === 0)
+      {
+        e = "You must enter a number. (No commas or $ allowed).";
+      }
+
+      if (input.valueAsNumber === NaN && e.length === 0)
+      {
+        e = "Please enter Numbers and Decimal points only.";
+      }
+
+      if (input.valueAsNumber < 0 && e.length === 0)
+      {
+        e = "Negative numbers are not allowed.";
+      }
+
+      let i = input.value.split(".");
+      if (i.length === 2 && e.length === 0)
+      {
+        if (i[1].length > 2)
+        {
+          e = "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
+        }
+      }
+      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+
+      return e.length === 0;
     }
 
 

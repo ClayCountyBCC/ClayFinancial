@@ -28,12 +28,26 @@ var Transaction;
                 this.payment_type_id = payment_type_id;
                 this.input_element.oninput = (event) => {
                     let input = event.target;
-                    if (control.data_type === "date") {
-                        let v = input.valueAsDate;
-                        this.value = v !== null ? Utilities.Format_Date(v) : "";
-                    }
-                    else {
-                        this.value = input.value;
+                    switch (control.data_type) {
+                        case "date":
+                            if (this.ValidateDate()) {
+                                let v = input.valueAsDate;
+                                this.value = v !== null ? Utilities.Format_Date(v) : "";
+                            }
+                            break;
+                        case "number":
+                            if (this.ValidateNumber()) {
+                                this.value = input.valueAsNumber.toString();
+                            }
+                            break;
+                        case "money":
+                            if (this.ValidateMoney()) {
+                                this.value = input.valueAsNumber.toString();
+                            }
+                            break;
+                        default:
+                            this.value = input.value;
+                            break;
                     }
                 };
                 if (control.data_type === "dropdown") {
@@ -49,6 +63,10 @@ var Transaction;
                         return this.ValidateDropdown();
                     case "date":
                         return this.ValidateDate();
+                    case "number":
+                        return this.ValidateNumber();
+                    case "money":
+                        return this.ValidateMoney();
                     case "text":
                     case "bigtext":
                         return this.ValidateText();
@@ -77,6 +95,7 @@ var Transaction;
                 }
             }
             ValidateText() {
+                let e = "";
                 Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
                 this.value = this.value.trim();
                 let c = this.control;
@@ -89,6 +108,39 @@ var Transaction;
                     return false;
                 }
                 return true;
+            }
+            ValidateNumber() {
+                let e = "";
+                let input = this.input_element;
+                if (input.value.length === 0) {
+                    e = "You must enter a number. (No commas or $ allowed).";
+                }
+                if (input.valueAsNumber === NaN && e.length === 0) {
+                    e = "Please enter Numbers and Decimal points only.";
+                }
+                Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+                return e.length === 0;
+            }
+            ValidateMoney() {
+                let e = "";
+                let input = this.input_element;
+                if (input.value.length === 0) {
+                    e = "You must enter a number. (No commas or $ allowed).";
+                }
+                if (input.valueAsNumber === NaN && e.length === 0) {
+                    e = "Please enter Numbers and Decimal points only.";
+                }
+                if (input.valueAsNumber < 0 && e.length === 0) {
+                    e = "Negative numbers are not allowed.";
+                }
+                let i = input.value.split(".");
+                if (i.length === 2 && e.length === 0) {
+                    if (i[1].length > 2) {
+                        e = "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
+                    }
+                }
+                Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+                return e.length === 0;
             }
         }
         Data.ControlData = ControlData;
