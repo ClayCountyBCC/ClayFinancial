@@ -61,49 +61,82 @@ namespace ClayFinancial.Models.Transaction
       return (List<Control>)myCache.GetItem("controls");
     }
 
-
-    public bool ValidateControlData(Data.ControlData controlData)
+    public bool Validate(Data.ControlData cd)
     {
       // Here we use this class' properties to validate our controldata
-      if(controlData.value.Length > max_length)
+      // you'll notice it doesn't matter if it's a department control
+      // or a payment type control
+
+      // if there is anything to validate that is not specific to it's data type,
+      // do it before this step.
+
+      if (cd.value.Length > max_length) 
       {
-        controlData.error_text = "Data is too long.";
+        cd.error_text = "Data is too long.";
         return false;
       }
 
-      // validate data type + value here
-
-      // if validation_regex has value, use it to perform some validation.
-
-
-      return true;
-
-    }
-
-    public bool ValidateDropdown(string group_by, string data_type, string value_to_find)
-    {
-      var controlvalues = (from c in Control.GetCached()
-                           where c.is_active &&
-                           c.group_by == group_by &&
-                           c.data_type == data_type
-                           select c.label).ToList();
-      return controlvalues.Contains(value_to_find);
-    }
-
-    public static Dictionary<int, Control> Get_Dict()
-    {
-      var controls = Control.GetCached();
-      var d = new Dictionary<int, Control>();
-      foreach (Control control in controls)
+      switch (this.data_type)
       {
-        d[control.control_id] = control;
+        case "bigtext":
+        case "text":
+          return ValidateText(cd);
+
+        case "money":
+          return ValidateMoney(cd);
+
+        case "date":
+          return ValidateDate(cd);
+
+        case "number":
+          return ValidateNumber(cd);
+
+        case "dropdown":
+          return ValidateDropdown(cd);
+
+        default:
+          // we don't know what data type this was.
+          return false;
+
       }
-      return d;
+
     }
 
-    public static Dictionary<int, Control> Get_Cached_Dict()
+    private bool ValidateDropdown(Data.ControlData cd)
     {
-      return (Dictionary<int, Control>)myCache.GetItem("control_dict");
+      var valid_values = value.Split('|');
+      if (!valid_values.Contains(value))
+      {
+        cd.error_text = "Invalid Value Selected";
+        return false;
+      }
+      return true;
+    }
+
+    private bool ValidateMoney(Data.ControlData cd)
+    {
+      return false;
+    }
+
+    private bool ValidateNumber(Data.ControlData cd)
+    {
+      return false;
+    }
+
+    private bool ValidateText(Data.ControlData cd)
+    {
+      return false;
+    }
+
+    private bool ValidateDate(Data.ControlData cd)
+    {
+      DateTime datevalue;
+      if(!DateTime.TryParse(cd.value, out datevalue))
+      {
+        cd.error_text = "Invalid Date";
+        return false;
+      }
+      return true;
     }
 
   }

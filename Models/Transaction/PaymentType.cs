@@ -58,20 +58,27 @@ namespace ClayFinancial.Models.Transaction
       return (List<PaymentType>)myCache.GetItem("payment_types");
     }
 
-    public static Dictionary<int, PaymentType> Get_Dict()
+    public bool Validate(Data.PaymentTypeData ptd)
     {
-      var paymentTypes = PaymentType.GetCached();
-      var d = new Dictionary<int, PaymentType>();
-      foreach (PaymentType pt in paymentTypes)
+      // in order to have a valid payment type, all of the required controls
+      // must have a value and all of the payment methods must be valid.
+      foreach(Data.ControlData cd in ptd.control_data)
       {
-        d[pt.payment_type_id] = pt;
+        if (!controls_dict[cd.control_id].Validate(cd))
+        {
+          return false;
+        }
       }
-      return d;
-    }
 
-    public static Dictionary<int, PaymentType> GetCachedDict()
-    {
-      return (Dictionary<int, PaymentType>)myCache.GetItem("payment_type_dict");
+      var PaymentMethod = new PaymentMethod();
+      foreach(Data.PaymentMethodData pmd in ptd.payment_method_data)
+      {
+        if (!PaymentMethod.Validate(pmd))
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
 

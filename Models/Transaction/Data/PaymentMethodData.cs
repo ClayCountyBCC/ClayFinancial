@@ -36,11 +36,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return new PaymentMethodData();
     }
-    public string Validate()
-    {
 
-      return "";
-    }
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS ALSO TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentTypeData.Save().

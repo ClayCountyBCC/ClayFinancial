@@ -35,44 +35,43 @@ namespace ClayFinancial.Models.Transaction.Data
       return new ControlData();
     }
 
-    public ControlData Validate(List<ControlData> control_data_list)
-    {
-      var control_dictionary = Control.Get_Cached_Dict();
-      List<int> bad_index = new List<int>();
+    //public ControlData Validate(List<ControlData> control_data_list)
+    //{
+    //  List<int> bad_index = new List<int>();
 
-      foreach (var c in control_data_list)
-      {
-        if(c.department_id > 0 && control_dictionary.ContainsKey(c.control_id))
-        { 
+    //  foreach (var c in control_data_list)
+    //  {
+    //    if(c.department_id > 0 && control_dictionary.ContainsKey(c.control_id))
+    //    { 
           
-        }
+    //    }
 
-        if (c.value.Length > control_dictionary[c.control_id].max_length)
-        {
-          c.error_text = $@"{control_dictionary[c.control_id].label} value exeeds max length of {control_dictionary[c.control_id].max_length}";
-          return this;
-        }
+    //    if (c.value.Length > control_dictionary[c.control_id].max_length)
+    //    {
+    //      c.error_text = $@"{control_dictionary[c.control_id].label} value exeeds max length of {control_dictionary[c.control_id].max_length}";
+    //      return this;
+    //    }
 
-        switch (control_dictionary[c.control_id].data_type)
-        {
-          case "text":
-          case "bigtext":
-            break;
-          case "date":
-            if (!DateTime.TryParse(c.value, out DateTime dateTime)) 
-            {
-              c.error_text = $@"Entered value ""{c.value}"" is not a valid {control_dictionary[c.control_id].label}";
-            }
-            break;
-          case "dropdown":
+    //    switch (control_dictionary[c.control_id].data_type)
+    //    {
+    //      case "text":
+    //      case "bigtext":
+    //        break;
+    //      case "date":
+    //        if (!DateTime.TryParse(c.value, out DateTime dateTime)) 
+    //        {
+    //          c.error_text = $@"Entered value ""{c.value}"" is not a valid {control_dictionary[c.control_id].label}";
+    //        }
+    //        break;
+    //      case "dropdown":
             
-            break;
+    //        break;
 
-        }
+    //    }
 
-      }
-      return this;
-    }
+    //  }
+    //  return this;
+    //}
 
 
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
@@ -91,83 +90,80 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var dt = new DataTable("ControlData");
 
-
       dt.Columns.Add(new DataColumn("department_id", typeof(short))); // all records will have the same department_id; this should be validated
       dt.Columns.Add(new DataColumn("control_id", typeof(short)));
       dt.Columns.Add(new DataColumn("value", typeof(string)));
       dt.Columns.Add(new DataColumn("payment_type_id", typeof(long))); // only used if being populated as payment type control
       dt.Columns.Add(new DataColumn("payment_type_index", typeof(short))); // only used if being populated as payment type control
 
-
-
       return dt;
 
     }
 
-    public TransactionData ValidateTransactionData(TransactionData transactionData)
-    {
-      // We treat the Data.TransactionData class as a department class because it has all of the
-      // departmental data we'll need to validate
+    //public TransactionData ValidateTransactionData(TransactionData transactionData)
+    //{
+    //  // We treat the Data.TransactionData class as a department class because it has all of the
+    //  // departmental data we'll need to validate
 
-      // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
-      // data to be saved
+    //  // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
+    //  // data to be saved
 
-      if (!is_active)
-      {
-        transactionData.error_text = "Department is no longer active.";
-        return transactionData;
-      }
+    //  if (!is_active)
+    //  {
+    //    transactionData.error_text = "Department is no longer active.";
+    //    return transactionData;
+    //  }
 
-      // let's make sure the department controls are valid
-      if (!ValidateDepartmentControls(transactionData)) return transactionData;
-
-
+    //  // let's make sure the department controls are valid
+    //  if (!ValidateDepartmentControls(transactionData)) return transactionData;
 
 
-      return transactionData;
-    }
 
-    private bool ValidateDepartmentControls(Data.TransactionData transactionData)
-    {
-      // things to validate here:
-      // department controls are all required.
-      // every control in controls_dict for this class needs to be present
-      // every control in controls must have a valid value.
-      var controlids = (from c in transactionData.department_control_data
-                        select c.control_id).ToList();
 
-      // let's make sure every department control is present in department_controls
-      //foreach (int key in controls_dict.Keys)
-      //{
-      //  if (!controlids.Contains((short)key))
-      //  {
+    //  return transactionData;
+    //}
 
-      //    transactionData.error_text = "Missing department information: " + controls_dict[key].label;
-      //    return false;
-      //  }
-      //}
+    //private bool ValidateDepartmentControls(Data.TransactionData transactionData)
+    //{
+    //  // things to validate here:
+    //  // department controls are all required.
+    //  // every control in controls_dict for this class needs to be present
+    //  // every control in controls must have a valid value.
+    //  var controlids = (from c in transactionData.department_control_data
+    //                    select c.control_id).ToList();
 
-      // now we validate each department control
-      //foreach (Data.ControlData cd in transactionData.department_controls)
-      //{
-      //  // if one of our department controls isn't found in our controls_dict object,
-      //  // it means that the client has an extra control
-      //  if (!controls_dict.ContainsKey(cd.control_id))
-      //  {
-      //    transactionData.error_text = "Invalid Department information found.";
-      //    return false;
-      //  }
+    //  // let's make sure every department control is present in department_controls
+    //  //foreach (int key in controls_dict.Keys)
+    //  //{
+    //  //  if (!controlids.Contains((short)key))
+    //  //  {
 
-      //  var control = controls_dict[cd.control_id];
+    //  //    transactionData.error_text = "Missing department information: " + controls_dict[key].label;
+    //  //    return false;
+    //  //  }
+    //  //}
 
-      //  if (!control.ValidateControlData(cd))
-      //  {
-      //    transactionData.error_text = "There was a problem with some of the data entered.";
-      //    return false;
-      //  }
+    //  // now we validate each department control
+    //  //foreach (Data.ControlData cd in transactionData.department_controls)
+    //  //{
+    //  //  // if one of our department controls isn't found in our controls_dict object,
+    //  //  // it means that the client has an extra control
+    //  //  if (!controls_dict.ContainsKey(cd.control_id))
+    //  //  {
+    //  //    transactionData.error_text = "Invalid Department information found.";
+    //  //    return false;
+    //  //  }
 
-      //}
-      return true;
-    }
+    //  //  var control = controls_dict[cd.control_id];
+
+    //  //  if (!control.ValidateControlData(cd))
+    //  //  {
+    //  //    transactionData.error_text = "There was a problem with some of the data entered.";
+    //  //    return false;
+    //  //  }
+
+    //  //}
+    //  return true;
+    //}
   }
 }

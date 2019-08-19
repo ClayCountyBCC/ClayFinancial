@@ -89,7 +89,6 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Department>)myCache.GetItem("departments_dict");
     }
 
-
     public Data.TransactionData ValidateTransactionData(Data.TransactionData transactionData)
     {
       // We treat the Data.TransactionData class as a department class because it has all of the
@@ -122,6 +121,9 @@ namespace ClayFinancial.Models.Transaction
       var controlids = (from c in transactionData.department_control_data
                         select c.control_id).ToList();
 
+      
+      
+
       var distinctControlIds = controlids.Distinct();
       // Todo make  sure error text is set in the object being passed to this function 
       if(controlids.Count() != distinctControlIds.Count())
@@ -130,16 +132,23 @@ namespace ClayFinancial.Models.Transaction
         return false;
       }
 
-
-      // let's make sure every department control is present in department_controls
-      foreach (int key in controls_dict.Keys)
+      // if this works, it will mean we won't need the two commented out sections
+      // of code.
+      if (!controlids.Equals(controls_dict.Keys))
       {
-        if (!distinctControlIds.Contains((short)key))
-        {
-          transactionData.error_text = "Missing department information: " + controls_dict[key].label;
-          return false;
-        }
+        transactionData.error_text = "Missing department information";
+        return false;
       }
+
+      //// let's make sure every department control is present in department_controls
+      //foreach (int key in controls_dict.Keys)
+      //{
+      //  if (!distinctControlIds.Contains(key))
+      //  {
+      //    transactionData.error_text = "Missing department information: " + controls_dict[key].label;
+      //    return false;
+      //  }
+      //}
 
 
       // now we validate each department control
@@ -147,21 +156,32 @@ namespace ClayFinancial.Models.Transaction
       {
         // if one of our department controls isn't found in our controls_dict object,
         // it means that the client has an extra control
-        if (!controls_dict.ContainsKey(cd.control_id))
-        {
-          transactionData.error_text = "Invalid Department information found.";
-          return false;
-        }
+        //if (!controls_dict.ContainsKey(cd.control_id))
+        //{
+        //  transactionData.error_text = "Invalid Department information found.";
+        //  return false;
+        //}
 
         var control = controls_dict[cd.control_id];
 
-        if (!control.ValidateControlData(cd))
+        if (!control.Validate(cd))
         {
           transactionData.error_text = "There was a problem with some of the data entered.";
           return false;
         }
 
       }
+      // Validate the payment types
+
+      foreach(Data.PaymentTypeData ptd in transactionData.payment_type_data)
+      {
+        if (!payment_types_dict[ptd.payment_type_id].Validate(ptd))
+        {
+          transactionData.error_text = "There was a problem with some of the payment types";
+          return false;
+        }
+      }
+
       return true;
     }
 
