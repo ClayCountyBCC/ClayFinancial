@@ -115,16 +115,25 @@ namespace ClayFinancial.Models.Transaction
 
     private bool ValidateMoney(Data.ControlData cd)
     {
-      return false;
+      decimal result;
+
+      return Decimal.TryParse(cd.value.Trim(), out result);
     }
 
     private bool ValidateNumber(Data.ControlData cd)
     {
-      return false;
+      int result;
+      if (is_active == false) return false;
+
+      return (int.TryParse(cd.value, out result) && 
+              (decimal.Parse(cd.value) - result == 0) &&
+              cd.value.Length <= max_length);
+
     }
 
     private bool ValidateText(Data.ControlData cd)
     {
+      
       return false;
     }
 
