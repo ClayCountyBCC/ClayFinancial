@@ -38,5 +38,14 @@ var Transaction;
     function NewDeposit() {
     }
     Transaction.NewDeposit = NewDeposit;
+    function GetPath() {
+        let path = "/";
+        let i = window.location.pathname.toLowerCase().indexOf("/clayfinancial");
+        if (i == 0) {
+            path = "/clayfinancial/";
+        }
+        return path;
+    }
+    Transaction.GetPath = GetPath;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

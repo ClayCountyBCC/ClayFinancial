@@ -34,13 +34,11 @@
     public modified_by: string = "";
     public reason_for_change: string = "";
     public error_text: string = "";
-    
 
     // client side controls
     private control: Control = null;
     public input_element: HTMLElement = null;
     public container_element: HTMLElement = null;
-
 
     constructor(control: Control, payment_type_id: number)
     {
@@ -257,7 +255,5 @@
 
       return e.length === 0;
     }
-
-
   }
 }

@@ -45,5 +45,16 @@
 
   }
 
+  export function GetPath(): string
+  {
+    let path = "/";
+    let i = window.location.pathname.toLowerCase().indexOf("/clayfinancial");
+    if (i == 0)
+    {
+      path = "/clayfinancial/";
+    }
+    return path;
+  }
+
 
 }
