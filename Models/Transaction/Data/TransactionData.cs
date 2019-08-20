@@ -122,13 +122,11 @@ namespace ClayFinancial.Models.Transaction.Data
                 transaction_id, 
                 payment_type_id, 
                 payment_type_index,
-                tax_exempt
               )
               SELECT
                 @transaction_id,
                 payment_type_id,
                 payment_type_index,
-                tax_exempt
               FROM @PaymentTypeData;
     
 
@@ -205,8 +203,7 @@ namespace ClayFinancial.Models.Transaction.Data
           paymentTypeDataTable.Rows.Add
           (
             ptd.payment_type_id,
-            ptd.payment_type_index,
-            ptd.tax_exempt
+            ptd.payment_type_index
           );
 
           // add payment method data to its data table

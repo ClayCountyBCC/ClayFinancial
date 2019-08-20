@@ -13,6 +13,7 @@ var Transaction;
                     return Control.CreateInput(control);
                 case "number":
                 case "money":
+                case "count":
                     return Control.CreateNumericInput(control);
                 case "bigtext":
                     return Control.CreateTextArea(control);
@@ -39,7 +40,14 @@ var Transaction;
             input.classList.add("input", "is-medium");
             input.placeholder = "0";
             input.required = control.required;
-            input.step = "any";
+            if (control.data_type === "count") {
+                input.step = "1";
+                input.min = "0";
+                input.pattern = "[0-9]";
+            }
+            else {
+                input.step = "any";
+            }
             input.value = "";
             input.setAttribute("control_id", control.control_id.toString());
             return input;

@@ -69,6 +69,15 @@
             }
             break;
 
+          case "count":
+            if (this.ValidateCount())
+            {
+              this.value = input.valueAsNumber.toString();
+              input.value = input.valueAsNumber.toString();
+              
+            }
+            break;
+
           case "money":
             if (this.ValidateMoney())
             {
@@ -100,6 +109,9 @@
       {
         case "dropdown":
           return this.ValidateDropdown();
+
+        case "count":
+          return this.ValidateCount();
 
         case "date":
           return this.ValidateDate();
@@ -185,6 +197,29 @@
         e = "Please enter Numbers and Decimal points only.";
       }
 
+      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+
+      return e.length === 0;
+    }
+
+    private ValidateCount(): boolean
+    {
+      let e: string = "";
+      let input = <HTMLInputElement>this.input_element;
+
+      if (input.value.length === 0)
+      {
+        e = "You must enter a number. (No commas, decimal points, or $ allowed).";
+      }
+
+      if (input.valueAsNumber === NaN && e.length === 0)
+      {
+        e = "Please enter Numbers only.";
+      }
+      if (input.valueAsNumber < 0)
+      {
+        e = "This value must be 0 or greater.";
+      }
       ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
 
       return e.length === 0;
