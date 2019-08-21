@@ -69,11 +69,11 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
     // This is used when a payment type has been added to a saved transaction
-    public TransactionView SaveChangePaymentType()
+    public TransactionData SaveChangePaymentType()
     {
       // TODO: add code to save new payment type
 
-      return new TransactionView(transaction_id);
+      return TransactionData.GetTransactionData(transaction_id);
 
     }
 

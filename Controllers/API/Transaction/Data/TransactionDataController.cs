@@ -78,7 +78,7 @@ namespace ClayFinancial.Controllers.API
       if(payment_method_data.ValidateChange())
       {
 
-        return Ok(new TransactionView(payment_method_data.transaction_id));
+        return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
       }
       return InternalServerError();
     }

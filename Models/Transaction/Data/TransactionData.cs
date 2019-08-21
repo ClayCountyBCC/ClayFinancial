@@ -65,10 +65,14 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.transaction_number
           ,ISNULL(TD.parent_transaction_id,-1) parent_transaction_id
           ,TD.department_id
-          ,TD.created_by_username
           ,TD.created_on
-        FROM ClayFinancial.dbo.transaction_data TD
+          ,CM.name county_manager_name
+          ,TD.created_on
+        FROM ClayFinancial.dbo.data_transaction TD
+        LEFT OUTER JOIN county_manager CM ON CAST(TD.created_on AS DATE)
+          BETWEEN CM.Start_date AND ISNULL(CM.end_date, CAST(GETDATE() AS DATE))
         WHERE transaction_id = @transaction_id;
+
 
       ";
 
@@ -99,7 +103,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       has_error = hasError;
     }
-    public TransactionView SaveNewReceipt()
+    public TransactionData SaveNewReceipt()
     {
 
       var param = new DynamicParameters();
@@ -124,7 +128,7 @@ namespace ClayFinancial.Models.Transaction.Data
                       @created_by_employee_ip_address;
     
               -- INSERT PAYMENT TYPE DATA
-              INSERT INTO payment_type_data
+              INSERT INTO data_payment_type
               (
                 transaction_id, 
                 payment_type_id, 
@@ -139,9 +143,9 @@ namespace ClayFinancial.Models.Transaction.Data
               FROM @PaymentTypeData;
     
 
-              -- INSERT PAYMENT METHOD DATA
-              -- INNER JOIN TO payment_type_data TO GET transaction_payment_type_id
-              INSERT INTO payment_method_data
+              -- INSERT data_payment_method
+              -- INNER JOIN TO data_payment_type TO GET transaction_payment_type_id
+              INSERT INTO data_payment_method 
               (
                 transaction_payment_type_id,
                 transaction_id, 
@@ -160,7 +164,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 check_from, 
                 paying_for
               FROM @PaymentMethodData PMD
-              INNER JOIN payment_type_data PTD ON 
+              INNER JOIN data_payment_type PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = PMD.payment_type_id AND 
                 PTD.payment_type_index = PMD.payment_type_index;
@@ -171,7 +175,7 @@ namespace ClayFinancial.Models.Transaction.Data
               -- department_id WILL BE NULL FOR PAYMENT TYPE CONTROLS. THE VALUE IS NOT SET IN THE APPLICATION.
               -- THE department_id WILL NOT BE NULL FOR DEPARTMENT CONTROLS. THE VALUE IS SET IN THE APPLICATION.
               --    THE transaction_payment_type_id WILL BE NULL FOR DEPARTMENT CONTROLS.
-              INSERT INTO control_data
+              INSERT INTO data_control
               (
                 transaction_payment_type_id,
                 department_id,
@@ -186,7 +190,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 CD.control_id,
                 CD.value
               FROM @ControlData CD
-              LEFT OUTER JOIN payment_type_data PTD ON 
+              LEFT OUTER JOIN data_payment_type PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = CD.payment_type_id AND 
                 PTD.payment_type_index = CD.payment_type_index;
@@ -278,7 +282,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
         transaction_id = param.Get<long>("@transaction_id");
 
-        return GetTransactionView();
+        return GetTransactionData(transaction_id);
 
       }
       catch (Exception ex)
@@ -292,10 +296,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
     }
-    private TransactionView GetTransactionView()
-    {
 
-      return new TransactionView(transaction_id);
-    }
   }
 }
