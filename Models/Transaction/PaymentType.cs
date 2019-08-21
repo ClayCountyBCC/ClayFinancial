@@ -11,7 +11,6 @@ namespace ClayFinancial.Models.Transaction
     public int payment_type_id { get; set; }
     public string name { get; set; }
     public bool is_active { get; set; }
-    public bool does_tax_exempt_apply { get; set; }
     public List<Control> controls { get; set; } = new List<Control>();
     public List<PaymentMethod> payment_methods {get;set;} 
     public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
@@ -30,7 +29,6 @@ namespace ClayFinancial.Models.Transaction
           department_id
           ,payment_type_id
           ,name
-          ,does_tax_exempt_apply
           ,is_active
         FROM vw_payment_types
         ORDER BY department_id ASC, name ASC";
@@ -58,7 +56,7 @@ namespace ClayFinancial.Models.Transaction
       return (List<PaymentType>)myCache.GetItem("payment_types");
     }
 
-    public bool Validate(Data.PaymentTypeData ptd)
+    public bool ValidatePaymentType(Data.PaymentTypeData ptd)
     {
       // in order to have a valid payment type, all of the required controls
       // must have a value and all of the payment methods must be valid.
@@ -70,10 +68,13 @@ namespace ClayFinancial.Models.Transaction
         }
       }
 
-      var PaymentMethod = new PaymentMethod();
+      // this object has been deemed unnecessary
+      //var PaymentMethod = new PaymentMethod();
+
+
       foreach(Data.PaymentMethodData pmd in ptd.payment_method_data)
       {
-        if (!PaymentMethod.Validate(pmd))
+        if (!pmd.Validate())
         {
           return false;
         }

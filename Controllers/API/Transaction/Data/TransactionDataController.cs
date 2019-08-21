@@ -15,7 +15,7 @@ namespace ClayFinancial.Controllers.API
   {
     [HttpPost]
     [Route("Save")]
-    public IHttpActionResult SaveTramsaction(TransactionData transaction)
+    public IHttpActionResult SaveTransaction(TransactionData transaction)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
@@ -25,9 +25,23 @@ namespace ClayFinancial.Controllers.API
       }
       transaction.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       transaction.SetUserProperties(ua);
-      TransactionData td = transaction.Save(/* ua */);
 
-      return Ok(td);
+      if (!transaction.ValidateNewReceipt())
+      {
+        transaction.error_text = "There was an issue with some of the data";
+        return Ok(transaction);
+      }
+
+      var newReceipt = transaction.SaveNewReceipt();
+      
+      if(newReceipt != null)
+      {
+        return Ok(newReceipt);
+      }
+
+      return InternalServerError();
+
+      
 
     }
   }

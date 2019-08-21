@@ -11,8 +11,8 @@ namespace ClayFinancial.Models.Transaction.Data
   public class PaymentMethodData
   {
 
-    public long payment_method_data_id { get; set; }
-    public long prior_payment_method_data_id { get; set; }
+    public long payment_method_data_id { get; set; } = -1;
+    public long prior_payment_method_data_id { get; set; } = -1;
     public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
     public decimal cash_amount { get; set; }
@@ -61,6 +61,52 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return dt;
     }
+
+    public bool Validate()
+    {
+      if (payment_method_data_id == -1)
+      {
+
+        if (cash_amount < 0)
+        {
+          error_text = "Cash amount can not be less than zero";
+          return false;
+        }
+
+        if (check_amount > 0 && check_number.Length > 0 && check_number != "bulk")
+        {
+          error_text = "The check number is missing from a check with an amount of " + check_amount.ToString();
+          return false;
+        }
+
+        if (check_number.Length > 0 && check_amount <= 0)
+        {
+          error_text = "The amount for check number " + check_number + " has not been entered";
+          return false;
+        }
+
+        if (check_number.Length > 0 && paying_for.Length == 0)
+        {
+          error_text = "A check must have the 'Paying For' field filled out";
+        }
+
+        if (reason_for_change.Length > 0 && prior_payment_method_data_id == -1)
+        {
+          error_text = "There was a data issue with the updated payment method";
+          return false;
+        }
+
+        if (prior_payment_method_data_id > 0 && reason_for_change.Length == 0)
+        {
+          error_text = "Please enter the reason for the change to this payment method";
+        }
+
+
+      }
+
+      return false;
+    }
+
   }
 }
  

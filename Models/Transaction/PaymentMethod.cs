@@ -7,13 +7,10 @@ namespace ClayFinancial.Models.Transaction
 {
   public class PaymentMethod
   {
-    // this class needs to be fleshed out with data that can be used to validate 
-    // the payment method data
+    // we are only validating the data. There is no table of type PaymentMethod to validate against.
+    // This class is completely unnecessary
 
-    public bool Validate(Data.PaymentMethodData pmd)
-    {
-      return false;
-    }
+
 
   }
 }

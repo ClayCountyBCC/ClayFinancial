@@ -38,7 +38,7 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public TransactionData validate()
+    public bool ValidateNewReceipt()
     {
       // get cached dept dictionary
       // look for department_id in keys
@@ -46,7 +46,7 @@ namespace ClayFinancial.Models.Transaction.Data
       //if(ControlData.Validate(department_control_data)) return this;
       //if (!ValidatePaymentTypes(payment_type_data)) return this;
 
-      return this;
+      return false;
     }
 
     public List<TransactionData> Get()
@@ -92,7 +92,7 @@ namespace ClayFinancial.Models.Transaction.Data
      
     }
 
-    public TransactionData Save()
+    public TransactionData SaveNewReceipt()
     { 
 
       var param = new DynamicParameters();
@@ -205,8 +205,7 @@ namespace ClayFinancial.Models.Transaction.Data
           paymentTypeDataTable.Rows.Add
           (
             ptd.payment_type_id,
-            ptd.payment_type_index,
-            ptd.tax_exempt
+            ptd.payment_type_index
           );
 
           // add payment method data to its data table
