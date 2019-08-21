@@ -256,11 +256,21 @@
       ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
     }
 
-    private SaveTransactionData():void
+    private SaveTransactionData(): void
     {
       // first let's reorder all of the payment_type_index fields
       // by reorder I mean make them representative
       // of the actual index that element is in the array.
+      let t = this;
+      let path = Transaction.GetPath();
+      Utilities.Post(path + "API/Transaction/Save", t)
+        .then(function (response)
+        {
+          console.log("post probably good", response)
+        }, function (error)
+          {
+            console.log("post error occurred", error);
+          });
     }
 
   }

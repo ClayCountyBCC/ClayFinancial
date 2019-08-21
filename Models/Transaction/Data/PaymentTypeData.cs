@@ -11,22 +11,6 @@ namespace ClayFinancial.Models.Transaction.Data
   public class PaymentTypeData
   {
 
-    /*
-     *      + payment_type
-     *        - tax_exempt
-     *        - payment_type_controls[]
-     *           + transaction_payment_type_id
-     *           + control_id
-     *           + value
-     *           + is_active
-     *        - payment_methods[]
-     *          + cash_amount
-     *          + check_amount
-     *          + check_number
-     *          + check_from
-     *          + paying_for
-     *          + is_active
-     * */
     public long transaction_payment_type_id { get; set; }
     public long transaction_id { get; set; }
     public int payment_type_id { get; set; }
@@ -62,7 +46,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       dt.Columns.Add(new DataColumn("payment_type_id", typeof(short)));
       dt.Columns.Add(new DataColumn("payment_type_index", typeof(short)));
-      dt.Columns.Add(new DataColumn("tax_exempt", typeof(bool)));
 
       return dt;
     }

@@ -133,13 +133,11 @@ namespace ClayFinancial.Models.Transaction.Data
                 transaction_id, 
                 payment_type_id, 
                 payment_type_index,
-                tax_exempt
               )
               SELECT
                 @transaction_id,
                 payment_type_id,
                 payment_type_index,
-                tax_exempt
               FROM @PaymentTypeData;
     
 

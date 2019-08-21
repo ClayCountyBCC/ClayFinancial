@@ -34,13 +34,11 @@
     public modified_by: string = "";
     public reason_for_change: string = "";
     public error_text: string = "";
-    
 
     // client side controls
     private control: Control = null;
     public input_element: HTMLElement = null;
     public container_element: HTMLElement = null;
-
 
     constructor(control: Control, payment_type_id: number)
     {
@@ -66,6 +64,15 @@
             if (this.ValidateNumber())
             {
               this.value = input.valueAsNumber.toString();
+            }
+            break;
+
+          case "count":
+            if (this.ValidateCount())
+            {
+              this.value = input.valueAsNumber.toString();
+              input.value = input.valueAsNumber.toString();
+              
             }
             break;
 
@@ -100,6 +107,9 @@
       {
         case "dropdown":
           return this.ValidateDropdown();
+
+        case "count":
+          return this.ValidateCount();
 
         case "date":
           return this.ValidateDate();
@@ -190,6 +200,29 @@
       return e.length === 0;
     }
 
+    private ValidateCount(): boolean
+    {
+      let e: string = "";
+      let input = <HTMLInputElement>this.input_element;
+
+      if (input.value.length === 0)
+      {
+        e = "You must enter a number. (No commas, decimal points, or $ allowed).";
+      }
+
+      if (input.valueAsNumber === NaN && e.length === 0)
+      {
+        e = "Please enter Numbers only.";
+      }
+      if (input.valueAsNumber < 0)
+      {
+        e = "This value must be 0 or greater.";
+      }
+      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+
+      return e.length === 0;
+    }
+
     private ValidateMoney(): boolean
     {
       let e: string = "";
@@ -222,7 +255,5 @@
 
       return e.length === 0;
     }
-
-
   }
 }

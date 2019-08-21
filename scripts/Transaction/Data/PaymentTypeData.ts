@@ -6,7 +6,6 @@
     payment_type_id: number;
     payment_type_index: number
     transaction_id: number;
-    tax_exempt: boolean;
     control_data: Array<ControlData>;
     payment_method_data: Array<PaymentMethodData>;
     error_text: string;
@@ -19,7 +18,6 @@
     public transaction_id: number = -1;
     public payment_type_id: number = -1;
     public payment_type_index: number = -1;
-    public tax_exempt: boolean = false;
     public control_data: Array<ControlData> = [];
     public added_after_save: boolean = false;
     public error_text: string = "";
@@ -46,7 +44,6 @@
       this.payment_type_parent_container = target_container;
       this.payment_type_id = payment_type.payment_type_id;      
       this.payment_type_index = payment_type_index;
-      this.tax_exempt = payment_type.does_tax_exempt_apply;
 
       let li = document.createElement("li");
       li.style.display = "block";
