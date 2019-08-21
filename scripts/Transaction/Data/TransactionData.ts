@@ -34,14 +34,14 @@
     public created_by_username: string = "";
     public created_by_ip_address: string = "";
     // client side only stuff
-    private base_container: string = 'root';
+    public base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private department_element_container: HTMLElement = null;
     private received_from_element: HTMLElement = null;
     private received_from_element_container: HTMLElement = null;
     private department_controls_target: string = 'department_controls_container';
     private payment_type_target: string = 'payment_type_container';
-    private selected_department: Department = null;
+    public selected_department: Department = null;
     private next_payment_type_index: number = 0;
 
     constructor()
@@ -143,14 +143,16 @@
 
         li.onclick = (event:Event) =>
         {
-          controls_container.classList.toggle("hide");
-          if (!controls_container.classList.contains("hide"))
+          if (controls_container.childElementCount === 0) // there is no payment type data created yet.
           {
-            if (controls_container.childElementCount === 0) // there is no payment type data created yet.
-            {
-              this.AddPaymentType(pt, controls_container);
-            }
+            this.AddPaymentType(pt, controls_container);
+            controls_container.classList.remove("hide");
           }
+          //controls_container.classList.toggle("hide");
+          //if (!controls_container.classList.contains("hide"))
+          //{
+
+          //}
 
           console.log('this transaction', this);
         }
@@ -199,7 +201,7 @@
 
         if (this.ValidateTransaction())
         {
-          this.SaveTransactionData();
+          Transaction.currentReceipt.ShowReceiptPreview();
         }
         else
         {
@@ -256,7 +258,7 @@
       ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
     }
 
-    private SaveTransactionData(): void
+    public SaveTransactionData(): void
     {
       // first let's reorder all of the payment_type_index fields
       // by reorder I mean make them representative

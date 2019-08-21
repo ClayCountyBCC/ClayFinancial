@@ -103,13 +103,15 @@ var Transaction;
                     controls_container.classList.add("control_container", "hide");
                     ol.appendChild(controls_container);
                     li.onclick = (event) => {
-                        controls_container.classList.toggle("hide");
-                        if (!controls_container.classList.contains("hide")) {
-                            if (controls_container.childElementCount === 0) // there is no payment type data created yet.
-                             {
-                                this.AddPaymentType(pt, controls_container);
-                            }
+                        if (controls_container.childElementCount === 0) // there is no payment type data created yet.
+                         {
+                            this.AddPaymentType(pt, controls_container);
+                            controls_container.classList.remove("hide");
                         }
+                        //controls_container.classList.toggle("hide");
+                        //if (!controls_container.classList.contains("hide"))
+                        //{
+                        //}
                         console.log('this transaction', this);
                     };
                 }
@@ -145,7 +147,7 @@ var Transaction;
                     let button = event.target;
                     Utilities.Toggle_Loading_Button(button, true);
                     if (this.ValidateTransaction()) {
-                        this.SaveTransactionData();
+                        Transaction.currentReceipt.ShowReceiptPreview();
                     }
                     else {
                         Utilities.Toggle_Loading_Button(button, false);

@@ -5,7 +5,6 @@
 }
 
 <nav class="navbar hide-for-print is-primary"
-     @*style="background-color: #5AB3FF;"*@
      role="navigation"
      aria-label="page navigation">
   <div class="container">
@@ -37,7 +36,7 @@
 <div class="container"
      id="root">
 
-  <p>Receipt list here</p>
+  @*<p>Receipt list here</p>
   <p>Filters for: </p>
   <ol>
     <li>Day</li>
@@ -61,7 +60,124 @@
     <li>Cash Amount</li>
   </ol>
 
-  <p>Infinite scroll?</p>
+  <p>Infinite scroll?</p>*@
+
+</div>
+
+<div id="receipt_view"
+     class="container hide">
+  <div id="receipt_view_header">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <img style="height: 100%; width: 100%;"
+               src="~/lib/ClayCountySeal-64x64.png" />
+        </div>
+      </div>
+      <div class="level-item has-text-centered">
+        <div>
+          <p style="font-size: 1.25rem;"
+             class="heading">
+            CLAY COUNTY
+          </p>
+          <p class="title">
+            BOARD OF COUNTY COMMISSIONERS
+          </p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item has-text-right">
+          <div>
+            <p style="font-size: 1.25rem;"
+               class="heading">
+              RECEIPT DATE
+            </p>
+            <p id="receipt_view_date"
+               class="title">
+              8/20/2019
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="columns">
+
+    <div class="field column is-half">
+      <label class="label is-medium">Received From</label>
+      <p class="control">
+        <input id="receipt_received_from"
+               class="input is-static is-medium"
+               type="text"
+               value=""
+               readonly />
+      </p>
+    </div>
+
+    <div class="field column is-half">
+      <label class="label is-medium">Department</label>
+      <p class="control">
+        <input id="receipt_department"
+               class="input is-static is-medium"
+               type="text"
+               value=""
+               readonly />
+      </p>
+    </div>
+
+  </div>
+  
+  <table>
+
+    <tbody id="receipt_view_contents">
+
+    </tbody>
+  </table> 
+
+  <div id="receipt_view_footer"
+       class="level">
+    <div class="level-left">
+      <div class="level-item has-text-right">
+        <div>
+          <p style="font-size: 1.25rem;"
+             class="heading">
+            RECEIPT NUMBER
+          </p>
+          <p id="receipt_view_number"
+             class="title">
+            19-2605-000001
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p style="font-size: 1.25rem;"
+           class="heading">
+          BOARD OF COUNTY COMMISSIONERS
+        </p>
+        <p id="receipt_view_county_manager"
+           class="title">
+          HOWARD WANAMAKER
+        </p>
+      </div>
+    </div>
+    <div class="level-right">
+      <div class="level-item has-text-right">
+        <div>
+          <p style="font-size: 1.25rem;"
+             class="heading">
+            RECEIPT BY
+          </p>
+          <p id="receipt_created_by"
+             class="title">
+            DAN MCCARTNEY
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 <script src="~/scripts/LevelItem.js"></script>
 <script src="~/scripts/Transaction/ControlGroup.js"></script>

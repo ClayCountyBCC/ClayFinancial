@@ -10,7 +10,7 @@ var Transaction;
 (function (Transaction) {
     Transaction.departments = [];
     Transaction.currentReceipt = null;
-    Transaction.currentTransactionData = null;
+    //export let currentTransactionData: Transaction.Data.TransactionData = null;
     Transaction.DepartmentControl = null;
     Transaction.DepartmentControlContainer = null;
     function Start() {
