@@ -7,9 +7,9 @@ namespace ClayFinancial.Models.Transaction
 {
   public class PaymentMethod
   {
-    // we are only validating the data. There is no table of type PaymentMethod to validate against.
+    // We are only validating the data is valid. 
+    // There is no table of type PaymentMethod with data to validate against.
     // This class is completely unnecessary
-
 
 
   }

@@ -41,11 +41,6 @@ namespace ClayFinancial.Models.Transaction.Data
       return new PaymentTypeData();
     }
 
-    public string Validate()
-    {
-
-      return "";
-    }
 
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT AFTER THE DATA IS VALIDATED. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
@@ -73,18 +68,29 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    private bool ValidatePaymentTypes(Data.TransactionData transactionData)
+    // This is used when a payment type has been added to a saved transaction
+    public TransactionView SaveChangePaymentType()
     {
-      // everything we did for the department controls, we need to do here.
-      // except that not every payment type should be filled out
-      // but if a payment type is in our transactionData, we should be validating it.
+      // TODO: add code to save new payment type
 
-      // Validate paymentTypeControlDatas
-
-      // Validate paymentMethodData
-
-      return false;
+      return new TransactionView(transaction_id);
 
     }
+
+    public bool ValidateChangePaymentType()
+    {
+      PaymentType pt = new PaymentType();
+
+      if(!pt.ValidateChangePaymentType(this))
+      {
+       
+        return false; 
+      }
+
+      return pt.ValidatePaymentType(this);
+
+    }
+
+
   }
 }// get the next transaction id

@@ -5,7 +5,7 @@ using System.Web;
 
 namespace ClayFinancial.Models.Transaction
 {
-  public class Transaction
+  public class TransactionView
   {
     public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
@@ -20,8 +20,22 @@ namespace ClayFinancial.Models.Transaction
     public string department { get; set; }
 
 
-    public Transaction() { }
+    public TransactionView() { }
+    public TransactionView(long id) 
+    {
+      transaction_id = id;
 
+      /*
+       *
+       *  TODO: use this spot to fill the parts of the view to return it. 
+       *  
+       */
+
+
+    }
+
+
+   
 
 
   }

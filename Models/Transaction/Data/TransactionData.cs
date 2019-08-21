@@ -17,7 +17,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
-    public string transaction_number { get; set; }    
+    public string transaction_number { get; set; }
     public long parent_transaction_id { get; set; }
     public int department_id { get; set; }
     public List<ControlData> department_control_data { get; set; }
@@ -27,6 +27,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public DateTime created_on { get; set; } = DateTime.MinValue;
     public string created_by_username { get; set; } = "";
     public string created_by_ip_address { get; set; } = "";
+    private bool has_error { get; set; } = false;
 
     public TransactionData()
     {
@@ -40,23 +41,22 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool ValidateNewReceipt()
     {
-      // get cached dept dictionary
-      // look for department_id in keys
 
-      //if(ControlData.Validate(department_control_data)) return this;
-      //if (!ValidatePaymentTypes(payment_type_data)) return this;
 
       return false;
     }
 
-    public List<TransactionData> Get()
-    {
+    //public List<TransactionData> Get()
+    //{
 
-      return new List<TransactionData>();
-    }
+    //  return new List<TransactionData>();
+    //}
 
-    public TransactionData GetTransactionData()
+    public static TransactionData GetTransactionData(long transaction_id)
     {
+      var param = new DynamicParameters();
+      param.Add("@transaction_id", transaction_id);
+
       var query = $@"
 
         SELECT 
@@ -67,16 +67,16 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.created_by_username
           ,TD.created_on
         FROM ClayFinancial.dbo.transaction_data TD
-        WHERE transaction_id = {this.transaction_id};
+        WHERE transaction_id = @transaction_id;
 
       ";
 
-      var td = Constants.Get_Data<TransactionData>(query,  Constants.ConnectionString.ClayFinancial);
+      var td = Constants.Get_Data<TransactionData>(query, Constants.ConnectionString.ClayFinancial);
 
-      if(td == null || td.Count() == 0)
+      if (td == null || td.Count() == 0)
       {
-        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction after saving it.", "", "", query);
-        return new TransactionData("There was an issue retrieving the transaction after saving it.");
+        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query);
+        return new TransactionData("There was an issue retrieving the transaction.");
       }
       // TODO: using statement for call
       return td.First();
@@ -89,11 +89,17 @@ namespace ClayFinancial.Models.Transaction.Data
       created_by_employee_id = ua.employee_id;
       created_by_username = ua.user_name;
       //display_name = ua.display_name;
-     
+
     }
 
-    public TransactionData SaveNewReceipt()
-    { 
+
+    public void SetHasError(bool hasError)
+    {
+
+      has_error = hasError;
+    }
+    public TransactionView SaveNewReceipt()
+    {
 
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
@@ -192,7 +198,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       // CREATE DATA TABLES
-      var controlDataTable =  ControlData.GetControlDataTable();
+      var controlDataTable = ControlData.GetControlDataTable();
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
 
@@ -255,23 +261,23 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
         // add tvp to parameter list
-        param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData")); 
-        param.Add("@PaymentMethodData",  paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
+        param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData"));
+        param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
 
         using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
         {
-         var i = db.ExecuteScalar(
-                       query, 
-                       param, 
-                       commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
+          var i = db.ExecuteScalar(
+                        query,
+                        param,
+                        commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
 
 
         }
 
         transaction_id = param.Get<long>("@transaction_id");
 
-        return GetTransactionData();
+        return GetTransactionView();
 
       }
       catch (Exception ex)
@@ -281,7 +287,14 @@ namespace ClayFinancial.Models.Transaction.Data
         return null;
 
       }
-    }
 
+
+
+    }
+    private TransactionView GetTransactionView()
+    {
+
+      return new TransactionView(transaction_id);
+    }
   }
 }

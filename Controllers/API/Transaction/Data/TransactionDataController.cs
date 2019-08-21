@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using ClayFinancial.Models.Transaction.Data;
+using ClayFinancial.Models.Transaction;
 using ClayFinancial.Models;
 
 namespace ClayFinancial.Controllers.API
@@ -13,6 +14,16 @@ namespace ClayFinancial.Controllers.API
   [RoutePrefix("API/Transaction")]
   public class TransactionDataController : ApiController
   {
+
+    [HttpGet]
+    [Route("Get")]
+    public IHttpActionResult GetAllTransactionView()
+
+    {
+      
+      return InternalServerError();
+    }
+
     [HttpPost]
     [Route("Save")]
     public IHttpActionResult SaveTransaction(TransactionData transaction)
@@ -32,7 +43,8 @@ namespace ClayFinancial.Controllers.API
         return Ok(transaction);
       }
 
-      var newReceipt = transaction.SaveNewReceipt();
+      // TODO: new receipt needs to be a TransactionView
+      var newReceipt = transaction.SaveNewReceipt(); 
       
       if(newReceipt != null)
       {
@@ -41,9 +53,53 @@ namespace ClayFinancial.Controllers.API
 
       return InternalServerError();
 
-      
+    }
+
+
+    [HttpPost]
+    [Route("AddPaymentType")]
+    public IHttpActionResult AddPaymentType(PaymentTypeData payment_type_data)
+    {
+      if (!payment_type_data.ValidateChangePaymentType())
+      {
+         return InternalServerError();
+      }
+
+      return Ok(payment_type_data.SaveChangePaymentType());
+     
+    }
+
+
+    [HttpPost]
+    [Route("ChangePaymentMethod")]
+    public IHttpActionResult AddPaymentType(PaymentMethodData payment_method_data)
+    {
+
+      if(payment_method_data.ValidateChange())
+      {
+
+        return Ok(new TransactionView(payment_method_data.transaction_id));
+      }
+      return InternalServerError();
+    }
+
+
+
+    [HttpGet]
+    [Route("GetTransactionData")]
+    public IHttpActionResult GetTransactionData(long transaction_id)
+    {
+      var td = TransactionData.GetTransactionData(transaction_id);
+
+      if(td == null)
+      {
+        return InternalServerError();
+      }
+
+      return Ok(td);
 
     }
+
   }
 }
 

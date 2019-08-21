@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Runtime.Caching;
+using ClayFinancial.Models.Transaction;
 
 namespace ClayFinancial.Models
 {
@@ -81,16 +82,16 @@ namespace ClayFinancial.Models
       {
 
         case "controls":
-          return Transaction.Control.Get();
+          return Control.Get();
 
         case "departments":
-          return Transaction.Department.Get();
+          return Department.Get();
 
         case "departments_dict":
-          return Transaction.Department.Get_Dict();
+          return Department.Get_Dict();
 
         case "payment_types":
-          return Transaction.PaymentType.Get();
+          return PaymentType.Get();
 
         default:
           return null;
