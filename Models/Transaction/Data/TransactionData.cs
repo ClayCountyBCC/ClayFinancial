@@ -22,6 +22,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int department_id { get; set; }
     public List<ControlData> department_control_data { get; set; }
     public List<PaymentTypeData> payment_type_data { get; set; }
+    public string county_manager_name { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
     public DateTime created_on { get; set; } = DateTime.MinValue;
@@ -46,11 +47,11 @@ namespace ClayFinancial.Models.Transaction.Data
       return false;
     }
 
-    //public List<TransactionData> Get()
-    //{
+    public static List<TransactionData> Get()
+    {
 
-    //  return new List<TransactionData>();
-    //}
+      return new List<TransactionData>();
+    }
 
     public static TransactionData GetTransactionData(long transaction_id)
     {

@@ -2,40 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
+using ClayFinancial.Models.Transaction.Data;
 namespace ClayFinancial.Models.Transaction
 {
   public class TransactionView
   {
-    public int fiscal_year { get; set; }
-    public int created_by_employee_id { get; set; }
-    public int employee_transaction_count { get; set; }
+
+    private long transaction_id { get; set; }
     public string transaction_number { get; set; }
-    public long transaction_id { get; set; }
-    public long? parent_transaction_id { get; set; }
     public DateTime created_on { get; set; }
     public string created_by_username { get; set; }
-    public string created_by_ip_address { get; set; }
-    public int department_id { get; set; }
-    public string department { get; set; }
+    public long department_id { get; set; }
+    public string department_name { get; set; }
+    private string transaction_type { get; set; }
+    public decimal cash_total { get; set; }
+    public decimal checks_total { get; set; }
+    public int number_of_checks { get; set; }
+    public bool has_been_modified { get; set; }
+    
+    public TransactionView() { }  
 
-
-    public TransactionView() { }
-    public TransactionView(long id) 
+    public static List<TransactionView> GetListOfTransactionView()
     {
-      transaction_id = id;
+      
 
-      /*
-       *
-       *  TODO: use this spot to fill the parts of the view to return it. 
-       *  
-       */
-
-
+      return new List<TransactionView>();
     }
-
-
-   
 
 
   }

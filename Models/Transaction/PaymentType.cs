@@ -15,7 +15,8 @@ namespace ClayFinancial.Models.Transaction
     public List<Control> controls { get; set; } = new List<Control>();
     public List<PaymentMethod> payment_methods { get; set; }
     public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
-
+    public string added_by { get; set; } = "";
+    public DateTime added_on { get; set; } = DateTime.MinValue;
     public PaymentType() { }
 
     public static List<PaymentType> Get()
