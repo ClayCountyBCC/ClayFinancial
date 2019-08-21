@@ -21,9 +21,6 @@
   "homepage": "https://github.com/ClayCountyBCC/ClayFinancial#readme",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.9.0",
-    "@types/react": "^16.8.23",
-    "@types/react-dom": "^16.8.4",
-    "bulma": "^0.7.5",
-    "ci": "^1.0.0"
+    "bulma": "^0.7.5"
   }
 }
