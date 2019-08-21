@@ -2,21 +2,5 @@
   "version": "1.0",
   "defaultProvider": "cdnjs",
   "libraries": [
-    {
-      "library": "react@16.8.6",
-      "destination": "lib/react/"
-    },
-    {
-      "library": "react-dom@16.8.6",
-      "destination": "lib/react-dom/",
-      "files": [
-        "cjs/react-dom.development.js",
-        "cjs/react-dom.production.min.js",
-        "cjs/react-dom.profiling.min.js",
-        "umd/react-dom.development.js",
-        "umd/react-dom.production.min.js",
-        "umd/react-dom.profiling.min.js"
-      ]
-    }
   ]
 }
