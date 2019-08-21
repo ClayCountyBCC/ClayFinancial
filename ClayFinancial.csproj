@@ -1741,6 +1741,7 @@
     <Compile Include="Models\Transaction\PaymentType.cs" />
     <Compile Include="Models\Transaction\Data\PaymentTypeData.cs" />
     <Compile Include="Models\Transaction\Data\TransactionData.cs" />
+    <Compile Include="Models\Transaction\TransactionView.cs" />
     <Compile Include="Models\UserAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

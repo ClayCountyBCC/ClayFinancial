@@ -17,16 +17,18 @@ namespace ClayFinancial.Models.Transaction.Data
     public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
-    public string transaction_number { get; set; }    
+    public string transaction_number { get; set; }
     public long parent_transaction_id { get; set; }
     public int department_id { get; set; }
     public List<ControlData> department_control_data { get; set; }
     public List<PaymentTypeData> payment_type_data { get; set; }
+    public string county_manager_name { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
     public DateTime created_on { get; set; } = DateTime.MinValue;
     public string created_by_username { get; set; } = "";
     public string created_by_ip_address { get; set; } = "";
+    private bool has_error { get; set; } = false;
 
     public TransactionData()
     {
@@ -38,25 +40,24 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public TransactionData validate()
+    public bool ValidateNewReceipt()
     {
-      // get cached dept dictionary
-      // look for department_id in keys
 
-      //if(ControlData.Validate(department_control_data)) return this;
-      //if (!ValidatePaymentTypes(payment_type_data)) return this;
 
-      return this;
+      return false;
     }
 
-    public List<TransactionData> Get()
+    public static List<TransactionData> Get()
     {
 
       return new List<TransactionData>();
     }
 
-    public TransactionData GetTransactionData()
+    public static TransactionData GetTransactionData(long transaction_id)
     {
+      var param = new DynamicParameters();
+      param.Add("@transaction_id", transaction_id);
+
       var query = $@"
 
         SELECT 
@@ -64,19 +65,23 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.transaction_number
           ,ISNULL(TD.parent_transaction_id,-1) parent_transaction_id
           ,TD.department_id
-          ,TD.created_by_username
           ,TD.created_on
-        FROM ClayFinancial.dbo.transaction_data TD
-        WHERE transaction_id = {this.transaction_id};
+          ,CM.name county_manager_name
+          ,TD.created_on
+        FROM ClayFinancial.dbo.data_transaction TD
+        LEFT OUTER JOIN county_manager CM ON CAST(TD.created_on AS DATE)
+          BETWEEN CM.Start_date AND ISNULL(CM.end_date, CAST(GETDATE() AS DATE))
+        WHERE transaction_id = @transaction_id;
+
 
       ";
 
-      var td = Constants.Get_Data<TransactionData>(query,  Constants.ConnectionString.ClayFinancial);
+      var td = Constants.Get_Data<TransactionData>(query, Constants.ConnectionString.ClayFinancial);
 
-      if(td == null || td.Count() == 0)
+      if (td == null || td.Count() == 0)
       {
-        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction after saving it.", "", "", query);
-        return new TransactionData("There was an issue retrieving the transaction after saving it.");
+        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query);
+        return new TransactionData("There was an issue retrieving the transaction.");
       }
       // TODO: using statement for call
       return td.First();
@@ -89,11 +94,17 @@ namespace ClayFinancial.Models.Transaction.Data
       created_by_employee_id = ua.employee_id;
       created_by_username = ua.user_name;
       //display_name = ua.display_name;
-     
+
     }
 
-    public TransactionData Save()
-    { 
+
+    public void SetHasError(bool hasError)
+    {
+
+      has_error = hasError;
+    }
+    public TransactionData SaveNewReceipt()
+    {
 
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
@@ -117,7 +128,7 @@ namespace ClayFinancial.Models.Transaction.Data
                       @created_by_employee_ip_address;
     
               -- INSERT PAYMENT TYPE DATA
-              INSERT INTO payment_type_data
+              INSERT INTO data_payment_type
               (
                 transaction_id, 
                 payment_type_id, 
@@ -130,9 +141,9 @@ namespace ClayFinancial.Models.Transaction.Data
               FROM @PaymentTypeData;
     
 
-              -- INSERT PAYMENT METHOD DATA
-              -- INNER JOIN TO payment_type_data TO GET transaction_payment_type_id
-              INSERT INTO payment_method_data
+              -- INSERT data_payment_method
+              -- INNER JOIN TO data_payment_type TO GET transaction_payment_type_id
+              INSERT INTO data_payment_method 
               (
                 transaction_payment_type_id,
                 transaction_id, 
@@ -151,7 +162,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 check_from, 
                 paying_for
               FROM @PaymentMethodData PMD
-              INNER JOIN payment_type_data PTD ON 
+              INNER JOIN data_payment_type PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = PMD.payment_type_id AND 
                 PTD.payment_type_index = PMD.payment_type_index;
@@ -162,7 +173,7 @@ namespace ClayFinancial.Models.Transaction.Data
               -- department_id WILL BE NULL FOR PAYMENT TYPE CONTROLS. THE VALUE IS NOT SET IN THE APPLICATION.
               -- THE department_id WILL NOT BE NULL FOR DEPARTMENT CONTROLS. THE VALUE IS SET IN THE APPLICATION.
               --    THE transaction_payment_type_id WILL BE NULL FOR DEPARTMENT CONTROLS.
-              INSERT INTO control_data
+              INSERT INTO data_control
               (
                 transaction_payment_type_id,
                 department_id,
@@ -177,7 +188,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 CD.control_id,
                 CD.value
               FROM @ControlData CD
-              LEFT OUTER JOIN payment_type_data PTD ON 
+              LEFT OUTER JOIN data_payment_type PTD ON 
                 PTD.transaction_id = @transaction_id AND 
                 PTD.payment_type_id = CD.payment_type_id AND 
                 PTD.payment_type_index = CD.payment_type_index;
@@ -190,7 +201,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       // CREATE DATA TABLES
-      var controlDataTable =  ControlData.GetControlDataTable();
+      var controlDataTable = ControlData.GetControlDataTable();
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
 
@@ -253,23 +264,23 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
         // add tvp to parameter list
-        param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData")); 
-        param.Add("@PaymentMethodData",  paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
+        param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData"));
+        param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
 
         using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
         {
-         var i = db.ExecuteScalar(
-                       query, 
-                       param, 
-                       commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
+          var i = db.ExecuteScalar(
+                        query,
+                        param,
+                        commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
 
 
         }
 
         transaction_id = param.Get<long>("@transaction_id");
 
-        return GetTransactionData();
+        return GetTransactionData(transaction_id);
 
       }
       catch (Exception ex)
@@ -279,6 +290,9 @@ namespace ClayFinancial.Models.Transaction.Data
         return null;
 
       }
+
+
+
     }
 
   }

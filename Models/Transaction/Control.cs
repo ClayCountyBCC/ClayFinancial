@@ -69,6 +69,11 @@ namespace ClayFinancial.Models.Transaction
 
       // if there is anything to validate that is not specific to it's data type,
       // do it before this step.
+      if (is_active == false)
+      {
+        cd.error_text = "This is no longer a valid control";
+        return false;
+      }
 
       if (cd.value.Length > max_length) 
       {
@@ -78,24 +83,26 @@ namespace ClayFinancial.Models.Transaction
 
       switch (this.data_type)
       {
+
         case "bigtext":
         case "text":
           return ValidateText(cd);
 
         case "money":
-          return ValidateMoney(cd);
+        case "number":
+          return ValidateDecimal(cd);
 
         case "date":
           return ValidateDate(cd);
 
-        case "number":
-          return ValidateNumber(cd);
+        case "count":
+          return ValidateCount(cd);
 
         case "dropdown":
           return ValidateDropdown(cd);
 
         default:
-          // we don't know what data type this was.
+          cd.error_text = "Unknown data type";
           return false;
 
       }
@@ -113,25 +120,35 @@ namespace ClayFinancial.Models.Transaction
       return true;
     }
 
-    private bool ValidateMoney(Data.ControlData cd)
+    private bool ValidateDecimal(Data.ControlData cd)
     {
-      return false;
-    }
-
-    private bool ValidateNumber(Data.ControlData cd)
-    {
-      return false;
+      return decimal.TryParse(cd.value, out _);
     }
 
     private bool ValidateText(Data.ControlData cd)
     {
-      return false;
+
+      return true;
+
+    }
+
+    private bool ValidateCount(Data.ControlData cd)
+    {
+
+      if (!int.TryParse(cd.value, out int result))
+      {
+        cd.error_text = "Invalid value for " + label;
+        return false;
+      }
+      decimal.TryParse(cd.value, out decimal test);
+
+      return test - result == 0;
+      
     }
 
     private bool ValidateDate(Data.ControlData cd)
     {
-      DateTime datevalue;
-      if(!DateTime.TryParse(cd.value, out datevalue))
+      if (!DateTime.TryParse(cd.value, out DateTime datevalue))
       {
         cd.error_text = "Invalid Date";
         return false;

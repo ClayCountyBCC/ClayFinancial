@@ -121,10 +121,9 @@ namespace ClayFinancial.Models.Transaction
       var controlids = (from c in transactionData.department_control_data
                         select c.control_id).ToList();
 
-      
-      
 
       var distinctControlIds = controlids.Distinct();
+
       // Todo make  sure error text is set in the object being passed to this function 
       if(controlids.Count() != distinctControlIds.Count())
       {
@@ -175,7 +174,7 @@ namespace ClayFinancial.Models.Transaction
 
       foreach(Data.PaymentTypeData ptd in transactionData.payment_type_data)
       {
-        if (!payment_types_dict[ptd.payment_type_id].Validate(ptd))
+        if (!payment_types_dict[ptd.payment_type_id].ValidatePaymentType(ptd))
         {
           transactionData.error_text = "There was a problem with some of the payment types";
           return false;
