@@ -15,7 +15,7 @@ namespace ClayFinancial.Models
 
 
     public bool authenticated { get; set; } = false;
-    
+
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
@@ -29,7 +29,7 @@ namespace ClayFinancial.Models
       mis_access = 4
     }
     public access_type current_access { get; set; } = access_type.no_access;// default to no_access.
-        
+
     public UserAccess(string name)
     {
       user_name = name;
@@ -76,23 +76,28 @@ namespace ClayFinancial.Models
           }
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
-          if (groups.Contains(mis_access_group) || groups.Contains(finance_access_group))
+          if (groups.Contains(mis_access_group))
           {
-            current_access = access_type.finance_access;
+            current_access = access_type.mis_access;
           }
           else
           {
-            if (groups.Contains(basic_access_group))
+            if (groups.Contains(admin_access_group))
             {
-              current_access = access_type.basic_access;
+              current_access = access_type.admin_access;
             }
-            //else
-            //{
-            //  current_access = access_type.no_access;
-            //}
-
+            else
+            {
+              if (groups.Contains(finance_access_group))
+              {
+                current_access = access_type.finance_access;
+              }
+              else
+              {
+                current_access = access_type.basic_access;
+              }
+            }
           }
-
         }
       }
       catch (Exception ex)
@@ -145,6 +150,7 @@ namespace ClayFinancial.Models
             ParseGroup(finance_access_group, ref d);
             ParseGroup(mis_access_group, ref d);
             ParseGroup(basic_access_group, ref d);
+            ParseGroup(admin_access_group, ref d);
             d[""] = new UserAccess("");
             break;
 
@@ -162,7 +168,6 @@ namespace ClayFinancial.Models
     {
       try
       {
-
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
         switch (Environment.MachineName.ToUpper())
         {

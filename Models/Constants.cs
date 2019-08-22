@@ -114,9 +114,6 @@ namespace ClayFinancial.Models
     {
       switch (Environment.MachineName.ToUpper())
       {
-        case "CLAYBCCDV10":
-          // Test Environment Machines
-          return false;
 
         //case "MISHL05":
         //case "MISSL01":
@@ -125,7 +122,6 @@ namespace ClayFinancial.Models
           return true;
 
         default:
-          // we'll return false for any machinenames we don't know.
           return false;
       }
     }
@@ -138,7 +134,7 @@ namespace ClayFinancial.Models
     //  var cd = new Dictionary<int,Control>();
     //  var dd = new Dictionary<int,Department>();
     //  var pd = new Dictionary<int,PaymentType>();
-      
+
     //  switch (dictionary_name)
     //  {
     //    case "Control":
@@ -166,7 +162,7 @@ namespace ClayFinancial.Models
     //  if (cd.Any())  return cd;
     //}
 
-   
+
 
   }
 }
