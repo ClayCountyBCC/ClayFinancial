@@ -12,9 +12,10 @@ namespace ClayFinancial.Controllers.MVC
     // GET: Transaction
     public ActionResult Index()
     {
-      //var transactionData = new TransactionData();
 
-      //var t = transactionData.Save();
+
+      //var tr = TransactionData.GetTransactionData(8);
+     
 
       return View();
     }

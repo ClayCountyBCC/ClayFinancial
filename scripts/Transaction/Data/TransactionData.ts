@@ -3,7 +3,7 @@
   interface ITransactionData
   {
     transaction_id: number;
-    parent_transaction_id: number;
+    child_transaction_id: number;
     department_id: number;
     fiscal_year: number;
     created_by_employee_id: number;
@@ -24,7 +24,7 @@
     public created_by_employee_id: number = -1;
     public employee_transaction_count: number = -1;
     public transaction_number: string = "";
-    public parent_transaction_id: number = -1;
+    public child_transaction_id: number = -1;
     public department_id: number = -1;
     public department_control_data: Array<ControlData> = [];
     public payment_type_data: Array<PaymentTypeData> = [];
@@ -201,7 +201,9 @@
 
         if (this.ValidateTransaction())
         {
-          Transaction.currentReceipt.ShowReceiptPreview();
+          //Transaction.currentReceipt.ShowReceiptPreview();
+          this.SaveTransactionData();
+
         }
         else
         {

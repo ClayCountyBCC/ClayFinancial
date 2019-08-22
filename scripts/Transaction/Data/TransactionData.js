@@ -9,7 +9,7 @@ var Transaction;
                 this.created_by_employee_id = -1;
                 this.employee_transaction_count = -1;
                 this.transaction_number = "";
-                this.parent_transaction_id = -1;
+                this.child_transaction_id = -1;
                 this.department_id = -1;
                 this.department_control_data = [];
                 this.payment_type_data = [];
@@ -147,7 +147,8 @@ var Transaction;
                     let button = event.target;
                     Utilities.Toggle_Loading_Button(button, true);
                     if (this.ValidateTransaction()) {
-                        Transaction.currentReceipt.ShowReceiptPreview();
+                        //Transaction.currentReceipt.ShowReceiptPreview();
+                        this.SaveTransactionData();
                     }
                     else {
                         Utilities.Toggle_Loading_Button(button, false);

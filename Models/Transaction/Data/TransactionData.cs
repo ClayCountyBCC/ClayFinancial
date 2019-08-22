@@ -5,7 +5,8 @@ using System.Web;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
-using ClayFinancial.Models;
+using ClayFinancial.Models.Transaction;
+
 
 
 namespace ClayFinancial.Models.Transaction.Data
@@ -13,12 +14,13 @@ namespace ClayFinancial.Models.Transaction.Data
   public class TransactionData
   {
 
-    public long transaction_id { get; set; }
+    public long transaction_id { get; set; } = -1;
     public int fiscal_year { get; set; }
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
-    public long parent_transaction_id { get; set; }
+    public char transaction_type { get; set; } = 'R';
+    public long child_transaction_id { get; set; }
     public int department_id { get; set; }
     public List<ControlData> department_control_data { get; set; }
     public List<PaymentTypeData> payment_type_data { get; set; }
@@ -27,6 +29,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string received_from { get; set; } = "";
     public DateTime created_on { get; set; } = DateTime.MinValue;
     public string created_by_username { get; set; } = "";
+    public string created_by_display_name { get; set; } = "";
     public string created_by_ip_address { get; set; } = "";
     private bool has_error { get; set; } = false;
 
@@ -40,18 +43,58 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public bool ValidateNewReceipt()
+
+    public bool ValidateTransaction()
     {
 
+      switch (transaction_type)
+      {
 
-      return false;
+        case 'R':
+          if (!ValidateNewReceipt()) return false;
+          break;
+        case 'D':
+          if (!ValidateNewDeposit()) return false;
+          break;
+        default:
+          return false;
+      }
+
+      return true;
     }
 
-    public static List<TransactionData> Get()
+    public TransactionData SaveTransactionData()
     {
 
-      return new List<TransactionData>();
+      switch (transaction_type)
+      {
+
+        case 'R':
+          if (!SaveNewReceipt()) return this;
+          break;
+        case 'D':
+          if (!SaveNewDeposit()) return this;
+          break;
+
+        default:
+          error_text = "Unknown transaction type.";
+          return this;
+      }
+
+      return GetTransactionData(transaction_id);
+
     }
+    private bool ValidateNewReceipt()
+    {
+      var department = new Department();
+      
+      return department.ValidateTransactionData(this);
+    }
+    private bool ValidateNewDeposit()
+    {
+       return false;
+    }
+
 
     public static TransactionData GetTransactionData(long transaction_id)
     {
@@ -60,14 +103,30 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var query = $@"
 
+      USE ClayFinancial;
+
+      DECLARE @county_manager_name varchar(75) = 
+        (SELECT
+          name FROM ClayFinancial.dbo.county_manager 
+        WHERE CAST(GETDATE() as DATE) BETWEEN start_date AND ISNULL(end_date, CAST(GETDATE() AS DATE)));
+
+
         SELECT 
           TD.transaction_id
+          ,fiscal_year
+          ,created_by_employee_id
           ,TD.transaction_number
-          ,ISNULL(TD.parent_transaction_id,-1) parent_transaction_id
+          ,ISNULL(TD.child_transaction_id,-1) child_transaction_id
           ,TD.department_id
+          ,transaction_type
+          ,child_transaction_id
           ,TD.created_on
-          ,CM.name county_manager_name
+          ,ISNULL(CM.name, 'Unknown') county_manager_name
           ,TD.created_on
+          ,received_from
+          ,created_by_username
+          ,created_by_display_name
+          ,created_by_ip_address
         FROM ClayFinancial.dbo.data_transaction TD
         LEFT OUTER JOIN county_manager CM ON CAST(TD.created_on AS DATE)
           BETWEEN CM.Start_date AND ISNULL(CM.end_date, CAST(GETDATE() AS DATE))
@@ -75,8 +134,12 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       ";
+      // TODO: FILL THE REST OF THE TRANSACTION DATA.
+      var td = Constants.Get_Data<TransactionData>(query, param,Constants.ConnectionString.ClayFinancial);
 
-      var td = Constants.Get_Data<TransactionData>(query, Constants.ConnectionString.ClayFinancial);
+      var tr= td.First();
+      tr.department_control_data = ControlData.Get(tr.transaction_id, tr.department_id);
+      tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id);
 
       if (td == null || td.Count() == 0)
       {
@@ -93,27 +156,35 @@ namespace ClayFinancial.Models.Transaction.Data
       // set all user properties here
       created_by_employee_id = ua.employee_id;
       created_by_username = ua.user_name;
-      //display_name = ua.display_name;
+      created_by_display_name = ua.display_name;
+
 
     }
 
 
     public void SetHasError(bool hasError)
     {
-
       has_error = hasError;
     }
-    public TransactionData SaveNewReceipt()
-    {
 
+    private bool SaveNewDeposit()
+    {
+      return true;  
+    }
+    private bool SaveNewReceipt()
+    {
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
       param.Add("@username", created_by_username);
       param.Add("@department_id", department_id);
+      param.Add("@transaction_type", transaction_type);
       //param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_ip_address);
-      param.Add("@parent_transaction_id", parent_transaction_id);
+      param.Add("@child_transaction_id", child_transaction_id);
+      param.Add("@created_by_display_name", created_by_display_name);
+      param.Add("@received_from", received_from);
+
 
       var query = @"
           USE ClayFinancial;
@@ -122,22 +193,26 @@ namespace ClayFinancial.Models.Transaction.Data
               EXEC ClayFinancial.dbo.insert_new_transaction_data 
                       @transaction_id OUTPUT, 
                       @department_id, 
-                      @created_by_employee_id, 
-                      @parent_transaction_id, 
+                      @created_by_employee_id,
+                      @transaction_type,
+                      @child_transaction_id, 
                       @username, 
-                      @created_by_employee_ip_address;
+                      @created_by_employee_ip_address,
+                      @created_by_display_name,
+                      @received_from
+
     
               -- INSERT PAYMENT TYPE DATA
               INSERT INTO data_payment_type
               (
                 transaction_id, 
                 payment_type_id, 
-                payment_type_index,
+                payment_type_index
               )
               SELECT
                 @transaction_id,
                 payment_type_id,
-                payment_type_index,
+                payment_type_index
               FROM @PaymentTypeData;
     
 
@@ -193,8 +268,6 @@ namespace ClayFinancial.Models.Transaction.Data
                 PTD.payment_type_id = CD.payment_type_id AND 
                 PTD.payment_type_index = CD.payment_type_index;
 
-
-              
 
         ";
 
@@ -268,26 +341,36 @@ namespace ClayFinancial.Models.Transaction.Data
         param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
 
-        using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
-        {
-          var i = db.ExecuteScalar(
-                        query,
-                        param,
-                        commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
+        //using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
+        //{
+        //  var i = db.ExecuteScalar(
+        //                query,
+        //                param,
+        //                commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
 
 
-        }
 
+        //}
+
+        var tran = Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial);
+        
         transaction_id = param.Get<long>("@transaction_id");
 
-        return GetTransactionData(transaction_id);
+        if(transaction_id == -1)
+        {
+          error_text = "There was an issue saving the receipt.";
+          return false;
+        }
+
+
+        return true;
 
       }
       catch (Exception ex)
       {
 
         new ErrorLog(ex, query);
-        return null;
+        return false;
 
       }
 

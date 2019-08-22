@@ -8,25 +8,28 @@ namespace ClayFinancial.Models
 {
   public class UserAccess
   {
-    private const string basic_access_group = "gReceiptAppBasicAccess"; // We may make this an argument if we end up using this code elsewhere.
-    private const string finance_access_group = "gReceiptAppFinanceAccess";
-    private const string admin_access_group = "gReceiptAppAdminAccess";
+    private const string basic_access_group = "gReceiptAppAccessByDepartment"; // We may make this an argument if we end up using this code elsewhere.
+    private const string finance_Level_one_group = "gReceiptAppFinanceLevelOneAccess";
+    private const string finance_Level_two_group = "gReceiptAppFinanceLevelTwoAccess";
+    private const string maintenance_access_group = "gReceiptAppMaintenanceAccess";
     private const string mis_access_group = "gMISDeveloper_Group";
 
 
     public bool authenticated { get; set; } = false;
-
+    public string finplus_department { get; set; } = "";
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
+    public bool maintenance_user { get; set; } = false;
 
     public enum access_type : int
     {
       no_access = 0,
-      basic_access = 1, // They get treated like public users.
-      finance_access = 2,
-      admin_access = 3,
-      mis_access = 4
+      basic = 1, // They get treated like public users.
+      finance_level_one = 2,
+      finance_level_two = 3,
+      maintenance_access = 4,
+      mis_access = 5
     }
     public access_type current_access { get; set; } = access_type.no_access;// default to no_access.
 
@@ -76,25 +79,28 @@ namespace ClayFinancial.Models
           }
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
+          maintenance_user = groups.Contains(maintenance_access_group);
+
+
           if (groups.Contains(mis_access_group))
           {
             current_access = access_type.mis_access;
           }
           else
           {
-            if (groups.Contains(admin_access_group))
+            if (groups.Contains(finance_Level_one_group))
             {
-              current_access = access_type.admin_access;
+              current_access = access_type.finance_level_one;
             }
             else
             {
-              if (groups.Contains(finance_access_group))
+              if (groups.Contains(finance_Level_two_group))
               {
-                current_access = access_type.finance_access;
+                current_access = access_type.finance_level_two;
               }
               else
               {
-                current_access = access_type.basic_access;
+                current_access = access_type.basic;
               }
             }
           }
@@ -147,10 +153,11 @@ namespace ClayFinancial.Models
             break;
 
           default:
-            ParseGroup(finance_access_group, ref d);
+            ParseGroup(finance_Level_one_group, ref d);
+            ParseGroup(finance_Level_two_group, ref d);
             ParseGroup(mis_access_group, ref d);
             ParseGroup(basic_access_group, ref d);
-            ParseGroup(admin_access_group, ref d);
+            ParseGroup(maintenance_access_group, ref d);
             d[""] = new UserAccess("");
             break;
 
