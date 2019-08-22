@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using ClayFinancial.Models.Transaction.Data;
+using Dapper;
+
 namespace ClayFinancial.Models.Transaction
 {
   public class TransactionView
@@ -21,8 +23,11 @@ namespace ClayFinancial.Models.Transaction
     private string transaction_type { get; set; }
     public TransactionView() { }  
 
-    public static List<TransactionView> GetListOfTransactionView()
+    public static List<TransactionView> GetListOfTransactionView(long transaction_id = -1)
     {
+      var param = new DynamicParameters();
+
+
       var query = @"
       USE ClayFinancial;
 
@@ -84,9 +89,19 @@ namespace ClayFinancial.Models.Transaction
       INNER JOIN departments D ON T.department_id = D.department_id
       LEFT OUTER JOIN TransactionIds_With_Changes TWC ON T.transaction_id = TWC.transaction_id
       LEFT OUTER JOIN PaymentMethodSums PMS ON T.transaction_id = PMS.transaction_id
+
         
       
       ";
+
+
+
+      if (transaction_id > -1)
+      {
+        // THIS MEANS WE ARE AFTER ALL TransactionView FOR A DEPOSIT
+        param.Add("transaction_id", transaction_id);
+        query += "WHERE child_transaction_id = @transaction_id";
+      }
 
       return Constants.Get_Data<TransactionView>(query, Constants.ConnectionString.ClayFinancial);
 

@@ -26,6 +26,9 @@ namespace ClayFinancial.Controllers.API
 
     [HttpPost]
     [Route("Save")]
+
+    // THIS SIGNATURE IS NOW UNNECESSARY AS THE List<long> transaction_ids IS NOW PART OF THE OBJECT
+    //public IHttpActionResult SaveTransaction(TransactionData transaction, List<long> transaction_ids = null)
     public IHttpActionResult SaveTransaction(TransactionData transactionData)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);

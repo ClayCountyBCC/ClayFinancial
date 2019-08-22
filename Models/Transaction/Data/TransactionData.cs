@@ -31,6 +31,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_username { get; set; } = "";
     public string created_by_display_name { get; set; } = "";
     public string created_by_ip_address { get; set; } = "";
+    public List<long> deposit_receipt_ids { get; set; }
+    public List<TransactionView> deposit_receipts { get; set; }
     private bool has_error { get; set; } = false;
 
     public TransactionData()
