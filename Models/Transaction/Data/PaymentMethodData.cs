@@ -31,10 +31,42 @@ namespace ClayFinancial.Models.Transaction.Data
     {
     }
 
-    public PaymentMethodData Get()
+    public static List<PaymentMethodData> Get(long transaction_id, long transaction_payment_type_id)
     {
+      var param = new DynamicParameters();
+      param.Add("transaction_payment_type_id", transaction_payment_type_id);
+      param.Add("transaction_id", transaction_id);
+
+      var query = @"
+        select 
+
+          pm.payment_method_data_id
+          ,cpm.original_payment_method_data_id
+          ,pm.transaction_payment_type_id
+          ,pm.transaction_id
+          ,pm.cash_amount
+          ,pm.check_amount
+          ,pm.check_number
+          ,pm.check_from
+          ,pm.paying_for
+          ,pm.is_active
+          ,pm.added_after_save
+          ,cpm.modified_on
+          ,cpm.modified_by
+          ,cpm.reason_for_change
+        from data_payment_method pm
+        left outer join data_changes_payment_method cpm on cpm.new_payment_method_data_id =  pm.payment_method_data_id
+        where transaction_id = @transaction_id
+          AND transaction_payment_type_id = @transaction_payment_type_id
+        order by payment_method_data_id, original_payment_method_data_id
+
+        
       
-      return new PaymentMethodData();
+      ";
+
+      var pm = Constants.Get_Data<PaymentMethodData>(query, param, Constants.ConnectionString.ClayFinancial);
+      // pm.RemoveAll(p => p.cash_amount == 0 && p.check_amount == 0 && p.check_number.Length == 0 && p.is_active == false);
+      return pm;
     }
 
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION

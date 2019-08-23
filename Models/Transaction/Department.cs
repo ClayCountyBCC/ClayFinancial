@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using ClayFinancial.Models.Transaction.Data;
 
 namespace ClayFinancial.Models.Transaction
 {
@@ -89,27 +90,34 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Department>)myCache.GetItem("departments_dict");
     }
 
-    public Data.TransactionData ValidateTransactionData(Data.TransactionData transactionData)
+    public bool ValidateTransactionData(TransactionData transactionData)
     {
+      if(transactionData.department_control_data.Count() == 0 && controls_dict.Count() == 0)
+      { return true; }
       // We treat the Data.TransactionData class as a department class because it has all of the
       // departmental data we'll need to validate
 
       // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
       // data to be saved
 
-      if (!is_active)
+
+
+      if (!GetCachedDict()[transactionData.department_id].is_active)
       {
         transactionData.error_text = "Department is no longer active.";
-        return transactionData;
+        return false;
       }
 
       // let's make sure the department controls are valid
-      if (!ValidateDepartmentControls(transactionData)) return transactionData;
+      if (!ValidateDepartmentControls(transactionData))
+      {
+        transactionData.error_text = "There was an issue validating some of the data";
+        return false;
+      }
+
+      return true;
 
       // if (!ValidatePaymentTypes(transactionData)) return transactionData;
-
-
-      return transactionData;
     }
 
     private bool ValidateDepartmentControls(Data.TransactionData transactionData)

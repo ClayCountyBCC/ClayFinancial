@@ -26,29 +26,34 @@ namespace ClayFinancial.Controllers.API
 
     [HttpPost]
     [Route("Save")]
-    public IHttpActionResult SaveTransaction(TransactionData transaction)
+
+    // THIS SIGNATURE IS NOW UNNECESSARY AS THE List<long> transaction_ids IS NOW PART OF THE OBJECT
+    //public IHttpActionResult SaveTransaction(TransactionData transaction, List<long> transaction_ids = null)
+    public IHttpActionResult SaveTransaction(TransactionData transactionData)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+
 
       if(ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
       }
-      transaction.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-      transaction.SetUserProperties(ua);
+      transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      transactionData.SetUserProperties(ua);
 
-      if (!transaction.ValidateNewReceipt())
+      if (!transactionData.ValidateTransaction())
       {
-        transaction.error_text = "There was an issue with some of the data";
-        return Ok(transaction);
+        transactionData.error_text = "There was an issue with some of the data";
+        return Ok(transactionData);
       }
 
       // TODO: new receipt needs to be a TransactionView
-      var newReceipt = transaction.SaveNewReceipt(); 
+      var td = transactionData.SaveTransactionData(); 
       
-      if(newReceipt != null)
+      if(td != null)
       {
-        return Ok(newReceipt);
+        return Ok(td);
       }
 
       return InternalServerError();

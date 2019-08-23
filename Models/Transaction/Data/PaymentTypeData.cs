@@ -19,10 +19,45 @@ namespace ClayFinancial.Models.Transaction.Data
     public List<PaymentMethodData> payment_method_data { get; set; }
     public string error_text { get; set; } = "";
     public bool added_after_save { get; set; } = false;
+    public DateTime added_on { get; set; } = DateTime.MinValue;
+    public string added_by { get; set; } = "";
 
-    public PaymentTypeData Get()
+    public static List<PaymentTypeData> Get(long transaction_id)
     {
-      return new PaymentTypeData();
+      var param = new DynamicParameters();
+
+      param.Add("@transaction_id", transaction_id);
+      var query = @"
+      
+        SELECT
+          PT.transaction_payment_type_id,
+          PT.transaction_id,
+          PT.payment_type_id,
+          PT.payment_type_index,
+          PT.added_after_save,
+          CPT.added_on,
+          CPT.added_by
+        FROM  ClayFinancial.dbo.data_payment_type PT
+        LEFT OUTER JOIN ClayFinancial.dbo.data_changes_payment_type CPT 
+          ON CPT.transaction_payment_type_id = PT.transaction_payment_type_id
+        WHERE 
+          transaction_id = @transaction_id
+      
+      ";
+
+      var pt = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
+
+      foreach(var type in pt)
+      {
+
+        type.control_data = ControlData.Get(transaction_id, type.transaction_payment_type_id);
+
+        type.payment_method_data = PaymentMethodData.Get(transaction_id, type.transaction_payment_type_id);
+
+      }
+
+
+      return pt;
     }
 
 
@@ -32,6 +67,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public static DataTable GetPaymentTypeDataTable()
     {
       var dt = CreatePaymentTypeDataTable();
+
+
 
       return dt;
     }

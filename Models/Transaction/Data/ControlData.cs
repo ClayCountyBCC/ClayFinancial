@@ -29,10 +29,35 @@ namespace ClayFinancial.Models.Transaction.Data
       
     }
 
-    public ControlData Get()
+    public static List<ControlData> Get(long transaction_id, long? transaction_payment_type_id = null)
     {
+      var param = new DynamicParameters();
+      param.Add("@transaction_id", transaction_id);
 
-      return new ControlData();
+      var query = @"
+      
+      
+        SELECT * FROM data_control
+        where
+          transaction_id = @transaction_id
+
+      
+      ";
+
+      if (transaction_payment_type_id is null)
+      {
+        query += "  AND department_id IS NOT NULL";
+      }
+      else 
+      {
+        param.Add("@transaction_payment_type_id", transaction_payment_type_id);
+        query += "  AND transaction_payment_type_id = @transaction_payment_type_id";
+      }
+
+      var c_data = Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+      return c_data;
+
+
     }
 
     //public ControlData Validate(List<ControlData> control_data_list)
