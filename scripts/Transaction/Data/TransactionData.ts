@@ -3,7 +3,7 @@
   interface ITransactionData
   {
     transaction_id: number;
-    parent_transaction_id: number;
+    child_transaction_id: number;
     department_id: number;
     fiscal_year: number;
     created_by_employee_id: number;
@@ -24,7 +24,8 @@
     public created_by_employee_id: number = -1;
     public employee_transaction_count: number = -1;
     public transaction_number: string = "";
-    public parent_transaction_id: number = -1;
+    public transaction_type: string = "";
+    public child_transaction_id: number = -1;
     public department_id: number = -1;
     public department_control_data: Array<ControlData> = [];
     public payment_type_data: Array<PaymentTypeData> = [];
@@ -44,8 +45,9 @@
     public selected_department: Department = null;
     private next_payment_type_index: number = 0;
 
-    constructor()
+    constructor(transaction_type: string)
     {
+      this.transaction_type = transaction_type;
       let targetContainer = document.getElementById(this.base_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer);
@@ -167,8 +169,7 @@
       this.received_from_element.oninput = (event: Event) =>
       {
         let e = (<HTMLInputElement>event.target);
-        e.value = e.value.trim();
-        this.received_from = e.value;
+        this.received_from = e.value.trim();
         this.IsValid();
       }
       this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");

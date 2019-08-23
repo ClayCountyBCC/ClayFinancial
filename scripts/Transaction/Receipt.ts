@@ -26,12 +26,12 @@
       this.received_from_element = <HTMLInputElement>document.getElementById("receipt_received_from");
       this.receipt_department_element = <HTMLInputElement>document.getElementById("receipt_department");
 
-      this.currentTransaction = new Transaction.Data.TransactionData();
+      this.currentTransaction = new Transaction.Data.TransactionData("R");
 
     }
 
 
-    public ShowReceiptPreview()
+    public ShowReceiptPreview():void
     {
       let t = this.currentTransaction;
       Utilities.Hide(this.currentTransaction.base_container);
@@ -42,6 +42,11 @@
       Utilities.Set_Text(this.county_manager_element, "PREVIEW");
       Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
       Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
+    }
+
+    private CreatePaymentTypeDisplay():void
+    {
+
     }
 
   }

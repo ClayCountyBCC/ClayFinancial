@@ -19,7 +19,7 @@ var Transaction;
             this.created_on_element = document.getElementById("receipt_view_date");
             this.received_from_element = document.getElementById("receipt_received_from");
             this.receipt_department_element = document.getElementById("receipt_department");
-            this.currentTransaction = new Transaction.Data.TransactionData();
+            this.currentTransaction = new Transaction.Data.TransactionData("R");
         }
         ShowReceiptPreview() {
             let t = this.currentTransaction;
@@ -31,6 +31,8 @@ var Transaction;
             Utilities.Set_Text(this.county_manager_element, "PREVIEW");
             Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
             Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
+        }
+        CreatePaymentTypeDisplay() {
         }
     }
     Transaction.Receipt = Receipt;
