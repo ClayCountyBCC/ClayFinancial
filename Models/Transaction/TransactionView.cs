@@ -20,7 +20,7 @@ namespace ClayFinancial.Models.Transaction
     public decimal total_cash { get; set; }
     public decimal total_checks { get; set; }
     public int number_of_checks { get; set; }
-    private string transaction_type { get; set; }
+    public string transaction_type { get; set; }
     public TransactionView() { }  
 
     public static List<TransactionView> GetListOfTransactionView(long transaction_id = -1)
@@ -80,6 +80,7 @@ namespace ClayFinancial.Models.Transaction
         ,T.created_by_display_name
         ,T.created_on
         ,T.department_id
+        ,T.transaction_type
         ,D.name department_name
         ,CASE WHEN TWC.transaction_id IS NULL THEN 0 ELSE 1 END has_been_modified
         ,PMS.total_cash

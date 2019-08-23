@@ -203,6 +203,7 @@
         if (this.ValidateTransaction())
         {
           Transaction.currentReceipt.ShowReceiptPreview();
+          Utilities.Toggle_Loading_Button(button, false);
         }
         else
         {
