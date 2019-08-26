@@ -33,7 +33,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; }
     public List<TransactionView> deposit_receipts { get; set; }
-    private bool has_error { get; set; } = false;
+    public bool has_error { get; set; } = false;
 
     public TransactionData()
     {
@@ -63,28 +63,6 @@ namespace ClayFinancial.Models.Transaction.Data
       }
 
       return true;
-    }
-
-    public TransactionData SaveTransactionData()
-    {
-
-      switch (transaction_type)
-      {
-
-        case 'R':
-          if (!SaveNewReceipt()) return this;
-          break;
-        case 'D':
-          if (!SaveNewDeposit()) return this;
-          break;
-
-        default:
-          error_text = "Unknown transaction type.";
-          return this;
-      }
-
-      return GetTransactionData(transaction_id);
-
     }
     private bool ValidateNewReceipt()
     {
@@ -169,6 +147,28 @@ namespace ClayFinancial.Models.Transaction.Data
       has_error = hasError;
     }
 
+
+    public TransactionData SaveTransactionData()
+    {
+
+      switch (transaction_type)
+      {
+
+        case 'R':
+          if (!SaveNewReceipt()) return this;
+          break;
+        case 'D':
+          if (!SaveNewDeposit()) return this;
+          break;
+
+        default:
+          error_text = "Unknown transaction type.";
+          return this;
+      }
+
+      return GetTransactionData(transaction_id);
+
+    }
     private bool SaveNewDeposit()
     {
       return true;  
@@ -192,6 +192,7 @@ namespace ClayFinancial.Models.Transaction.Data
           USE ClayFinancial;
 
               -- SAVE TRANSACTION DATA
+              -- if
               EXEC ClayFinancial.dbo.insert_new_transaction_data 
                       @transaction_id OUTPUT, 
                       @department_id, 
