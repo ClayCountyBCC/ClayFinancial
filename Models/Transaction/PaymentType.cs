@@ -13,7 +13,7 @@ namespace ClayFinancial.Models.Transaction
     public string name { get; set; }
     public bool is_active { get; set; }
     public List<Control> controls { get; set; } = new List<Control>();
-    public List<PaymentMethod> payment_methods { get; set; }
+    //public List<PaymentMethodData> payment_methods { get; set; }
     public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
     public string added_by { get; set; } = "";
     public DateTime added_on { get; set; } = DateTime.MinValue;

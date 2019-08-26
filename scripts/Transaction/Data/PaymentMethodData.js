@@ -10,6 +10,7 @@ var Transaction;
                 this.transaction_id = -1;
                 this.cash_amount = 0;
                 this.check_amount = 0;
+                this.check_count = 0;
                 this.check_number = "";
                 this.check_from = "";
                 this.paying_for = "";
@@ -26,6 +27,8 @@ var Transaction;
                 this.cash_amount_input_element_container = null;
                 this.check_amount_input_element = null;
                 this.check_amount_input_element_container = null;
+                this.check_count_input_element = null;
+                this.check_count_input_element_container = null;
                 this.check_number_input_element = null;
                 this.check_number_input_element_container = null;
                 this.paying_for_input_element = null;
@@ -34,6 +37,7 @@ var Transaction;
                 this.check_from_input_element_container = null;
                 this.add_check_button_element = null;
                 this.cancel_check_button_element = null;
+                this.check_buttons_container_element = null;
                 this.payment_method_change = () => { };
                 this.validate_money_regex = "(?=.*?\d)^\$?(([1-9]\d{0,2}(,\d{3})*)|\d+)?(\.\d{1,2})?$";
                 this.control_to_render = null;
@@ -49,32 +53,14 @@ var Transaction;
                 return this.ValidateCheck();
             }
             ValidateCash() {
-                let input = this.cash_amount_input_element;
-                let e = this.ValidateNumericAmount(input);
-                Transaction.ControlGroup.UpdateInputError(this.cash_amount_input_element, this.cash_amount_input_element_container, e);
-                return e.length === 0;
-            }
-            ValidateNumericAmount(input) {
-                if (input.value.length === 0) {
-                    return "You must enter a number. (No commas or $ allowed).";
-                }
-                if (input.valueAsNumber === NaN) {
-                    return "Please enter Numbers and Decimal points only.";
-                }
-                if (input.valueAsNumber < 0) {
-                    return "Negative numbers are not allowed.";
-                }
-                let i = input.value.split(".");
-                if (i.length === 2) {
-                    if (i[1].length > 2) {
-                        return "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
-                    }
-                }
-                return "";
+                return Transaction.ControlGroup.ValidateMoney(this.cash_amount_input_element, this.cash_amount_input_element_container);
             }
             ValidateCheck() {
                 let is_valid = true;
                 let v = this.ValidateCheckAmount();
+                if (!v && is_valid)
+                    is_valid = v;
+                v = this.ValidateCheckCount();
                 if (!v && is_valid)
                     is_valid = v;
                 v = this.ValidateCheckNumber();
@@ -89,10 +75,10 @@ var Transaction;
                 return is_valid;
             }
             ValidateCheckAmount() {
-                let input = this.check_amount_input_element;
-                let e = this.ValidateNumericAmount(input);
-                Transaction.ControlGroup.UpdateInputError(this.check_amount_input_element, this.check_amount_input_element_container, e);
-                return e.length === 0;
+                return Transaction.ControlGroup.ValidateMoney(this.check_amount_input_element, this.check_amount_input_element_container);
+            }
+            ValidateCheckCount() {
+                return Transaction.ControlGroup.ValidateCount(this.check_count_input_element, this.check_count_input_element_container);
             }
             ValidateCheckNumber() {
                 let input = this.check_number_input_element;
@@ -100,8 +86,8 @@ var Transaction;
                 if (input.value.length > 0 && this.check_amount === 0) {
                     e = "This field should only be used if a check is entered.";
                 }
-                if (input.value.length === 0 && this.check_amount > 0) {
-                    e = "A check number is required when you enter a check amount.";
+                if (input.value.length === 0 && this.check_amount > 0 && this.check_count === 1) {
+                    e = "A check number is required when you enter a check amount and set the check count to 1 check.";
                 }
                 if (input.value.length > 50) {
                     e = "The check number can be at most 50 characters long.";
@@ -113,7 +99,7 @@ var Transaction;
                 let input = this.paying_for_input_element;
                 let e = "";
                 if (input.value.length > 0 && this.check_amount === 0) {
-                    e = "This field should only be used if a check is entered.";
+                    e = "This field should only be used if a check amount is entered.";
                 }
                 if (input.value.length > 500) {
                     e = "This field can be at most 500 characters long.";
@@ -125,10 +111,10 @@ var Transaction;
                 let input = this.check_from_input_element;
                 let e = "";
                 if (input.value.length > 0 && this.check_amount === 0) {
-                    e = "This field should only be used if a check is entered.";
+                    e = "This field should only be used if a check amount is entered.";
                 }
-                if (input.value.length === 0 && this.check_amount > 0) {
-                    e = "This field is required if you enter a check amount.";
+                if (input.value.length === 0 && this.check_amount > 0 && this.check_count === 1) {
+                    e = "This field is required if you enter a check amount and set the check count to 1 check.";
                 }
                 if (input.value.length > 500) {
                     e = "This field can be at most 500 characters long.";
@@ -154,11 +140,46 @@ var Transaction;
             RenderCheckControls() {
                 let columns = document.createElement("div");
                 columns.classList.add("columns", "is-multiline", "check");
-                this.check_amount_input_element = Transaction.ControlGroup.CreateInput("number", 15, true, "0");
+                this.check_amount_input_element = Transaction.ControlGroup.CreateInput("number", 15, false, "0");
                 this.check_amount_input_element.oninput = (event) => {
                     this.check_amount = 0;
                     if (this.ValidateCheckAmount()) {
                         this.check_amount = this.check_amount_input_element.valueAsNumber;
+                        if (this.check_amount > 0) {
+                            Utilities.Show_Flex(this.check_buttons_container_element);
+                            this.check_count_input_element.required = true;
+                        }
+                        else {
+                            Utilities.Hide(this.check_buttons_container_element);
+                            this.check_count_input_element.required = false;
+                        }
+                    }
+                    this.payment_method_change();
+                };
+                this.check_count_input_element = Transaction.ControlGroup.CreateInput("number", 5, false, "# of Checks");
+                this.check_count_input_element.step = "1";
+                this.check_count_input_element.min = "0";
+                this.check_count_input_element.oninput = (event) => {
+                    if (this.ValidateCheckCount()) {
+                        this.check_count = event.target.valueAsNumber;
+                        if (this.check_amount > 0) {
+                            switch (this.check_count) {
+                                case 0:
+                                    Transaction.ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Partial Check");
+                                    break;
+                                case 1:
+                                    Transaction.ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Single Check");
+                                    break;
+                                default:
+                                    Transaction.ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Bulk Check");
+                            }
+                        }
+                        else {
+                            Transaction.ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "");
+                        }
+                    }
+                    else {
+                        Transaction.ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "");
                     }
                     this.payment_method_change();
                 };
@@ -185,6 +206,8 @@ var Transaction;
                 this.add_check_button_element.appendChild(document.createTextNode("Add Another Check"));
                 this.check_amount_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_amount_input_element, "Check Amount", true, "is-one-quarter");
                 columns.appendChild(this.check_amount_input_element_container);
+                this.check_count_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_count_input_element, "# of Checks", true, "is-2", true);
+                columns.appendChild(this.check_count_input_element_container);
                 this.check_number_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_number_input_element, "Check Number", true, "is-one-quarter");
                 columns.appendChild(this.check_number_input_element_container);
                 if (this.show_cancel) {
@@ -194,11 +217,13 @@ var Transaction;
                     this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
                     buttons.push(this.add_check_button_element);
                     buttons.push(this.cancel_check_button_element);
-                    columns.appendChild(Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-half"));
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-half");
                 }
                 else {
-                    columns.appendChild(Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-half"));
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-half");
+                    this.check_buttons_container_element.classList.add("hide");
                 }
+                columns.appendChild(this.check_buttons_container_element);
                 this.paying_for_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half");
                 columns.appendChild(this.paying_for_input_element_container);
                 this.check_from_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_from_input_element, "Check From", true, "is-half");

@@ -130,9 +130,7 @@ var Transaction;
                 for (let pmt of this.payment_method_data) {
                     cash += pmt.cash_amount;
                     checks += pmt.check_amount;
-                    if (pmt.check_amount > 0) {
-                        number_checks += 1;
-                    }
+                    number_checks += pmt.check_count;
                 }
                 this.total_cash_element.innerHTML = Utilities.Format_Amount(cash);
                 this.total_checks_element.innerHTML = Utilities.Format_Amount(checks);

@@ -42,6 +42,7 @@
     private received_from_element_container: HTMLElement = null;
     private department_controls_target: string = 'department_controls_container';
     private payment_type_target: string = 'payment_type_container';
+    private transaction_error_element: HTMLElement = null;
     public selected_department: Department = null;
     private next_payment_type_index: number = 0;
 
@@ -58,6 +59,14 @@
       this.department_element = <HTMLSelectElement>Transaction.DepartmentControl.cloneNode(true);
       this.RenderDepartmentSelection(control_container);
       this.RenderReceivedFromInput(control_container);
+      this.transaction_error_element = this.CreateTransactionErrorElement();
+      targetContainer.appendChild(this.transaction_error_element);
+    }
+
+    private CreateTransactionErrorElement(): HTMLElement
+    {
+      let e = document.createElement("div");      
+      return e;
     }
 
     private CreateReceiptTitle(target:HTMLElement)
@@ -231,12 +240,36 @@
         if (!v && is_valid) is_valid = false;
       }
 
+      if (is_valid)
+      {
+        if (!this.ValidateCheckCount())
+        {
+          Utilities.Error_Show(this.transaction_error_element, "You have entered a check amount but have entered that you have collected no checks.");
+          this.transaction_error_element.parentElement.scrollIntoView();
+          is_valid = false;
+        }
+      }
 
       return is_valid;
     }
 
+    private ValidateCheckCount(): boolean
+    {
+      let check_amount: number = 0;
+      for (let pt of this.payment_type_data)
+      {
+        for (let pmd of pt.payment_method_data)
+        {
+          if (pmd.check_count > 0) return true;
+          check_amount += pmd.check_amount;
+        }
+      }
+      return check_amount === 0;
+    }
+
     private IsValid(): boolean
     {
+      Transaction.error_scrolled = false;
       this.ResetErrorElements();
 
       let is_valid = true;
@@ -256,6 +289,7 @@
 
     private ResetErrorElements()
     {
+      Utilities.Clear_Element(this.transaction_error_element);
       ControlGroup.UpdateSelectError(this.department_element_container, "");
       ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
     }

@@ -1,5 +1,6 @@
 ﻿namespace Transaction
 {
+  export let error_scrolled: boolean = false;
   export let departments: Array<Department> = [];
   export let currentReceipt: Receipt = null;
   //export let currentTransactionData: Transaction.Data.TransactionData = null;

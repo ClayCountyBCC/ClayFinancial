@@ -70,37 +70,48 @@
 
       let check_total = 0;
       let cash_total = 0;
+      let check_count = 0;
       for (let ptd of this.currentTransaction.payment_type_data)
       {
         let current_check_total = 0;
         let current_cash_total = 0;
+        let current_check_count = 0;
         for (let pmd of ptd.payment_method_data)
         {
           current_cash_total += pmd.cash_amount;
           current_check_total += pmd.check_amount;
+          current_check_count += pmd.check_count;
         }
         this.receipt_view_contents_element.appendChild(
           this.CreatePaymentTypeRow(
             ptd.selected_payment_type.name,
             current_cash_total,
-            current_check_total));
+            current_check_total,
+            current_check_count));
 
         check_total += current_check_total;
         cash_total += current_cash_total;
+        check_count += current_check_count;
       }
       this.receipt_view_totals_element.appendChild(
         this.CreatePaymentTypeRow(
           "Grand Total",
           cash_total,
-          check_total));      
+          check_total,
+          check_count));
     }
 
-    private CreatePaymentTypeRow(payment_type: string, cash_amount: number, check_amount: number): HTMLTableRowElement
+    private CreatePaymentTypeRow(
+      payment_type: string,
+      cash_amount: number,
+      check_amount: number,
+      check_count: number): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
       tr.appendChild(this.CreateTableCell(payment_type, "has-text-left"));
-      tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount), "has-text-right"));
+      tr.appendChild(this.CreateTableCell(check_count.toString(), "has-text-right"));
       tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(check_amount), "has-text-right"));
+      tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount), "has-text-right"));
       tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
       return tr;
     }

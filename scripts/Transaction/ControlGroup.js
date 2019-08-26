@@ -18,7 +18,7 @@ var Transaction;
         static CreateInputFieldContainerByControl(control, input, add_column = false, class_to_add = "") {
             return this.CreateInputFieldContainer(input, control.label, add_column, control.render_hints);
         }
-        static CreateInputFieldContainer(input, field_label, add_column = false, class_to_add = "") {
+        static CreateInputFieldContainer(input, field_label, add_column = false, class_to_add = "", guide_message_capable = false) {
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
@@ -34,6 +34,11 @@ var Transaction;
             control_element.classList.add("control");
             control_element.appendChild(input);
             field.appendChild(control_element);
+            if (guide_message_capable) {
+                let guide_element = document.createElement("p");
+                guide_element.classList.add("help", "guide");
+                field.appendChild(guide_element);
+            }
             let error_element = document.createElement("p");
             error_element.classList.add("help", "is-danger");
             field.appendChild(error_element);
@@ -109,18 +114,6 @@ var Transaction;
             field.appendChild(error_element);
             return field;
         }
-        static GetPercent(render_hints) {
-            if (render_hints.includes("short")) {
-                return 33;
-            }
-            if (render_hints.includes("medium")) {
-                return 50;
-            }
-            return 100;
-            //if (render_hints.includes("long"))
-            //{
-            //}
-        }
         CreateControlData(target_container) {
             let control_data = [];
             let group_element = document.createElement("div");
@@ -148,7 +141,7 @@ var Transaction;
             return input;
         }
         static UpdateSelectError(container, error_text = "") {
-            let error_element = container.querySelector("p.help");
+            let error_element = container.querySelector("p.help.is-danger");
             let select_element = container.querySelector("div.select");
             if (error_text.length === 0) {
                 Utilities.Clear_Element(error_element);
@@ -157,10 +150,14 @@ var Transaction;
             else {
                 Utilities.Simple_Error_Show(error_element, error_text);
                 select_element.classList.add("is-danger");
+                if (!Transaction.error_scrolled) {
+                    Transaction.error_scrolled = true;
+                    container.scrollIntoView(true);
+                }
             }
         }
         static UpdateInputError(input, container, error_text = "") {
-            let error_element = container.querySelector("p.help");
+            let error_element = container.querySelector("p.help.is-danger");
             if (error_text.length === 0) {
                 Utilities.Clear_Element(error_element);
                 input.classList.remove("is-danger");
@@ -168,7 +165,95 @@ var Transaction;
             else {
                 Utilities.Simple_Error_Show(error_element, error_text);
                 input.classList.add("is-danger");
+                if (!Transaction.error_scrolled) {
+                    Transaction.error_scrolled = true;
+                    container.scrollIntoView(true);
+                }
             }
+        }
+        static UpdateInputGuide(container, guide_text = "") {
+            let guide_element = container.querySelector("p.help.guide");
+            if (guide_element === null) {
+                console.log('UpdateInputGuide called, no guide elements found', container, guide_text);
+                return;
+            }
+            Utilities.Set_Text(guide_element, guide_text);
+        }
+        static ValidateDropdown(input, container, valid_values) {
+            let e = "";
+            if (input.value === "-1") {
+                e = "You must choose one of these options.";
+            }
+            if (valid_values.indexOf(input.value) === -1 && e.length === 0) {
+                e = "Please select a valid value.";
+            }
+            ControlGroup.UpdateSelectError(container, e);
+            return e.length === 0;
+        }
+        static ValidateDate(input, container) {
+            let e = "";
+            //let input = <HTMLInputElement>this.input_element;
+            if (input.valueAsDate === null && input.required) {
+                e = "You must selected a date.";
+            }
+            ControlGroup.UpdateInputError(input, container, e);
+            return e.length === 0;
+        }
+        static ValidateText(input, container) {
+            let e = "";
+            if (input.required && input.value.length === 0) {
+                e = "This field is required.";
+            }
+            if (input.maxLength > 0 && input.value.length > input.maxLength && e.length === 0) {
+                e = "You entered " + input.value.length.toString() + " characters but " + input.maxLength.toString() + " is the maximum number of characters allowed.";
+            }
+            ControlGroup.UpdateInputError(input, container, e);
+            return e.length === 0;
+        }
+        static ValidateNumber(input, container) {
+            let e = "";
+            if (input.value.length === 0) {
+                e = "You must enter a number. (No commas or $ allowed).";
+            }
+            if (input.valueAsNumber === NaN && e.length === 0) {
+                e = "Please enter Numbers and Decimal points only.";
+            }
+            ControlGroup.UpdateInputError(input, container, e);
+            return e.length === 0;
+        }
+        static ValidateCount(input, container) {
+            let e = "";
+            if (input.value.length === 0 && input.required) {
+                e = "You must enter a number. (No commas, decimal points, or $ allowed).";
+            }
+            if (input.valueAsNumber === NaN && e.length === 0) {
+                e = "Please enter Numbers only.";
+            }
+            if (input.valueAsNumber < 0) {
+                e = "This value must be 0 or greater.";
+            }
+            ControlGroup.UpdateInputError(input, container, e);
+            return e.length === 0;
+        }
+        static ValidateMoney(input, container) {
+            let e = "";
+            if (input.value.length === 0) {
+                e = "You must enter a number. (No commas or $ allowed).";
+            }
+            if (input.valueAsNumber === NaN && e.length === 0) {
+                e = "Please enter Numbers and Decimal points only.";
+            }
+            if (input.valueAsNumber < 0 && e.length === 0) {
+                e = "Negative numbers are not allowed.";
+            }
+            let i = input.value.split(".");
+            if (i.length === 2 && e.length === 0) {
+                if (i[1].length > 2) {
+                    e = "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
+                }
+            }
+            ControlGroup.UpdateInputError(input, container, e);
+            return e.length === 0;
         }
     }
     Transaction.ControlGroup = ControlGroup;

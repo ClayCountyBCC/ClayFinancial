@@ -49,43 +49,32 @@
       this.input_element.oninput = (event: Event) =>
       {
         let input = (<HTMLInputElement>event.target);
-        switch (control.data_type)
+        if (this.Validate())
         {
-          case "date":
-            if (this.ValidateDate())
-            {
+          switch (control.data_type)
+          {
+            case "date":
               this.value = Utilities.Format_Date(input.valueAsDate);
-            }
+              break;
 
-            break;
-
-          case "number":
-            if (this.ValidateNumber())
-            {
+            case "number":
               this.value = input.valueAsNumber.toString();
-            }
-            break;
+              break;
 
-          case "count":
-            if (this.ValidateCount())
-            {
+            case "count":
               this.value = input.valueAsNumber.toString();
               input.value = input.valueAsNumber.toString();
-              
-            }
-            break;
 
-          case "money":
-            if (this.ValidateMoney())
-            {
+              break;
+
+            case "money":
               this.value = input.valueAsNumber.toString();
-            }
-            break;
+              break;
 
-          default:
-            this.value = input.value;
-            break;
-
+            default: // "bigtext", "text", "dropdown"
+              this.value = input.value;
+              break;
+          }
         }
 
       }
@@ -131,128 +120,138 @@
 
     private ValidateDropdown(): boolean
     {
-      ControlGroup.UpdateSelectError(this.container_element, "");
-      if (this.value === "-1")
-      {
-        ControlGroup.UpdateSelectError(this.container_element, "You must choose one of these options.");
-        return false;
-      }
-      if (this.control.valid_values.indexOf(this.value) === -1)
-      {
-        ControlGroup.UpdateSelectError(this.container_element, "Please select a valid value.");
-        return false;
-      }
-      return true;
+      return ControlGroup.ValidateDropdown(
+        <HTMLSelectElement>this.input_element,
+        this.container_element,
+        this.control.valid_values);
+      //ControlGroup.UpdateSelectError(this.container_element, "");
+      //if (this.value === "-1")
+      //{
+      //  ControlGroup.UpdateSelectError(this.container_element, "You must choose one of these options.");
+      //  return false;
+      //}
+      //if (this.control.valid_values.indexOf(this.value) === -1)
+      //{
+      //  ControlGroup.UpdateSelectError(this.container_element, "Please select a valid value.");
+      //  return false;
+      //}
+      //return true;
     }
 
     private ValidateDate(): boolean
     {
-      let e = "";
-      let input = <HTMLInputElement>this.input_element;
-      if (input.valueAsDate === null && this.control.required)
-      {
-        e = "You must selected a date.";
-      }
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
-      return e.length === 0;
+      return ControlGroup.ValidateDate(<HTMLInputElement>this.input_element, this.container_element);
+      //let e = "";
+      //let input = <HTMLInputElement>this.input_element;
+      //if (input.valueAsDate === null && this.control.required)
+      //{
+      //  e = "You must selected a date.";
+      //}
+      //ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+      //return e.length === 0;
     }
 
     private ValidateText(): boolean
     {
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
-      this.value = this.value.trim();
+      return ControlGroup.ValidateText(<HTMLInputElement>this.input_element, this.container_element);
+      //ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
+      //this.value = this.value.trim();
 
-      let c = this.control;
+      //let c = this.control;
 
-      if (c.required && this.value.length === 0)
-      {
-        ControlGroup.UpdateInputError(this.input_element, this.container_element, "This field is required.");
-        return false;
-      }
+      //if (c.required && this.value.length === 0)
+      //{
+      //  ControlGroup.UpdateInputError(this.input_element, this.container_element, "This field is required.");
+      //  return false;
+      //}
 
-      if (c.max_length > 0 && this.value.length > c.max_length)
-      {
-        ControlGroup.UpdateInputError(this.input_element, this.container_element, "You entered " + this.value.length.toString() + " characters but " + c.max_length.toString() + " is the maximum number of characters allowed.");
-        return false;
-      }
-      return true;
+      //if (c.max_length > 0 && this.value.length > c.max_length)
+      //{
+      //  ControlGroup.UpdateInputError(this.input_element, this.container_element, "You entered " + this.value.length.toString() + " characters but " + c.max_length.toString() + " is the maximum number of characters allowed.");
+      //  return false;
+      //}
+      //return true;
 
     }
 
     private ValidateNumber(): boolean
     {
-      let e: string = "";
-      let input = <HTMLInputElement>this.input_element;
+      return ControlGroup.ValidateNumber(<HTMLInputElement>this.input_element, this.container_element);
+      //let e: string = "";
+      //let input = <HTMLInputElement>this.input_element;
 
-      if (input.value.length === 0)
-      {
-        e = "You must enter a number. (No commas or $ allowed).";
-      }
+      //if (input.value.length === 0)
+      //{
+      //  e = "You must enter a number. (No commas or $ allowed).";
+      //}
 
-      if (input.valueAsNumber === NaN && e.length === 0)
-      {
-        e = "Please enter Numbers and Decimal points only.";
-      }
+      //if (input.valueAsNumber === NaN && e.length === 0)
+      //{
+      //  e = "Please enter Numbers and Decimal points only.";
+      //}
 
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+      //ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
 
-      return e.length === 0;
+      //return e.length === 0;
     }
 
     private ValidateCount(): boolean
     {
-      let e: string = "";
-      let input = <HTMLInputElement>this.input_element;
+      return ControlGroup.ValidateCount(<HTMLInputElement>this.input_element, this.container_element);
 
-      if (input.value.length === 0)
-      {
-        e = "You must enter a number. (No commas, decimal points, or $ allowed).";
-      }
+      //let e: string = "";
+      //let input = <HTMLInputElement>this.input_element;
 
-      if (input.valueAsNumber === NaN && e.length === 0)
-      {
-        e = "Please enter Numbers only.";
-      }
-      if (input.valueAsNumber < 0)
-      {
-        e = "This value must be 0 or greater.";
-      }
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+      //if (input.value.length === 0)
+      //{
+      //  e = "You must enter a number. (No commas, decimal points, or $ allowed).";
+      //}
 
-      return e.length === 0;
+      //if (input.valueAsNumber === NaN && e.length === 0)
+      //{
+      //  e = "Please enter Numbers only.";
+      //}
+      //if (input.valueAsNumber < 0)
+      //{
+      //  e = "This value must be 0 or greater.";
+      //}
+      //ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+
+      //return e.length === 0;
     }
 
     private ValidateMoney(): boolean
     {
-      let e: string = "";
-      let input = <HTMLInputElement>this.input_element;
+      return ControlGroup.ValidateMoney(<HTMLInputElement>this.input_element, this.container_element);
+      //let e: string = "";
+      //let input = <HTMLInputElement>this.input_element;
 
-      if (input.value.length === 0)
-      {
-        e = "You must enter a number. (No commas or $ allowed).";
-      }
+      //if (input.value.length === 0)
+      //{
+      //  e = "You must enter a number. (No commas or $ allowed).";
+      //}
 
-      if (input.valueAsNumber === NaN && e.length === 0)
-      {
-        e = "Please enter Numbers and Decimal points only.";
-      }
+      //if (input.valueAsNumber === NaN && e.length === 0)
+      //{
+      //  e = "Please enter Numbers and Decimal points only.";
+      //}
 
-      if (input.valueAsNumber < 0 && e.length === 0)
-      {
-        e = "Negative numbers are not allowed.";
-      }
+      //if (input.valueAsNumber < 0 && e.length === 0)
+      //{
+      //  e = "Negative numbers are not allowed.";
+      //}
 
-      let i = input.value.split(".");
-      if (i.length === 2 && e.length === 0)
-      {
-        if (i[1].length > 2)
-        {
-          e = "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
-        }
-      }
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+      //let i = input.value.split(".");
+      //if (i.length === 2 && e.length === 0)
+      //{
+      //  if (i[1].length > 2)
+      //  {
+      //    e = "Too many digits after the decimal place. Amounts are limited to 2 digits after the decimal place.";
+      //  }
+      //}
+      //ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
 
-      return e.length === 0;
+      //return e.length === 0;
     }
   }
 }
