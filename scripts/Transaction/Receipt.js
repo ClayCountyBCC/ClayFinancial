@@ -11,6 +11,11 @@ var Transaction;
             this.created_on_element = null;
             this.received_from_element = null;
             this.receipt_department_element = null;
+            this.receipt_view_contents_element = null;
+            this.receipt_view_totals_element = null;
+            this.receipt_preview_controls_element = null;
+            this.receipt_preview_cancel_button_element = null;
+            this.receipt_preview_save_button_element = null;
             console.log('New Receipt', Transaction.departments);
             this.view_container = document.getElementById("receipt_view");
             this.receipt_number_element = document.getElementById("receipt_view_number");
@@ -19,18 +24,64 @@ var Transaction;
             this.created_on_element = document.getElementById("receipt_view_date");
             this.received_from_element = document.getElementById("receipt_received_from");
             this.receipt_department_element = document.getElementById("receipt_department");
-            this.currentTransaction = new Transaction.Data.TransactionData();
+            this.receipt_view_contents_element = document.getElementById("receipt_view_contents");
+            this.receipt_view_totals_element = document.getElementById("receipt_view_totals");
+            this.currentTransaction = new Transaction.Data.TransactionData("R");
+            this.receipt_preview_controls_element = document.getElementById("receipt_preview_controls");
+            this.receipt_preview_cancel_button_element = document.getElementById("receipt_view_cancel");
+            this.receipt_preview_save_button_element = document.getElementById("receipt_view_save");
+            this.receipt_preview_cancel_button_element.onclick = (event) => {
+                Utilities.Hide(this.view_container);
+                Utilities.Show(this.currentTransaction.base_container);
+            };
+            this.receipt_preview_save_button_element.onclick = (event) => {
+                this.currentTransaction.SaveTransactionData();
+            };
         }
         ShowReceiptPreview() {
             let t = this.currentTransaction;
             Utilities.Hide(this.currentTransaction.base_container);
             Utilities.Show(this.view_container);
             Utilities.Set_Text(this.created_on_element, Utilities.Format_Date(new Date()));
-            Utilities.Set_Text(this.receipt_number_element, "PREVIEW");
-            Utilities.Set_Text(this.created_by_element, "PREVIEW");
-            Utilities.Set_Text(this.county_manager_element, "PREVIEW");
+            //Utilities.Set_Text(this.receipt_number_element, "PREVIEW");
+            //Utilities.Set_Text(this.created_by_element, "PREVIEW");
+            //Utilities.Set_Text(this.county_manager_element, "PREVIEW");
             Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
             Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
+            this.CreatePaymentTypeDisplay();
+            Utilities.Show(this.receipt_preview_controls_element);
+        }
+        CreatePaymentTypeDisplay() {
+            Utilities.Clear_Element(this.receipt_view_contents_element);
+            Utilities.Clear_Element(this.receipt_view_totals_element);
+            let check_total = 0;
+            let cash_total = 0;
+            for (let ptd of this.currentTransaction.payment_type_data) {
+                let current_check_total = 0;
+                let current_cash_total = 0;
+                for (let pmd of ptd.payment_method_data) {
+                    current_cash_total += pmd.cash_amount;
+                    current_check_total += pmd.check_amount;
+                }
+                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeRow(ptd.selected_payment_type.name, current_cash_total, current_check_total));
+                check_total += current_check_total;
+                cash_total += current_cash_total;
+            }
+            this.receipt_view_totals_element.appendChild(this.CreatePaymentTypeRow("Grand Total", cash_total, check_total));
+        }
+        CreatePaymentTypeRow(payment_type, cash_amount, check_amount) {
+            let tr = document.createElement("tr");
+            tr.appendChild(this.CreateTableCell(payment_type, "has-text-left"));
+            tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount), "has-text-right"));
+            tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(check_amount), "has-text-right"));
+            tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
+            return tr;
+        }
+        CreateTableCell(value, class_to_add) {
+            let td = document.createElement("td");
+            td.appendChild(document.createTextNode(value));
+            td.classList.add(class_to_add);
+            return td;
         }
     }
     Transaction.Receipt = Receipt;

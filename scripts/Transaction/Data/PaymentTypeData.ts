@@ -26,7 +26,7 @@
     //clientside controls
     private payment_type_parent_container: HTMLElement = null;
     public payment_type_container: HTMLElement = null;    
-    private selected_payment_type: PaymentType = null;
+    public selected_payment_type: PaymentType = null;
     public cancel_payment_type_button: HTMLElement = null;
     public add_another_payment_type_button: HTMLElement = null;
     public save_button: HTMLElement = null;

@@ -125,7 +125,7 @@ namespace ClayFinancial.Models.Transaction
       // things to validate here:
       // department controls are all required.
       // every control in controls_dict for this class needs to be present
-      // every control in controls must have a valid value.
+      // every control in controls must have a valid value.      
       var controlids = (from c in transactionData.department_control_data
                         select c.control_id).ToList();
 

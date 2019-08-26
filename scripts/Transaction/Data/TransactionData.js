@@ -3,12 +3,13 @@ var Transaction;
     var Data;
     (function (Data) {
         class TransactionData {
-            constructor() {
+            constructor(transaction_type) {
                 this.transaction_id = -1;
                 this.fiscal_year = -1;
                 this.created_by_employee_id = -1;
                 this.employee_transaction_count = -1;
                 this.transaction_number = "";
+                this.transaction_type = "";
                 this.child_transaction_id = -1;
                 this.department_id = -1;
                 this.department_control_data = [];
@@ -28,6 +29,7 @@ var Transaction;
                 this.payment_type_target = 'payment_type_container';
                 this.selected_department = null;
                 this.next_payment_type_index = 0;
+                this.transaction_type = transaction_type;
                 let targetContainer = document.getElementById(this.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
@@ -121,8 +123,7 @@ var Transaction;
                 this.received_from_element = Transaction.ControlGroup.CreateInput("text", 500, true, "Received From");
                 this.received_from_element.oninput = (event) => {
                     let e = event.target;
-                    e.value = e.value.trim();
-                    this.received_from = e.value;
+                    this.received_from = e.value.trim();
                     this.IsValid();
                 };
                 this.received_from_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
@@ -147,8 +148,7 @@ var Transaction;
                     let button = event.target;
                     Utilities.Toggle_Loading_Button(button, true);
                     if (this.ValidateTransaction()) {
-                        //Transaction.currentReceipt.ShowReceiptPreview();
-                        this.SaveTransactionData();
+                        Transaction.currentReceipt.ShowReceiptPreview();
                     }
                     else {
                         Utilities.Toggle_Loading_Button(button, false);

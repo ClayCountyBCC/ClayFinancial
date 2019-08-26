@@ -126,14 +126,49 @@
     </div>
 
   </div>
-  
-  <table>
 
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th style="width: 55%;">
+        </th>
+        <th class="has-text-right"
+            style="width: 15%;">
+          Cash Collected
+        </th>
+        <th class="has-text-right"
+            style="width: 15%;">
+          Checks Collected
+        </th>
+        <th class="has-text-right"
+            style="width: 15%;">
+          Total
+        </th>
+      </tr>
+    </thead>
     <tbody id="receipt_view_contents">
-
     </tbody>
-  </table> 
+    <tfoot id="receipt_view_totals">
+    </tfoot>
+  </table>
+  <div id="receipt_preview_controls"
+       class="level">
+    <div class="level-left">
 
+    </div>
+    <div class="level-right">
+      <div class="level-item buttons">
+        <button class="button is-warning"
+                id="receipt_view_cancel">
+          Cancel
+        </button>
+        <button class="button is-success"
+                id="receipt_view_save">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
   <div id="receipt_view_footer"
        class="level">
     <div class="level-left">

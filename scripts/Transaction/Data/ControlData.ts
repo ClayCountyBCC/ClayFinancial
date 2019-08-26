@@ -54,8 +54,7 @@
           case "date":
             if (this.ValidateDate())
             {
-              let v = input.valueAsDate;
-              this.value = v !== null ? Utilities.Format_Date(v) : "";
+              this.value = Utilities.Format_Date(input.valueAsDate);
             }
 
             break;
@@ -148,18 +147,18 @@
 
     private ValidateDate(): boolean
     {
-      ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
+      let e = "";
       let input = <HTMLInputElement>this.input_element;
       if (input.valueAsDate === null && this.control.required)
       {
-        ControlGroup.UpdateInputError(this.input_element, this.container_element, "You must selected a date.");
-        return false
+        e = "You must selected a date.";
       }
+      ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+      return e.length === 0;
     }
 
     private ValidateText(): boolean
     {
-      let e = "";
       ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
       this.value = this.value.trim();
 

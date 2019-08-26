@@ -31,8 +31,7 @@ var Transaction;
                     switch (control.data_type) {
                         case "date":
                             if (this.ValidateDate()) {
-                                let v = input.valueAsDate;
-                                this.value = v !== null ? Utilities.Format_Date(v) : "";
+                                this.value = Utilities.Format_Date(input.valueAsDate);
                             }
                             break;
                         case "number":
@@ -95,15 +94,15 @@ var Transaction;
                 return true;
             }
             ValidateDate() {
-                Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
+                let e = "";
                 let input = this.input_element;
                 if (input.valueAsDate === null && this.control.required) {
-                    Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, "You must selected a date.");
-                    return false;
+                    e = "You must selected a date.";
                 }
+                Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, e);
+                return e.length === 0;
             }
             ValidateText() {
-                let e = "";
                 Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, "");
                 this.value = this.value.trim();
                 let c = this.control;
