@@ -101,7 +101,7 @@ namespace ClayFinancial.Models.Transaction
 
       ";
 
-      return Constants.Get_Data<TransactionView>(query, Constants.ConnectionString.ClayFinancial);
+      return Constants.Get_Data<TransactionView>(query, param,Constants.ConnectionString.ClayFinancial);
 
 
     }

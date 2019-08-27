@@ -125,6 +125,38 @@ namespace ClayFinancial.Models.Transaction.Data
 
     }
 
+    public static string GetSaveControlDataQuery()
+  {
+      return @"
+      
+              -- INSERT CONTROL DATA
+              -- OUTER JOIN TO payment_type_data TO GET transaction_payment_type_id FOR payment_type_controls
+              -- department_id WILL BE NULL FOR PAYMENT TYPE CONTROLS. THE VALUE IS NOT SET IN THE APPLICATION.
+              -- THE department_id WILL NOT BE NULL FOR DEPARTMENT CONTROLS. THE VALUE IS SET IN THE APPLICATION.
+              --    THE transaction_payment_type_id WILL BE NULL FOR DEPARTMENT CONTROLS.
+              INSERT INTO data_control
+              (
+                transaction_payment_type_id,
+                department_id,
+                transaction_id,
+                control_id,
+                value
+              )
+              SELECT
+                CASE WHEN PTD.transaction_payment_type_id = -1 THEN NULL ELSE PTD.transaction_payment_type_id END,
+                CASE WHEN CD.department_id = -1 THEN NULL ELSE CD.department_id END,
+                @transaction_id,
+                CD.control_id,
+                CD.value
+              FROM @ControlData CD
+              LEFT OUTER JOIN data_payment_type PTD ON 
+                PTD.transaction_id = @transaction_id AND 
+                PTD.payment_type_id = CD.payment_type_id AND 
+                PTD.payment_type_index = CD.payment_type_index;
+      
+      ";
+  }
+
     //public TransactionData ValidateTransactionData(TransactionData transactionData)
     //{
     //  // We treat the Data.TransactionData class as a department class because it has all of the

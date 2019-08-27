@@ -112,7 +112,7 @@ namespace ClayFinancial.Models.Transaction
     private bool ValidateDropdown(Data.ControlData cd)
     {
       var valid_values = value.Split('|');
-      if (!valid_values.Contains(value))
+      if (!valid_values.Contains(cd.value))
       {
         cd.error_text = "Invalid Value Selected";
         return false;
@@ -122,7 +122,11 @@ namespace ClayFinancial.Models.Transaction
 
     private bool ValidateDecimal(Data.ControlData cd)
     {
-      return decimal.TryParse(cd.value, out _);
+      if (decimal.TryParse(cd.value, out _))
+      {
+        return false;
+      }
+      return true;
     }
 
     private bool ValidateText(Data.ControlData cd)

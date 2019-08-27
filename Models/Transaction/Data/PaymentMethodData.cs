@@ -17,6 +17,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_id { get; set; } = -1;
     public decimal cash_amount { get; set; } = -1;
     public decimal check_amount { get; set; } = -1;
+    public decimal check_count { get; set; } = -1;
     public string check_number { get; set; } = "";
     public string paying_for { get; set; } = "";
     public string check_from { get; set; } = "";
@@ -85,6 +86,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       dt.Columns.Add(new DataColumn("cash_amount", typeof(decimal)));
       dt.Columns.Add(new DataColumn("check_amount", typeof(decimal)));
+      dt.Columns.Add(new DataColumn("check_count", typeof(short)));
       dt.Columns.Add(new DataColumn("check_number", typeof(string)));
       dt.Columns.Add(new DataColumn("check_from", typeof(string)));
       dt.Columns.Add(new DataColumn("paying_for", typeof(string)));
@@ -96,37 +98,43 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool ValidateNew()
     {
-      if (payment_method_data_id == -1 && prior_payment_method_data_id == -1)
+      
+      if (cash_amount < 0)
       {
-
-        if (cash_amount < 0)
-        {
-          error_text = "Cash amount can not be less than zero";
-          return false;
-        }
-
-        if (check_amount > 0 && check_number.Length > 0 && check_number != "bulk")
-        {
-          error_text = "The check number is missing from a check with an amount of " + check_amount.ToString();
-          return false;
-        }
-
-        if (check_number.Length > 0 && check_amount <= 0)
-        {
-          error_text = "The amount for check number " + check_number + " has not been entered";
-          return false;
-        }
-
-        if (check_number.Length > 0 && paying_for.Length == 0)
-        {
-          error_text = "A check must have the 'Paying For' field filled out";
-          return false;
-        }
-
+        error_text = "Cash amount can not be less than zero";
+        return false;
       }
-      else
+
+      if (check_amount > 0)
       {
-        error_text = "There was an issue with this payment method";
+        if (check_count == 1)
+        {
+          if(check_number.Length == 0)
+          {
+            error_text = "The check number is missing";
+            return false;
+          }
+
+        }
+
+
+        if(check_count == 1)
+        {
+          if(check_from.Length == 0)
+          error_text = "Missing data in the check from field";
+        }
+        return false;
+      }
+
+      if (check_number.Length > 0 && check_amount <= 0)
+      {
+        error_text = "No amount was entered for check number " + check_number ;
+        return false;
+      }
+
+      if (check_number.Length > 0 && paying_for.Length == 0)
+      {
+        error_text = "A check must have the 'Paying For' field filled out";
         return false;
       }
 
@@ -150,8 +158,48 @@ namespace ClayFinancial.Models.Transaction.Data
         return false;
       }
 
+      //Need to be able to validate the number of checks has now changed from one person to the next.;
+
       return ValidateNew();
     }
+
+    public static string GetSavePaymentMethodsQuery()
+    {
+
+      return @"
+    
+              -- INSERT data_payment_method
+              -- INNER JOIN TO data_payment_type TO GET transaction_payment_type_id
+              INSERT INTO data_payment_method 
+              (
+                transaction_payment_type_id,
+                transaction_id, 
+                cash_amount, 
+                check_amount,
+                check_count,
+                check_number, 
+                check_from, 
+                paying_for
+              )
+              SELECT
+                PTD.transaction_payment_type_id, 
+                @transaction_id,
+                cash_amount,
+                check_amount,
+                check_count,
+                check_number, 
+                check_from, 
+                paying_for
+              FROM @PaymentMethodData PMD
+              INNER JOIN data_payment_type PTD ON 
+                PTD.transaction_id = @transaction_id AND 
+                PTD.payment_type_id = PMD.payment_type_id AND 
+                PTD.payment_type_index = PMD.payment_type_index;
+                
+                ";
+    }
+
+
   }
 }
  

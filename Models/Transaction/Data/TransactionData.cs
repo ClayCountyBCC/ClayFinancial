@@ -66,13 +66,13 @@ namespace ClayFinancial.Models.Transaction.Data
     }
     private bool ValidateNewReceipt()
     {
-      var department = new Department();
-      
+      Department department = Department.GetCachedDict()[department_id];
+     
       return department.ValidateTransactionData(this);
     }
     private bool ValidateNewDeposit()
     {
-       return false;
+      return false;
     }
 
 
@@ -115,9 +115,9 @@ namespace ClayFinancial.Models.Transaction.Data
 
       ";
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
-      var td = Constants.Get_Data<TransactionData>(query, param,Constants.ConnectionString.ClayFinancial);
+      var td = Constants.Get_Data<TransactionData>(query, param, Constants.ConnectionString.ClayFinancial);
 
-      var tr= td.First();
+      var tr = td.First();
       tr.department_control_data = ControlData.Get(tr.transaction_id, tr.department_id);
       tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id);
 
@@ -171,7 +171,7 @@ namespace ClayFinancial.Models.Transaction.Data
     }
     private bool SaveNewDeposit()
     {
-      return true;  
+      return true;
     }
     private bool SaveNewReceipt()
     {
@@ -188,9 +188,10 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@received_from", received_from);
 
 
+
       var query = @"
           USE ClayFinancial;
-
+          
               -- SAVE TRANSACTION DATA
               -- if
               EXEC ClayFinancial.dbo.insert_new_transaction_data 
@@ -203,82 +204,19 @@ namespace ClayFinancial.Models.Transaction.Data
                       @created_by_employee_ip_address,
                       @created_by_display_name,
                       @received_from
+          ";
 
     
-              -- INSERT PAYMENT TYPE DATA
-              INSERT INTO data_payment_type
-              (
-                transaction_id, 
-                payment_type_id, 
-                payment_type_index
-              )
-              SELECT
-                @transaction_id,
-                payment_type_id,
-                payment_type_index
-              FROM @PaymentTypeData;
-    
-
-              -- INSERT data_payment_method
-              -- INNER JOIN TO data_payment_type TO GET transaction_payment_type_id
-              INSERT INTO data_payment_method 
-              (
-                transaction_payment_type_id,
-                transaction_id, 
-                cash_amount, 
-                check_amount, 
-                check_number, 
-                check_from, 
-                paying_for
-              )
-              SELECT
-                PTD.transaction_payment_type_id, 
-                @transaction_id,
-                cash_amount,
-                check_amount, 
-                check_number, 
-                check_from, 
-                paying_for
-              FROM @PaymentMethodData PMD
-              INNER JOIN data_payment_type PTD ON 
-                PTD.transaction_id = @transaction_id AND 
-                PTD.payment_type_id = PMD.payment_type_id AND 
-                PTD.payment_type_index = PMD.payment_type_index;
-
-
-              -- INSERT CONTROL DATA
-              -- OUTER JOIN TO payment_type_data TO GET transaction_payment_type_id FOR payment_type_controls
-              -- department_id WILL BE NULL FOR PAYMENT TYPE CONTROLS. THE VALUE IS NOT SET IN THE APPLICATION.
-              -- THE department_id WILL NOT BE NULL FOR DEPARTMENT CONTROLS. THE VALUE IS SET IN THE APPLICATION.
-              --    THE transaction_payment_type_id WILL BE NULL FOR DEPARTMENT CONTROLS.
-              INSERT INTO data_control
-              (
-                transaction_payment_type_id,
-                department_id,
-                transaction_id,
-                control_id,
-                value
-              )
-              SELECT
-                CASE WHEN PTD.transaction_payment_type_id = -1 THEN NULL ELSE PTD.transaction_payment_type_id END,
-                CASE WHEN CD.department_id = -1 THEN NULL ELSE CD.department_id END,
-                @transaction_id,
-                CD.control_id,
-                CD.value
-              FROM @ControlData CD
-              LEFT OUTER JOIN data_payment_type PTD ON 
-                PTD.transaction_id = @transaction_id AND 
-                PTD.payment_type_id = CD.payment_type_id AND 
-                PTD.payment_type_index = CD.payment_type_index;
-
-
-        ";
-
+      query += PaymentTypeData.GetSavePaymentTypeDataQuery();
+      query += PaymentMethodData.GetSavePaymentMethodsQuery();
+      query += ControlData.GetSaveControlDataQuery();
 
 
       // CREATE DATA TABLES
-      var controlDataTable = ControlData.GetControlDataTable();
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
+
+      var controlDataTable = ControlData.GetControlDataTable();
+
       var paymentMethodDataTable = PaymentMethodData.GetPaymentMethodDataTable();
 
       try
@@ -356,10 +294,10 @@ namespace ClayFinancial.Models.Transaction.Data
         //}
 
         var tran = Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial);
-        
+
         transaction_id = param.Get<long>("@transaction_id");
 
-        if(transaction_id == -1)
+        if (transaction_id == -1)
         {
           error_text = "There was an issue saving the receipt.";
           return false;

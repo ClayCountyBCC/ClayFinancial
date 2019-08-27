@@ -84,6 +84,7 @@ namespace ClayFinancial.Models
         case "controls":
           return Control.Get();
 
+
         case "departments":
           return Department.Get();
 
@@ -93,6 +94,8 @@ namespace ClayFinancial.Models
         case "payment_types":
           return PaymentType.Get();
 
+
+        
         case "useraccess":
           return UserAccess.GetAllUserAccess();
 

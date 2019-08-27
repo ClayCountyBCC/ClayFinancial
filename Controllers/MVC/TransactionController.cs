@@ -17,7 +17,7 @@ namespace ClayFinancial.Controllers.MVC
       //var tr = TransactionData.GetTransactionData(8);
 
       // test getting list of ALL transactionView
-      var tr = TransactionView.GetListOfTransactionView();
+      //var tr = TransactionView.GetListOfTransactionView();
 
       return View();
     }

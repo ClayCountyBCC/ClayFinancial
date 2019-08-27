@@ -18,7 +18,10 @@ namespace ClayFinancial.Models.Transaction
     public Dictionary<int, PaymentType> payment_types_dict { get; set; } = new Dictionary<int, PaymentType>();
     public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
 
-    public Department() { }
+    public Department() 
+    {
+
+    }
 
     public static List<Department> Get()
     {
@@ -99,7 +102,16 @@ namespace ClayFinancial.Models.Transaction
 
       // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
       // data to be saved
-
+      if(controls_dict.Count() == 0 && transactionData.department_control_data.Count() > 0)
+      {
+        transactionData.error_text = "There was an issue validating the department information";
+        new ErrorLog(
+          "Error: Control dictionary is not being populated.", 
+          "Cannot validate department controls", 
+          "controls_dict.Count(): " + controls_dict.Count().ToString(), 
+          "Transaction.Department.ValidateTransactionData()",
+          "");
+      }
 
 
       if (!GetCachedDict()[transactionData.department_id].is_active)
@@ -126,8 +138,16 @@ namespace ClayFinancial.Models.Transaction
       // department controls are all required.
       // every control in controls_dict for this class needs to be present
       // every control in controls must have a valid value.      
-      var controlids = (from c in transactionData.department_control_data
-                        select c.control_id).ToList();
+
+      Dictionary<int, Control> c = new Dictionary<int, Control>();
+
+      foreach(ControlData control in transactionData.department_control_data)
+      {
+        c[control.control_id] = controls_dict[control.control_id];
+      }
+
+      var controlids = (from cid in transactionData.department_control_data
+                        select cid.control_id).ToList();
 
 
       var distinctControlIds = controlids.Distinct();
@@ -141,7 +161,7 @@ namespace ClayFinancial.Models.Transaction
 
       // if this works, it will mean we won't need the two commented out sections
       // of code.
-      if (!controlids.Equals(controls_dict.Keys))
+      if (!controlids.SequenceEqual(c.Keys))
       {
         transactionData.error_text = "Missing department information";
         return false;
@@ -180,7 +200,7 @@ namespace ClayFinancial.Models.Transaction
       }
       // Validate the payment types
 
-      foreach(Data.PaymentTypeData ptd in transactionData.payment_type_data)
+      foreach(PaymentTypeData ptd in transactionData.payment_type_data)
       {
         if (!payment_types_dict[ptd.payment_type_id].ValidatePaymentType(ptd))
         {
