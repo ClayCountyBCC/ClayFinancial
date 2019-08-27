@@ -28,7 +28,7 @@
   display: inline-flex;
 }
 
-/*@media print
+@media print
 {
   @page
   {
@@ -94,8 +94,5 @@
     break-inside: avoid !important;
   }
 
-  #projects .table tr > th
-  {
-    position: initial;
-  }
-}*/
+  
+}

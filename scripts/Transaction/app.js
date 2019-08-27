@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var Transaction;
 (function (Transaction) {
+    Transaction.error_scrolled = false;
     Transaction.departments = [];
     Transaction.currentReceipt = null;
     //export let currentTransactionData: Transaction.Data.TransactionData = null;

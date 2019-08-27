@@ -27,6 +27,7 @@ var Transaction;
                 this.received_from_element_container = null;
                 this.department_controls_target = 'department_controls_container';
                 this.payment_type_target = 'payment_type_container';
+                this.transaction_error_element = null;
                 this.selected_department = null;
                 this.next_payment_type_index = 0;
                 this.transaction_type = transaction_type;
@@ -40,6 +41,12 @@ var Transaction;
                 this.department_element = Transaction.DepartmentControl.cloneNode(true);
                 this.RenderDepartmentSelection(control_container);
                 this.RenderReceivedFromInput(control_container);
+                this.transaction_error_element = this.CreateTransactionErrorElement();
+                targetContainer.appendChild(this.transaction_error_element);
+            }
+            CreateTransactionErrorElement() {
+                let e = document.createElement("div");
+                return e;
             }
             CreateReceiptTitle(target) {
                 let title = document.createElement("h2");
@@ -169,9 +176,28 @@ var Transaction;
                     if (!v && is_valid)
                         is_valid = false;
                 }
+                if (is_valid) {
+                    if (!this.ValidateCheckCount()) {
+                        Utilities.Error_Show(this.transaction_error_element, "You have entered a check amount but have entered that you have collected no checks.");
+                        this.transaction_error_element.parentElement.scrollIntoView();
+                        is_valid = false;
+                    }
+                }
                 return is_valid;
             }
+            ValidateCheckCount() {
+                let check_amount = 0;
+                for (let pt of this.payment_type_data) {
+                    for (let pmd of pt.payment_method_data) {
+                        if (pmd.check_count > 0)
+                            return true;
+                        check_amount += pmd.check_amount;
+                    }
+                }
+                return check_amount === 0;
+            }
             IsValid() {
+                Transaction.error_scrolled = false;
                 this.ResetErrorElements();
                 let is_valid = true;
                 if (this.department_id === -1) {
@@ -185,6 +211,7 @@ var Transaction;
                 return is_valid;
             }
             ResetErrorElements() {
+                Utilities.Clear_Element(this.transaction_error_element);
                 Transaction.ControlGroup.UpdateSelectError(this.department_element_container, "");
                 Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "");
             }

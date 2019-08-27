@@ -17,7 +17,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_id { get; set; } = -1;
     public decimal cash_amount { get; set; } = -1;
     public decimal check_amount { get; set; } = -1;
-    public decimal check_count { get; set; } = -1;
+    public int check_count { get; set; } = -1;
     public string check_number { get; set; } = "";
     public string paying_for { get; set; } = "";
     public string check_from { get; set; } = "";
