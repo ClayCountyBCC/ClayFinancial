@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using ClayFinancial.Models.Transaction.Data;
 using ClayFinancial.Models.Transaction;
+
 namespace ClayFinancial.Controllers.MVC
 {
   public class TransactionController : Controller
@@ -18,7 +19,7 @@ namespace ClayFinancial.Controllers.MVC
 
       // test getting list of ALL transactionView
       //var tr = TransactionView.GetListOfTransactionView();
-
+      ViewBag.Development = Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
       return View();
     }
   }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Data;
+using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 using ClayFinancial.Models.Transaction;
@@ -188,8 +189,8 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@received_from", received_from);
 
 
-
-      var query = @"
+      StringBuilder query = new StringBuilder();
+      query.Append(@"
           USE ClayFinancial;
           
               -- SAVE TRANSACTION DATA
@@ -203,13 +204,13 @@ namespace ClayFinancial.Models.Transaction.Data
                       @username, 
                       @created_by_employee_ip_address,
                       @created_by_display_name,
-                      @received_from
-          ";
+                      @received_from;
+          ");
 
     
-      query += PaymentTypeData.GetSavePaymentTypeDataQuery();
-      query += PaymentMethodData.GetSavePaymentMethodsQuery();
-      query += ControlData.GetSaveControlDataQuery();
+      query.Append(PaymentTypeData.GetSavePaymentTypeDataQuery());
+      query.Append(PaymentMethodData.GetSavePaymentMethodsQuery());
+      query.Append(ControlData.GetSaveControlDataQuery());
 
 
       // CREATE DATA TABLES
@@ -293,7 +294,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
         //}
 
-        var tran = Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial);
+        var tran = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
         transaction_id = param.Get<long>("@transaction_id");
 
@@ -310,7 +311,7 @@ namespace ClayFinancial.Models.Transaction.Data
       catch (Exception ex)
       {
 
-        new ErrorLog(ex, query);
+        new ErrorLog(ex, query.ToString());
         return false;
 
       }

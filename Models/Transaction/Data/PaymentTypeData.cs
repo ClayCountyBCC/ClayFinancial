@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Data;
+using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 
@@ -112,15 +113,16 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@created_by_display_name", ua.display_name);
 
 
-      var query = @"
-        USE ClayFinancial;
-       
+      StringBuilder query = new StringBuilder();
+      query.Append(@"
+          USE ClayFinancial;
+     
+          ");
 
-          ";
 
-      query += GetSavePaymentTypeDataQuery();
-      query += PaymentMethodData.GetSavePaymentMethodsQuery();
-      query += ControlData.GetSaveControlDataQuery();
+      query.Append(PaymentTypeData.GetSavePaymentTypeDataQuery());
+      query.Append(PaymentMethodData.GetSavePaymentMethodsQuery());
+      query.Append(ControlData.GetSaveControlDataQuery());
 
 
       // CREATE DATA TABLES
@@ -178,13 +180,13 @@ namespace ClayFinancial.Models.Transaction.Data
         param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
 
-        return Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial) > -1;
+        return Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial) > -1;
 
       }
       catch (Exception ex)
       {
 
-        new ErrorLog(ex, query);
+        new ErrorLog(ex, query.ToString());
         return false;
 
       }
