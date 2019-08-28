@@ -17,7 +17,7 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("Get")]
-    public IHttpActionResult GetAllTransactionView()
+    public IHttpActionResult GetAllTransactionData(int page_number)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
@@ -25,7 +25,8 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      var tr = TransactionView.GetListOfTransactionView();
+
+      var tr = TransactionData.GetTransactionList(ua, page_number);
       if(tr == null)
       {
         return InternalServerError();

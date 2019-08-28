@@ -114,16 +114,19 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       StringBuilder query = new StringBuilder();
-      query.Append(@"
+      query.AppendLine(@"
           USE ClayFinancial;
      
           ");
 
 
-      query.Append(PaymentTypeData.GetSavePaymentTypeDataQuery());
-      query.Append(PaymentMethodData.GetSavePaymentMethodsQuery());
-      query.Append(ControlData.GetSaveControlDataQuery());
+      query.AppendLine(PaymentTypeData.GetSavePaymentTypeDataQuery());
+      query.AppendLine(PaymentMethodData.GetSavePaymentMethodsQuery());
+      query.AppendLine(ControlData.GetSaveControlDataQuery());
 
+      // this needs to happen to recalculate the totals for the transaction.
+      // we may need to consider having a transaction_data_changes table to track changes
+      query.AppendLine(TransactionData.GetUpdateTransactionTotals());
 
       // CREATE DATA TABLES
       var controlDataTable = ControlData.GetControlDataTable();
@@ -150,6 +153,7 @@ namespace ClayFinancial.Models.Transaction.Data
             (
               pmd.cash_amount,
               pmd.check_amount,
+              pmd.check_count,
               pmd.check_number,
               pmd.check_from,
               pmd.paying_for,

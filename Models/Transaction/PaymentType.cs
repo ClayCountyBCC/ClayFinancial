@@ -8,10 +8,10 @@ namespace ClayFinancial.Models.Transaction
 {
   public class PaymentType
   {
-    public int department_id { get; set; }
-    public int payment_type_id { get; set; }
-    public string name { get; set; }
-    public bool is_active { get; set; }
+    public int department_id { get; set; } = -1;
+    public int payment_type_id { get; set; } = -1;
+    public string name { get; set; } = "";
+    public bool is_active { get; set; } = false;
     public List<Control> controls { get; set; } = new List<Control>();
     //public List<PaymentMethodData> payment_methods { get; set; }
     public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();

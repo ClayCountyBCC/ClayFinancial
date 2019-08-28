@@ -17,11 +17,11 @@ namespace ClayFinancial.Models.Transaction.Data
     public long transaction_id { get; set; } = -1;
     public decimal cash_amount { get; set; } = -1;
     public decimal check_amount { get; set; } = -1;
-    public int check_count { get; set; } = -1;
+    public int check_count { get; set; } = 0;
     public string check_number { get; set; } = "";
     public string paying_for { get; set; } = "";
     public string check_from { get; set; } = "";
-    public bool is_active { get; set; }
+    public bool is_active { get; set; } = false;
     public bool added_after_save { get; set; } = false;
     public string modified_by { get; set; } = "";
     public DateTime modified_on { get; set; } = DateTime.MinValue;
@@ -98,7 +98,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool ValidateNew()
     {
-      
+
       if (cash_amount < 0)
       {
         error_text = "Cash amount can not be less than zero";
@@ -109,22 +109,22 @@ namespace ClayFinancial.Models.Transaction.Data
       {
         if (check_count == 1)
         {
-          if(check_number.Length == 0)
+          if (check_number.Length == 0)
           {
             error_text = "The check number is missing";
             return false;
           }
 
-        }
+          if (check_from.Length == 0)
+          {
+            error_text = "Missing data in the check from field";
+            return false;
+          }
 
-
-        if(check_count == 1)
-        {
-          if(check_from.Length == 0)
-          error_text = "Missing data in the check from field";
         }
-        return false;
       }
+
+
 
       if (check_number.Length > 0 && check_amount <= 0)
       {
@@ -132,11 +132,11 @@ namespace ClayFinancial.Models.Transaction.Data
         return false;
       }
 
-      if (check_number.Length > 0 && paying_for.Length == 0)
-      {
-        error_text = "A check must have the 'Paying For' field filled out";
-        return false;
-      }
+      //if (check_number.Length > 0 && paying_for.Length == 0)
+      //{
+      //  error_text = "A check must have the 'Paying For' field filled out";
+      //  return false;
+      //}
 
       return true;
     }

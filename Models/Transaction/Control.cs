@@ -69,7 +69,7 @@ namespace ClayFinancial.Models.Transaction
 
       // if there is anything to validate that is not specific to it's data type,
       // do it before this step.
-      if (is_active == false)
+      if (!is_active)
       {
         cd.error_text = "This is no longer a valid control";
         return false;
