@@ -8,16 +8,8 @@ var Transaction;
             this.control_groups = [];
         }
         Constructor() { }
-        static GetPath() {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/clayfinancial");
-            if (i == 0) {
-                path = "/clayfinancial/";
-            }
-            return path;
-        }
         static GetDepartments() {
-            let path = Department.GetPath();
+            let path = Transaction.GetPath();
             return Utilities.Get(path + "API/Transaction/Departments");
         }
         static CreateDepartmentElement(departments) {

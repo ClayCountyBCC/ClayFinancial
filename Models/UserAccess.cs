@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.DirectoryServices.AccountManagement;
+using Dapper;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace ClayFinancial.Models
 {
@@ -19,16 +22,16 @@ namespace ClayFinancial.Models
     public string finplus_department { get; set; } = "";
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
+    public List<int> departments_can_access = new List<int>();
     public string display_name { get; set; } = "";
     public bool maintenance_user { get; set; } = false;
 
     public enum access_type : int
     {
       no_access = 0,
-      basic = 1, // They get treated like public users.
+      basic = 1, 
       finance_level_one = 2,
-      finance_level_two = 3,
-      maintenance_access = 4,
+      finance_level_two = 3,    
       mis_access = 5
     }
     public access_type current_access { get; set; } = access_type.no_access;// default to no_access.
@@ -68,48 +71,79 @@ namespace ClayFinancial.Models
     {
       try
       {
-        if (up != null)
+        if (up == null) return;
+
+        user_name = up.SamAccountName.ToLower();
+        authenticated = true;
+        display_name = up.DisplayName;
+        if (int.TryParse(up.EmployeeId, out int eid))
         {
-          user_name = up.SamAccountName.ToLower();
-          authenticated = true;
-          display_name = up.DisplayName;
-          if (int.TryParse(up.EmployeeId, out int eid))
-          {
-            employee_id = eid;
-          }
-          var groups = (from g in up.GetAuthorizationGroups()
-                        select g.Name).ToList();
-          maintenance_user = groups.Contains(maintenance_access_group);
-
-
-          if (groups.Contains(mis_access_group))
-          {
-            current_access = access_type.mis_access;
-          }
-          else
-          {
-            if (groups.Contains(finance_Level_one_group))
-            {
-              current_access = access_type.finance_level_one;
-            }
-            else
-            {
-              if (groups.Contains(finance_Level_two_group))
-              {
-                current_access = access_type.finance_level_two;
-              }
-              else
-              {
-                current_access = access_type.basic;
-              }
-            }
-          }
+          employee_id = eid;
         }
+        var groups = (from g in up.GetAuthorizationGroups()
+                      select g.Name).ToList();
+        maintenance_user = groups.Contains(maintenance_access_group);
+
+        if (groups.Contains(mis_access_group))
+        {
+          current_access = access_type.mis_access;
+          return;
+        }
+
+        if (groups.Contains(finance_Level_one_group))
+        {
+          current_access = access_type.finance_level_one;
+          return;
+        }
+
+        if (groups.Contains(finance_Level_two_group))
+        {
+          current_access = access_type.finance_level_two;
+          return;
+        }
+
+        if (groups.Contains(basic_access_group))
+        {
+          current_access = access_type.basic;
+          UpdateDepartmentalAccess();
+        }
+        
       }
       catch (Exception ex)
       {
         new ErrorLog(ex);
       }
+    }
+
+    private void UpdateDepartmentalAccess()
+    {
+      finplus_department = GetFinplusDepartment();
+      departments_can_access = GetDepartmentsCanAccess();
+    }
+
+    private string GetFinplusDepartment()
+    {
+      if (employee_id == 0) return "";
+      var dp = new DynamicParameters();
+      dp.Add("employee_id", employee_id.ToString());
+      string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
+      string department = Constants.Exec_Scalar<string>(query, Constants.ConnectionString.Finplus, dp);
+      return department.Trim();
+
+    }
+
+    private List<int> GetDepartmentsCanAccess()
+    {
+      List<int> departments = new List<int>();
+      if (finplus_department == "") return departments;
+      foreach(Transaction.Department d in Transaction.Department.GetCached())
+      {
+        if(d.organization.Length > 0)
+        {
+          if (d.organization_access.Contains(finplus_department)) departments.Add(d.department_id);
+        }
+      }
+      return departments;
     }
 
     private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)

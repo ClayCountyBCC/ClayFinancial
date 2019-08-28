@@ -18,10 +18,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44302</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication>
-    </IISExpressAnonymousAuthentication>
-    <IISExpressWindowsAuthentication>
-    </IISExpressWindowsAuthentication>
+    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -1742,7 +1740,6 @@
     <Compile Include="Models\Transaction\PaymentType.cs" />
     <Compile Include="Models\Transaction\Data\PaymentTypeData.cs" />
     <Compile Include="Models\Transaction\Data\TransactionData.cs" />
-    <Compile Include="Models\Transaction\TransactionView.cs" />
     <Compile Include="Models\UserAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

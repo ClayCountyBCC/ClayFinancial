@@ -2,10 +2,12 @@
 {
   export let error_scrolled: boolean = false;
   export let departments: Array<Department> = [];
+  export let transactions: Array<Data.TransactionData> = [];
   export let currentReceipt: Receipt = null;
   //export let currentTransactionData: Transaction.Data.TransactionData = null;
   export let DepartmentControl: HTMLSelectElement = null;
   export let DepartmentControlContainer: HTMLElement = null;
+  
 
   export async function Start()
   {
@@ -30,6 +32,13 @@
           }
         }
 
+      });
+
+    await Data.TransactionData.GetTransactionList()
+      .then((tv) =>
+      {
+        Transaction.transactions = tv;
+        console.log('transactions', Transaction.transactions);
       });
 
     console.log('departments', Transaction.departments);

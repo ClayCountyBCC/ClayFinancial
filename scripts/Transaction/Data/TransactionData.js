@@ -16,6 +16,9 @@ var Transaction;
                 this.payment_type_data = [];
                 this.error_text = "";
                 this.received_from = "";
+                this.total_cash_amount = -1;
+                this.total_check_amount = -1;
+                this.total_check_count = -1;
                 this.created_on = new Date();
                 this.created_by_username = "";
                 this.created_by_ip_address = "";
@@ -43,6 +46,10 @@ var Transaction;
                 this.RenderReceivedFromInput(control_container);
                 this.transaction_error_element = this.CreateTransactionErrorElement();
                 targetContainer.appendChild(this.transaction_error_element);
+            }
+            static GetTransactionList() {
+                let path = Transaction.GetPath();
+                return Utilities.Get(path + "API/Transaction/Get");
             }
             CreateTransactionErrorElement() {
                 let e = document.createElement("div");

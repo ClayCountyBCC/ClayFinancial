@@ -15,7 +15,9 @@ namespace ClayFinancial.Models
     public enum ConnectionString
     {
       ClayFinancial,
-      Log
+      Log,
+      Finplus,
+      FinplusQA
     }
 
     public static List<T> Get_Data<T>(string query, ConnectionString cs)
@@ -95,6 +97,22 @@ namespace ClayFinancial.Models
       {
         new ErrorLog(ex, query);
         return -1;
+
+      }
+    }
+    public static T Exec_Scalar<T>(string query, ConnectionString cs, DynamicParameters dbA = null)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(Get_ConnStr(cs)))
+        {
+          return db.ExecuteScalar<T>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return default(T);
       }
     }
 
@@ -116,7 +134,7 @@ namespace ClayFinancial.Models
       {
 
         //case "MISHL05":
-        //case "MISSL01":
+        case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           return true;
@@ -125,6 +143,7 @@ namespace ClayFinancial.Models
           return false;
       }
     }
+
 
 
     //public static Dictionary<T, T2> Get_Dict<T, T2>(string dictionary_name)
