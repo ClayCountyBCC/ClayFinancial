@@ -31,8 +31,7 @@ namespace ClayFinancial.Models
       no_access = 0,
       basic = 1, 
       finance_level_one = 2,
-      finance_level_two = 3,
-      maintenance_access = 4,
+      finance_level_two = 3,    
       mis_access = 5
     }
     public access_type current_access { get; set; } = access_type.no_access;// default to no_access.
@@ -80,7 +79,6 @@ namespace ClayFinancial.Models
         if (int.TryParse(up.EmployeeId, out int eid))
         {
           employee_id = eid;
-          finplus_department = GetFinplusDepartment();
         }
         var groups = (from g in up.GetAuthorizationGroups()
                       select g.Name).ToList();

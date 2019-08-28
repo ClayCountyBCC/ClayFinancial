@@ -2,7 +2,7 @@
 {
   export let error_scrolled: boolean = false;
   export let departments: Array<Department> = [];
-  export let transactions: Array<TransactionView> = [];
+  export let transactions: Array<Data.TransactionData> = [];
   export let currentReceipt: Receipt = null;
   //export let currentTransactionData: Transaction.Data.TransactionData = null;
   export let DepartmentControl: HTMLSelectElement = null;
@@ -34,7 +34,7 @@
 
       });
 
-    await TransactionView.Get()
+    await Data.TransactionData.GetTransactionList()
       .then((tv) =>
       {
         Transaction.transactions = tv;

@@ -13,6 +13,9 @@
     payment_type_data: Array<PaymentTypeData>;
     error_text: string;
     received_from: string;
+    total_cash_amount: number;
+    total_check_amount: number;
+    total_check_count: number;
     created_on: any;
     created_by_username: string;
     created_by_ip_address: string;
@@ -31,6 +34,9 @@
     public payment_type_data: Array<PaymentTypeData> = [];
     public error_text: string = "";
     public received_from: string = "";
+    public total_cash_amount: number = -1;
+    public total_check_amount: number = -1;
+    public total_check_count: number = -1;
     public created_on: any = new Date();
     public created_by_username: string = "";
     public created_by_ip_address: string = "";
@@ -61,6 +67,12 @@
       this.RenderReceivedFromInput(control_container);
       this.transaction_error_element = this.CreateTransactionErrorElement();
       targetContainer.appendChild(this.transaction_error_element);
+    }
+
+    public static GetTransactionList(): Promise<Array<TransactionData>>
+    {
+      let path = Transaction.GetPath();
+      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get");
     }
 
     private CreateTransactionErrorElement(): HTMLElement

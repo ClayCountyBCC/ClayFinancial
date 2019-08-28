@@ -6,7 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using ClayFinancial.Models.Transaction;
-
+using System.Text;
 
 
 namespace ClayFinancial.Models.Transaction.Data
@@ -20,10 +20,14 @@ namespace ClayFinancial.Models.Transaction.Data
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
     public char transaction_type { get; set; } = 'R';
-    public long child_transaction_id { get; set; }
+    public long? child_transaction_id { get; set; }
     public int department_id { get; set; }
+    public string department_name { get; set; } = "";
     public List<ControlData> department_control_data { get; set; }
     public List<PaymentTypeData> payment_type_data { get; set; }
+    public decimal total_cash_amount { get; set; } = -1;
+    public decimal total_check_amount { get; set; } = -1;
+    public decimal total_check_count { get; set; } = -1;
     public string county_manager_name { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
@@ -32,7 +36,9 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_display_name { get; set; } = "";
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; }
-    public List<TransactionView> deposit_receipts { get; set; }
+    public List<TransactionData> deposit_receipts { get; set; }
+    public bool my_transaction { get; set; } = false;
+    public bool can_modify { get; set; } = false;
     private bool has_error { get; set; } = false;
 
     public TransactionData()
@@ -42,6 +48,62 @@ namespace ClayFinancial.Models.Transaction.Data
     public TransactionData(string er)
     {
       error_text = er;
+    }
+
+    public static List<TransactionData> GetTransactionList(UserAccess ua, long transaction_id = -1)
+    {
+      var sb = new StringBuilder();
+      var param = new DynamicParameters();
+      param.Add("@my_employee_id", ua.employee_id);
+
+      var query = @"
+        SELECT 
+          T.transaction_id
+          ,T.child_transaction_id
+          ,T.transaction_number
+          ,T.created_by_display_name
+          ,CASE WHEN T.created_by_employee_id = @my_employee_id 
+            THEN 1 
+            ELSE 0 
+            END my_transaction
+          ,CASE WHEN T.child_transaction_id IS NULL AND T.created_by_employee_id = @my_employee_id
+            THEN 1
+            ELSE 
+              CASE WHEN TV.grandchild_created_by_employee_id IS NULL
+                        AND TV.child_created_by_employee_id = @my_employee_id
+                THEN 1
+                ELSE 
+                  CASE WHEN TV.grandchild_created_by_employee_id = @my_employee_id
+                    THEN 1
+                    ELSE 0
+                    END
+                END
+            END can_modify
+          ,T.created_on
+          ,T.department_id
+          ,T.transaction_type
+          ,TV.department_name
+          ,T.has_been_modified
+          ,T.total_cash_amount
+          ,T.total_check_amount
+          ,T.total_check_count
+        FROM ClayFinancial.dbo.data_transaction T
+        INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
+      ";
+
+      sb.AppendLine(query);
+
+      if (transaction_id > -1)
+      {
+        // THIS MEANS WE ARE AFTER ALL TransactionView FOR A DEPOSIT
+        param.Add("@transaction_id", transaction_id);
+        sb.AppendLine("WHERE T.child_transaction_id = @transaction_id");
+      }
+
+      sb.AppendLine("ORDER BY T.created_on DESC");
+
+      return Constants.Get_Data<TransactionData>(sb.ToString(), param, Constants.ConnectionString.ClayFinancial);
+
     }
 
 
@@ -107,34 +169,28 @@ namespace ClayFinancial.Models.Transaction.Data
 
       USE ClayFinancial;
 
-      DECLARE @county_manager_name varchar(75) = 
-        (SELECT
-          name FROM ClayFinancial.dbo.county_manager 
-        WHERE CAST(GETDATE() as DATE) BETWEEN start_date AND ISNULL(end_date, CAST(GETDATE() AS DATE)));
-
-
         SELECT 
           TD.transaction_id
-          ,fiscal_year
-          ,created_by_employee_id
+          ,TD.fiscal_year
+          ,TD.created_by_employee_id
           ,TD.transaction_number
-          ,ISNULL(TD.child_transaction_id,-1) child_transaction_id
           ,TD.department_id
-          ,transaction_type
-          ,child_transaction_id
+          ,TD.transaction_type
+          ,TD.child_transaction_id
           ,TD.created_on
           ,ISNULL(CM.name, 'Unknown') county_manager_name
+          ,TD.total_cash_amount
+          ,TD.total_check_amount
+          ,TD.total_check_count
           ,TD.created_on
-          ,received_from
-          ,created_by_username
-          ,created_by_display_name
-          ,created_by_ip_address
+          ,TD.received_from
+          ,TD.created_by_username
+          ,TD.created_by_display_name
+          ,TD.created_by_ip_address
         FROM ClayFinancial.dbo.data_transaction TD
-        LEFT OUTER JOIN county_manager CM ON CAST(TD.created_on AS DATE)
+        LEFT OUTER JOIN ClayFinancial.dbo.county_manager CM ON CAST(TD.created_on AS DATE)
           BETWEEN CM.Start_date AND ISNULL(CM.end_date, CAST(GETDATE() AS DATE))
         WHERE transaction_id = @transaction_id;
-
-
       ";
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
       var td = Constants.Get_Data<TransactionData>(query, param,Constants.ConnectionString.ClayFinancial);

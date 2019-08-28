@@ -22,7 +22,7 @@ namespace ClayFinancial.Controllers.API
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
 
-      return Ok(TransactionView.Get(ua));
+      return Ok(TransactionData.GetTransactionList(ua));
     }
 
     [HttpPost]

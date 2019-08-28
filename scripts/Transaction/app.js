@@ -29,7 +29,7 @@ var Transaction;
                     }
                 }
             });
-            yield Transaction.TransactionView.Get()
+            yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
                 Transaction.transactions = tv;
                 console.log('transactions', Transaction.transactions);
