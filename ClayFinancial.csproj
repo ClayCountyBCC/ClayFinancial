@@ -18,10 +18,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44302</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication>
-    </IISExpressAnonymousAuthentication>
-    <IISExpressWindowsAuthentication>
-    </IISExpressWindowsAuthentication>
+    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -1895,6 +1893,7 @@
     <TypeScriptCompile Include="scripts\Transaction\Department.ts" />
     <TypeScriptCompile Include="scripts\Transaction\PaymentType.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Receipt.ts" />
+    <TypeScriptCompile Include="scripts\Transaction\TransactionView.ts" />
     <TypeScriptCompile Include="scripts\Utilities.ts" />
   </ItemGroup>
   <ItemGroup>

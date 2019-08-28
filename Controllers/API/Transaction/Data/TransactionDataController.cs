@@ -18,10 +18,11 @@ namespace ClayFinancial.Controllers.API
     [HttpGet]
     [Route("Get")]
     public IHttpActionResult GetAllTransactionView()
-
     {
-      
-      return InternalServerError();
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
+
+      return Ok(TransactionView.Get(ua));
     }
 
     [HttpPost]

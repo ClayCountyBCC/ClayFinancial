@@ -10,6 +10,7 @@ var Transaction;
 (function (Transaction) {
     Transaction.error_scrolled = false;
     Transaction.departments = [];
+    Transaction.transactions = [];
     Transaction.currentReceipt = null;
     //export let currentTransactionData: Transaction.Data.TransactionData = null;
     Transaction.DepartmentControl = null;
@@ -27,6 +28,11 @@ var Transaction;
                         paymentType.control_groups = Transaction.ControlGroup.CreateControlGroups(paymentType.controls);
                     }
                 }
+            });
+            yield Transaction.TransactionView.Get()
+                .then((tv) => {
+                Transaction.transactions = tv;
+                console.log('transactions', Transaction.transactions);
             });
             console.log('departments', Transaction.departments);
         });

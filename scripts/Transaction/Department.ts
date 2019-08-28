@@ -27,20 +27,9 @@
 
     Constructor() { }
 
-    public static GetPath(): string
-    {
-      let path = "/";
-      let i = window.location.pathname.toLowerCase().indexOf("/clayfinancial");
-      if (i == 0)
-      {
-        path = "/clayfinancial/";
-      }
-      return path;
-    }
-
     public static GetDepartments(): Promise<Array<Department>>
     {
-      let path = Department.GetPath();
+      let path = Transaction.GetPath();
       return Utilities.Get<Array<Department>>(path + "API/Transaction/Departments");
     }
 

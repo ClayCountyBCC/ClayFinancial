@@ -9,10 +9,18 @@ namespace ClayFinancial.Models.Transaction
 {
   public class Department
   {
-    public int department_id { get; set; }
-    public string name { get; set; }
-    public bool is_active { get; set; }
-    public string organization { get; set; }
+    public int department_id { get; set; } = -1;
+    public string name { get; set; } = "";
+    public bool is_active { get; set; } = true;
+    public string organization { get; set; } = "";
+    public List<string> organization_access
+    {
+      get
+      {
+        if (organization.Length == 0) return new List<string>();
+        return organization.Split('|').ToList();
+      }
+    }
     public List<PaymentType> payment_types { get; set; } = new List<PaymentType>();
     public List<Control> controls { get; set; } = new List<Control>();
     public Dictionary<int, PaymentType> payment_types_dict { get; set; } = new Dictionary<int, PaymentType>();
