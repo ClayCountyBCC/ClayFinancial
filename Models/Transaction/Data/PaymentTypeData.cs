@@ -124,7 +124,7 @@ namespace ClayFinancial.Models.Transaction.Data
       query.AppendLine(PaymentMethodData.GetSavePaymentMethodsQuery());
       query.AppendLine(ControlData.GetSaveControlDataQuery());
 
-      // this needs to happen to recalculate the totals for the transaction.
+      // this query needs to be included in order to recalculate the totals for the transaction.
       // we may need to consider having a transaction_data_changes table to track changes
       query.AppendLine(TransactionData.GetUpdateTransactionTotals());
 
@@ -203,20 +203,20 @@ namespace ClayFinancial.Models.Transaction.Data
       return
       @"              
 
-              -- INSERT PAYMENT TYPE DATA
-              INSERT INTO data_payment_type
-              (
-                transaction_id,
-                payment_type_id,
-                payment_type_index
-              )
-              SELECT
-                @transaction_id,
-                payment_type_id,
-                payment_type_index
-              FROM @PaymentTypeData; 
+        -- INSERT PAYMENT TYPE DATA
+        INSERT INTO data_payment_type
+        (
+          transaction_id,
+          payment_type_id,
+          payment_type_index
+        )
+        SELECT
+          @transaction_id,
+          payment_type_id,
+          payment_type_index
+        FROM @PaymentTypeData; 
               
-              ";
+        ";
 
     }
   }// get the next transaction id
