@@ -30,6 +30,7 @@
     public transaction_type: string = "";
     public child_transaction_id: number = -1;
     public department_id: number = -1;
+    public department_name: string = "";
     public department_control_data: Array<ControlData> = [];
     public payment_type_data: Array<PaymentTypeData> = [];
     public error_text: string = "";
@@ -41,7 +42,8 @@
     public created_by_username: string = "";
     public created_by_ip_address: string = "";
     // client side only stuff
-    public base_container: string = 'root';
+    public static base_container: string = 'root';
+    //public base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private department_element_container: HTMLElement = null;
     private received_from_element: HTMLElement = null;
@@ -55,7 +57,7 @@
     constructor(transaction_type: string)
     {
       this.transaction_type = transaction_type;
-      let targetContainer = document.getElementById(this.base_container);
+      let targetContainer = document.getElementById(TransactionData.base_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer);
       let control_container = document.createElement("div");
@@ -110,7 +112,7 @@
       {
         departmentControlContainer = document.createElement("div");
         departmentControlContainer.id = this.department_controls_target;
-        document.getElementById(this.base_container).appendChild(departmentControlContainer);
+        document.getElementById(TransactionData.base_container).appendChild(departmentControlContainer);
       }
       Utilities.Clear_Element(departmentControlContainer);
       if (this.department_id === -1 ||
@@ -133,7 +135,7 @@
       {
         paymentTypeContainer = document.createElement("div");
         paymentTypeContainer.id = this.payment_type_target;
-        document.getElementById(this.base_container).appendChild(paymentTypeContainer);
+        document.getElementById(TransactionData.base_container).appendChild(paymentTypeContainer);
       }
 
       Utilities.Clear_Element(paymentTypeContainer);
@@ -323,7 +325,55 @@
           });
     }
 
+    public static RenderTransactionList()
+    {
+      let container = document.getElementById(TransactionData.base_container);
+      Utilities.Clear_Element(container);
+      let table = TransactionData.CreateTransactionListTable();
+      container.appendChild(table);
+      let tbody = document.createElement("tbody");
+      table.appendChild(tbody);
+      for (let data of Transaction.transactions)
+      {
+        tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+      }
+
+    }
+
+    private static CreateTransactionListTable():HTMLTableElement
+    {
+      let table = document.createElement("table");
+      table.classList.add("table", "is-fullwidth");
+      let thead = document.createElement("thead");
+      table.appendChild(thead);
+      let tr = document.createElement("tr");
+      thead.appendChild(tr);
+      tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "20%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "15%"));
+      return table;
+    }
+
+    private static CreateTransactionListRow(data: TransactionData): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type === "R" ? "Receipt" : "Deposit", "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+      return tr;
+    }
+
   }
+
+
 
 
 }

@@ -38,6 +38,7 @@
       .then((tv) =>
       {
         Transaction.transactions = tv;
+        Data.TransactionData.RenderTransactionList();
         console.log('transactions', Transaction.transactions);
       });
 

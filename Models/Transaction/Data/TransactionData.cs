@@ -19,7 +19,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int created_by_employee_id { get; set; }
     public int employee_transaction_count { get; set; }
     public string transaction_number { get; set; }
-    public char transaction_type { get; set; } = 'R';
+    public string transaction_type { get; set; } = "R";
     public long? child_transaction_id { get; set; }
     public int department_id { get; set; }
     public string department_name { get; set; } = "";
@@ -27,7 +27,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public List<PaymentTypeData> payment_type_data { get; set; }
     public decimal total_cash_amount { get; set; } = -1;
     public decimal total_check_amount { get; set; } = -1;
-    public decimal total_check_count { get; set; } = -1;
+    public int total_check_count { get; set; } = -1;
     public string county_manager_name { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
@@ -114,10 +114,10 @@ namespace ClayFinancial.Models.Transaction.Data
       switch (transaction_type)
       {
 
-        case 'R':
+        case "R":
           if (!ValidateNewReceipt()) return false;
           break;
-        case 'D':
+        case "D":
           if (!ValidateNewDeposit()) return false;
           break;
         default:
@@ -133,10 +133,10 @@ namespace ClayFinancial.Models.Transaction.Data
       switch (transaction_type)
       {
 
-        case 'R':
+        case "R":
           if (!SaveNewReceipt()) return this;
           break;
-        case 'D':
+        case "D":
           if (!SaveNewDeposit()) return this;
           break;
 
@@ -167,7 +167,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var query = $@"
 
-      USE ClayFinancial;
+        USE ClayFinancial;
 
         SELECT 
           TD.transaction_id

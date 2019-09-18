@@ -32,6 +32,7 @@ var Transaction;
             yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
                 Transaction.transactions = tv;
+                Transaction.Data.TransactionData.RenderTransactionList();
                 console.log('transactions', Transaction.transactions);
             });
             console.log('departments', Transaction.departments);

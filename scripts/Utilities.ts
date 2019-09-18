@@ -569,4 +569,14 @@ namespace Utilities
     return levelitem;
   }
 
+  export function CreateTableCell(celltype: string, value: string, class_to_add: string, width: string = ""): HTMLTableCellElement
+  {
+    if (celltype !== "td" && celltype !== "th") celltype = "td";
+    let cell = <HTMLTableCellElement>document.createElement(celltype);
+    if (width.length > 0) cell.style.width = width;
+    cell.appendChild(document.createTextNode(value));
+    cell.classList.add(class_to_add);
+    return cell;
+  }
+
 }

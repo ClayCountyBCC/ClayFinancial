@@ -39,7 +39,7 @@
       this.receipt_preview_cancel_button_element.onclick = (event: Event) =>
       {
         Utilities.Hide(this.view_container);
-        Utilities.Show(this.currentTransaction.base_container);
+        Utilities.Show(Data.TransactionData.base_container);
       }
       this.receipt_preview_save_button_element.onclick = (event: Event) =>
       {
@@ -51,12 +51,12 @@
     public ShowReceiptPreview():void
     {
       let t = this.currentTransaction;
-      Utilities.Hide(this.currentTransaction.base_container);
+      Utilities.Hide(Data.TransactionData.base_container);
       Utilities.Show(this.view_container);
       Utilities.Set_Text(this.created_on_element, Utilities.Format_Date(new Date()));
-      //Utilities.Set_Text(this.receipt_number_element, "PREVIEW");
-      //Utilities.Set_Text(this.created_by_element, "PREVIEW");
-      //Utilities.Set_Text(this.county_manager_element, "PREVIEW");
+      Utilities.Set_Text(this.receipt_number_element, "PREVIEW");
+      Utilities.Set_Text(this.created_by_element, "PREVIEW");
+      Utilities.Set_Text(this.county_manager_element, "PREVIEW");
       Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
       Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
       this.CreatePaymentTypeDisplay();
@@ -108,21 +108,15 @@
       check_count: number): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
-      tr.appendChild(this.CreateTableCell(payment_type, "has-text-left"));
-      tr.appendChild(this.CreateTableCell(check_count.toString(), "has-text-right"));
-      tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(check_amount), "has-text-right"));
-      tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount), "has-text-right"));
-      tr.appendChild(this.CreateTableCell(Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", payment_type, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", check_count.toString(), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(check_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(cash_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
       return tr;
     }
 
-    private CreateTableCell(value: string, class_to_add: string): HTMLTableCellElement
-    {
-      let td = document.createElement("td");
-      td.appendChild(document.createTextNode(value));
-      td.classList.add(class_to_add);
-      return td;
-    }
+
 
   }
 

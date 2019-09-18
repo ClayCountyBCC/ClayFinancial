@@ -12,6 +12,7 @@ var Transaction;
                 this.transaction_type = "";
                 this.child_transaction_id = -1;
                 this.department_id = -1;
+                this.department_name = "";
                 this.department_control_data = [];
                 this.payment_type_data = [];
                 this.error_text = "";
@@ -22,8 +23,7 @@ var Transaction;
                 this.created_on = new Date();
                 this.created_by_username = "";
                 this.created_by_ip_address = "";
-                // client side only stuff
-                this.base_container = 'root';
+                //public base_container: string = 'root';
                 this.department_element = null;
                 this.department_element_container = null;
                 this.received_from_element = null;
@@ -34,7 +34,7 @@ var Transaction;
                 this.selected_department = null;
                 this.next_payment_type_index = 0;
                 this.transaction_type = transaction_type;
-                let targetContainer = document.getElementById(this.base_container);
+                let targetContainer = document.getElementById(TransactionData.base_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
                 let control_container = document.createElement("div");
@@ -77,7 +77,7 @@ var Transaction;
                 if (departmentControlContainer === null) {
                     departmentControlContainer = document.createElement("div");
                     departmentControlContainer.id = this.department_controls_target;
-                    document.getElementById(this.base_container).appendChild(departmentControlContainer);
+                    document.getElementById(TransactionData.base_container).appendChild(departmentControlContainer);
                 }
                 Utilities.Clear_Element(departmentControlContainer);
                 if (this.department_id === -1 ||
@@ -95,7 +95,7 @@ var Transaction;
                 if (paymentTypeContainer === null) {
                     paymentTypeContainer = document.createElement("div");
                     paymentTypeContainer.id = this.payment_type_target;
-                    document.getElementById(this.base_container).appendChild(paymentTypeContainer);
+                    document.getElementById(TransactionData.base_container).appendChild(paymentTypeContainer);
                 }
                 Utilities.Clear_Element(paymentTypeContainer);
                 if (this.department_id === -1 || this.selected_department === null)
@@ -235,7 +235,47 @@ var Transaction;
                     console.log("post error occurred", error);
                 });
             }
+            static RenderTransactionList() {
+                let container = document.getElementById(TransactionData.base_container);
+                Utilities.Clear_Element(container);
+                let table = TransactionData.CreateTransactionListTable();
+                container.appendChild(table);
+                let tbody = document.createElement("tbody");
+                table.appendChild(tbody);
+                for (let data of Transaction.transactions) {
+                    tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+                }
+            }
+            static CreateTransactionListTable() {
+                let table = document.createElement("table");
+                table.classList.add("table", "is-fullwidth");
+                let thead = document.createElement("thead");
+                table.appendChild(thead);
+                let tr = document.createElement("tr");
+                thead.appendChild(tr);
+                tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-left", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "20%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "15%"));
+                return table;
+            }
+            static CreateTransactionListRow(data) {
+                let tr = document.createElement("tr");
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type === "R" ? "Receipt" : "Deposit", "has-text-left"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+                return tr;
+            }
         }
+        // client side only stuff
+        TransactionData.base_container = 'root';
         Data.TransactionData = TransactionData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
 })(Transaction || (Transaction = {}));
