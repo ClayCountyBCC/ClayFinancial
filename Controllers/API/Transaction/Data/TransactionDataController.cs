@@ -35,28 +35,28 @@ namespace ClayFinancial.Controllers.API
       return Ok(tr);
     }
 
-    [HttpGet]
-    [Route("Get")]
-    public IHttpActionResult CreateDeposit(TransactionData transactionData)
-    {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+    //[HttpGet]
+    //[Route("Get")]
+    //public IHttpActionResult CreateDeposit(TransactionData transactionData)
+    //{
+    //  var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-      if (ua.current_access == UserAccess.access_type.no_access)
-      {
-        return Unauthorized();
-      }
-      transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-      transactionData.SetUserProperties(ua);
+    //  if (ua.current_access == UserAccess.access_type.no_access)
+    //  {
+    //    return Unauthorized();
+    //  }
+    //  transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+    //  transactionData.SetUserProperties(ua);
 
-      var tr = transactionData.CreateDeposit(ua);
+    //  var tr = transactionData.CreateDeposit(ua);
 
-      if (tr == null)
-      {
-        return InternalServerError();
-      }
+    //  if (tr == null)
+    //  {
+    //    return InternalServerError();
+    //  }
 
-      return Ok(tr);
-    }
+    //  return Ok(tr);
+    //}
 
 
     [HttpPost]
