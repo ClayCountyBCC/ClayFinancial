@@ -23,7 +23,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public DateTime added_on { get; set; } = DateTime.MinValue;
     public string added_by { get; set; } = "";
 
-    public static List<PaymentTypeData> Get(long transaction_id)
+    public static List<PaymentTypeData> Get(long transaction_id, List<ControlData> controls, List<PaymentMethodData> payment_methods)
     {
       var param = new DynamicParameters();
 
@@ -46,19 +46,24 @@ namespace ClayFinancial.Models.Transaction.Data
       
       ";
 
-      var pt = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
+      var payment_types = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
 
-      foreach (var type in pt)
+      foreach (var payment_type in payment_types)
       {
 
-        type.control_data = ControlData.Get(transaction_id, type.transaction_payment_type_id);
+        payment_type.control_data = (from c in controls
+                                     where c.transaction_payment_type_id.HasValue &&
+                                     c.transaction_payment_type_id.Value == payment_type.payment_type_id
+                                     select c).ToList();
 
-        type.payment_method_data = PaymentMethodData.Get(transaction_id, type.transaction_payment_type_id);
+        payment_type.payment_method_data = (from p in payment_methods
+                                            where p.transaction_payment_type_id == payment_type.payment_type_id
+                                            select p).ToList();
 
       }
 
 
-      return pt;
+      return payment_types;
     }
 
 

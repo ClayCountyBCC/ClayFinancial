@@ -9,7 +9,7 @@
 .light-function {
   color: white; }
 
-#root {
+#root, #transaction_view, #action_view {
   padding-top: 1em;
   height: calc(100% - 3em);
   margin-bottom: 2em; }

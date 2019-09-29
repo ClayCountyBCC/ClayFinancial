@@ -8,13 +8,14 @@ var Transaction;
                 this.fiscal_year = -1;
                 this.created_by_employee_id = -1;
                 this.employee_transaction_count = -1;
-                this.transaction_number = "";
+                this.transaction_number = "PREVIEW";
                 this.transaction_type = "";
                 this.child_transaction_id = -1;
                 this.department_id = -1;
                 this.department_name = "";
                 this.department_control_data = [];
                 this.payment_type_data = [];
+                this.county_manager_name = "PREVIEW";
                 this.error_text = "";
                 this.received_from = "";
                 this.total_cash_amount = -1;
@@ -23,6 +24,7 @@ var Transaction;
                 this.created_on = new Date();
                 this.created_by_username = "";
                 this.created_by_ip_address = "";
+                this.created_by_display_name = "PREVIEW";
                 //public base_container: string = 'root';
                 this.department_element = null;
                 this.department_element_container = null;
@@ -33,8 +35,11 @@ var Transaction;
                 this.transaction_error_element = null;
                 this.selected_department = null;
                 this.next_payment_type_index = 0;
+                Utilities.Hide(TransactionData.transaction_view_container);
+                Utilities.Show(TransactionData.action_container);
+                Utilities.Hide(Transaction.Receipt.receipt_container);
                 this.transaction_type = transaction_type;
-                let targetContainer = document.getElementById(TransactionData.base_container);
+                let targetContainer = document.getElementById(TransactionData.action_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer);
                 let control_container = document.createElement("div");
@@ -46,10 +51,6 @@ var Transaction;
                 this.RenderReceivedFromInput(control_container);
                 this.transaction_error_element = this.CreateTransactionErrorElement();
                 targetContainer.appendChild(this.transaction_error_element);
-            }
-            static GetTransactionList() {
-                let path = Transaction.GetPath();
-                return Utilities.Get(path + "API/Transaction/Get");
             }
             CreateTransactionErrorElement() {
                 let e = document.createElement("div");
@@ -77,7 +78,7 @@ var Transaction;
                 if (departmentControlContainer === null) {
                     departmentControlContainer = document.createElement("div");
                     departmentControlContainer.id = this.department_controls_target;
-                    document.getElementById(TransactionData.base_container).appendChild(departmentControlContainer);
+                    document.getElementById(TransactionData.action_container).appendChild(departmentControlContainer);
                 }
                 Utilities.Clear_Element(departmentControlContainer);
                 if (this.department_id === -1 ||
@@ -95,7 +96,7 @@ var Transaction;
                 if (paymentTypeContainer === null) {
                     paymentTypeContainer = document.createElement("div");
                     paymentTypeContainer.id = this.payment_type_target;
-                    document.getElementById(TransactionData.base_container).appendChild(paymentTypeContainer);
+                    document.getElementById(TransactionData.action_container).appendChild(paymentTypeContainer);
                 }
                 Utilities.Clear_Element(paymentTypeContainer);
                 if (this.department_id === -1 || this.selected_department === null)
@@ -231,12 +232,29 @@ var Transaction;
                 Utilities.Post(path + "API/Transaction/Save", t)
                     .then(function (response) {
                     console.log("post probably good", response);
+                    Transaction.currentReceipt.ShowReceipt(response);
+                    Transaction.Data.TransactionData.GetTransactionList(1)
+                        .then((tv) => {
+                        Transaction.transactions = tv;
+                    });
+                    // need to reset the current transaction
+                    // and display the one that I just downloaded.
                 }, function (error) {
                     console.log("post error occurred", error);
                 });
             }
+            /*
+             * Transaction View Code
+             */
+            static GetTransactionList(page) {
+                let path = Transaction.GetPath();
+                return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString());
+            }
             static RenderTransactionList() {
-                let container = document.getElementById(TransactionData.base_container);
+                Utilities.Show(TransactionData.transaction_view_container);
+                Utilities.Hide(TransactionData.action_container);
+                Utilities.Hide(Transaction.Receipt.receipt_container);
+                let container = document.getElementById(TransactionData.transaction_view_container);
                 Utilities.Clear_Element(container);
                 let table = TransactionData.CreateTransactionListTable();
                 container.appendChild(table);
@@ -255,27 +273,77 @@ var Transaction;
                 thead.appendChild(tr);
                 tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-left", "10%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "20%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "15%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "15%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "15%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
                 return table;
             }
             static CreateTransactionListRow(data) {
                 let tr = document.createElement("tr");
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
                 tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type === "R" ? "Receipt" : "Deposit", "has-text-left"));
+                let status = "";
+                if (data.transaction_type === "R") {
+                    if (data.child_transaction_id === null) {
+                        status = "Open";
+                    }
+                    else {
+                        if (data.child_transaction_id === data.transaction_id) {
+                            status = "Completed";
+                        }
+                        else {
+                            status = "Deposited"; // maybe turn this into a link to the deposit?
+                        }
+                    }
+                }
+                else {
+                    if (data.transaction_type === "D") {
+                        if (data.child_transaction_id === null) {
+                            status = "Open";
+                        }
+                        else {
+                            status = "Accepted";
+                        }
+                    }
+                }
+                tr.appendChild(Utilities.CreateTableCell("td", status, "has-text-left"));
                 tr.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
                 tr.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+                //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
+                let listtd = document.createElement("td");
+                listtd.classList.add("has-text-right");
+                listtd.appendChild(TransactionData.CreateTableCellIconButton("fa-list", "is-small"));
+                tr.appendChild(listtd);
+                let printtd = document.createElement("td");
+                printtd.classList.add("has-text-right");
+                printtd.appendChild(TransactionData.CreateTableCellIconButton("fa-print", "is-small"));
+                tr.appendChild(printtd);
+                //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
                 return tr;
+            }
+            static CreateTableCellIconButton(icon, size) {
+                let button = document.createElement("a");
+                button.classList.add("button", size);
+                let span = document.createElement("span");
+                span.classList.add("icon", size);
+                let i = document.createElement("i");
+                i.classList.add("fas", icon);
+                span.appendChild(i);
+                button.appendChild(span);
+                return button;
             }
         }
         // client side only stuff
-        TransactionData.base_container = 'root';
+        TransactionData.action_container = 'action_view';
+        TransactionData.transaction_view_container = 'transaction_view';
         Data.TransactionData = TransactionData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
 })(Transaction || (Transaction = {}));

@@ -14,8 +14,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public long control_data_id { get; set; } = -1;
     public long prior_control_data_id { get; set; } = -1;
-    public long transaction_payment_type_id { get; set; }
-    public int department_id { get; set; } = -1;
+    public long? transaction_payment_type_id { get; set; }
+    public int? department_id { get; set; }
     public long transaction_id { get; set; } = -1;
     public int control_id { get; set; } = -1;
     public string value { get; set; } = "";
@@ -29,30 +29,26 @@ namespace ClayFinancial.Models.Transaction.Data
       
     }
 
-    public static List<ControlData> Get(long transaction_id, long? transaction_payment_type_id = null)
+    public static List<ControlData> GetActiveTransactionControls(long transaction_id)
     {
       var param = new DynamicParameters();
       param.Add("@transaction_id", transaction_id);
 
       var query = @"
       
-      
-        SELECT * FROM data_control
+        SELECT 
+          control_data_id
+          ,transaction_payment_type_id
+          ,department_id
+          ,transaction_id
+          ,control_id
+          ,value
+          ,is_active
+        FROM data_control
         where
           transaction_id = @transaction_id
+          AND is_active = 1";
 
-      
-      ";
-
-      if (transaction_payment_type_id is null)
-      {
-        query += "  AND department_id IS NOT NULL";
-      }
-      else 
-      {
-        param.Add("@transaction_payment_type_id", transaction_payment_type_id);
-        query += "  AND transaction_payment_type_id = @transaction_payment_type_id";
-      }
 
       var c_data = Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
       return c_data;

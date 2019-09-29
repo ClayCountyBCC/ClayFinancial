@@ -445,8 +445,10 @@ var Utilities;
         let cell = document.createElement(celltype);
         if (width.length > 0)
             cell.style.width = width;
-        cell.appendChild(document.createTextNode(value));
-        cell.classList.add(class_to_add);
+        if (value.length > 0)
+            cell.appendChild(document.createTextNode(value));
+        if (class_to_add.length > 0)
+            cell.classList.add(class_to_add);
         return cell;
     }
     Utilities.CreateTableCell = CreateTableCell;

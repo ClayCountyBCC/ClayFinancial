@@ -34,7 +34,7 @@
 
       });
 
-    await Data.TransactionData.GetTransactionList()
+    await Data.TransactionData.GetTransactionList(1)
       .then((tv) =>
       {
         Transaction.transactions = tv;
