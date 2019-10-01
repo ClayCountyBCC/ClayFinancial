@@ -11,6 +11,7 @@
     employee_transaction_count: number;
     department_control_data: Array<ControlData>;
     payment_type_data: Array<PaymentTypeData>;
+    county_manager_name: string;
     error_text: string;
     received_from: string;
     total_cash_amount: number;
@@ -18,20 +19,24 @@
     total_check_count: number;
     created_on: any;
     created_by_username: string;
+    created_by_display_name: string;
     created_by_ip_address: string;
   }
+
   export class TransactionData implements ITransactionData
   {
     public transaction_id: number = -1;
     public fiscal_year: number = -1;
     public created_by_employee_id: number = -1;
     public employee_transaction_count: number = -1;
-    public transaction_number: string = "";
+    public transaction_number: string = "PREVIEW";
     public transaction_type: string = "";
     public child_transaction_id: number = -1;
     public department_id: number = -1;
+    public department_name: string = "";
     public department_control_data: Array<ControlData> = [];
     public payment_type_data: Array<PaymentTypeData> = [];
+    public county_manager_name: string = "PREVIEW";
     public error_text: string = "";
     public received_from: string = "";
     public total_cash_amount: number = -1;
@@ -40,8 +45,11 @@
     public created_on: any = new Date();
     public created_by_username: string = "";
     public created_by_ip_address: string = "";
+    public created_by_display_name: string = "PREVIEW";
     // client side only stuff
-    public base_container: string = 'root';
+    public static action_container: string = 'action_view';
+    public static transaction_view_container: string = 'transaction_view';
+    //public base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private department_element_container: HTMLElement = null;
     private received_from_element: HTMLElement = null;
@@ -54,8 +62,12 @@
 
     constructor(transaction_type: string)
     {
+      Utilities.Hide(TransactionData.transaction_view_container);
+      Utilities.Show(TransactionData.action_container);
+      Utilities.Hide(Receipt.receipt_container);
+
       this.transaction_type = transaction_type;
-      let targetContainer = document.getElementById(this.base_container);
+      let targetContainer = document.getElementById(TransactionData.action_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer);
       let control_container = document.createElement("div");
@@ -69,11 +81,7 @@
       targetContainer.appendChild(this.transaction_error_element);
     }
 
-    public static GetTransactionList(): Promise<Array<TransactionData>>
-    {
-      let path = Transaction.GetPath();
-      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get");
-    }
+
 
     private CreateTransactionErrorElement(): HTMLElement
     {
@@ -110,7 +118,7 @@
       {
         departmentControlContainer = document.createElement("div");
         departmentControlContainer.id = this.department_controls_target;
-        document.getElementById(this.base_container).appendChild(departmentControlContainer);
+        document.getElementById(TransactionData.action_container).appendChild(departmentControlContainer);
       }
       Utilities.Clear_Element(departmentControlContainer);
       if (this.department_id === -1 ||
@@ -133,7 +141,7 @@
       {
         paymentTypeContainer = document.createElement("div");
         paymentTypeContainer.id = this.payment_type_target;
-        document.getElementById(this.base_container).appendChild(paymentTypeContainer);
+        document.getElementById(TransactionData.action_container).appendChild(paymentTypeContainer);
       }
 
       Utilities.Clear_Element(paymentTypeContainer);
@@ -313,17 +321,152 @@
       // of the actual index that element is in the array.
       let t = this;
       let path = Transaction.GetPath();
-      Utilities.Post(path + "API/Transaction/Save", t)
+      Utilities.Post<TransactionData>(path + "API/Transaction/Save", t)
         .then(function (response)
         {
-          console.log("post probably good", response)
+          console.log("post probably good", response);
+
+          Transaction.currentReceipt.ShowReceipt(response);
+
+          Transaction.Data.TransactionData.GetTransactionList(1)
+            .then((tv) =>
+            {
+              Transaction.transactions = tv;
+            });
+
+          // need to reset the current transaction
+          // and display the one that I just downloaded.
         }, function (error)
           {
             console.log("post error occurred", error);
           });
     }
 
+
+    /* 
+     * Transaction View Code
+     */
+
+    public static GetTransactionList(page: number): Promise<Array<TransactionData>>
+    {
+      let path = Transaction.GetPath();
+      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString());
+    }
+
+    public static RenderTransactionList()
+    {
+      Utilities.Show(TransactionData.transaction_view_container);
+      Utilities.Hide(TransactionData.action_container);
+      Utilities.Hide(Receipt.receipt_container);
+
+      let container = document.getElementById(TransactionData.transaction_view_container);
+      Utilities.Clear_Element(container);
+      let table = TransactionData.CreateTransactionListTable();
+      container.appendChild(table);
+      let tbody = document.createElement("tbody");
+      table.appendChild(tbody);
+      for (let data of Transaction.transactions)
+      {
+        tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+      }
+
+    }
+
+    private static CreateTransactionListTable():HTMLTableElement
+    {
+      let table = document.createElement("table");
+      table.classList.add("table", "is-fullwidth");
+      let thead = document.createElement("thead");
+      table.appendChild(thead);
+      let tr = document.createElement("tr");
+      thead.appendChild(tr);
+      tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
+      return table;
+    }
+
+    private static CreateTransactionListRow(data: TransactionData): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type === "R" ? "Receipt" : "Deposit", "has-text-left"));
+      let status = "";
+      if (data.transaction_type === "R")
+      {
+        if (data.child_transaction_id === null)
+        {
+          status = "Open";
+        }
+        else
+        {
+          if (data.child_transaction_id === data.transaction_id)
+          {
+            status = "Completed";
+          }
+          else
+          {
+            status = "Deposited"; // maybe turn this into a link to the deposit?
+          }
+        }
+      }
+      else
+      {
+        if (data.transaction_type === "D")
+        {
+          if (data.child_transaction_id === null)
+          {
+            status = "Open";
+          }
+          else
+          {
+            status = "Accepted";
+          }
+        }
+      }
+      tr.appendChild(Utilities.CreateTableCell("td", status, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+      //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
+      let listtd = document.createElement("td");
+      listtd.classList.add("has-text-right");
+      listtd.appendChild(TransactionData.CreateTableCellIconButton("fa-list", "is-small"));
+      tr.appendChild(listtd);
+      let printtd = document.createElement("td");
+      printtd.classList.add("has-text-right");
+      printtd.appendChild(TransactionData.CreateTableCellIconButton("fa-print", "is-small"));
+      tr.appendChild(printtd);
+
+      //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
+      return tr;
+    }
+
+    private static CreateTableCellIconButton(icon: string, size: string): HTMLAnchorElement
+    {
+      let button = document.createElement("a");
+      button.classList.add("button", size);
+      let span = document.createElement("span");
+      span.classList.add("icon", size);
+      let i = document.createElement("i");
+      i.classList.add("fas", icon)
+      span.appendChild(i);
+      button.appendChild(span);
+      return button;
+    }
+
   }
+
+
 
 
 }

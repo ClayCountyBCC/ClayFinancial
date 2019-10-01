@@ -12,7 +12,7 @@ namespace ClayFinancial.Models.Transaction.Data
   {
 
     public long payment_method_data_id { get; set; } = -1;
-    public long prior_payment_method_data_id { get; set; } = -1;
+    public long? prior_payment_method_data_id { get; set; }
     public long transaction_payment_type_id { get; set; } = -1;
     public long transaction_id { get; set; } = -1;
     public decimal cash_amount { get; set; } = -1;
@@ -32,15 +32,13 @@ namespace ClayFinancial.Models.Transaction.Data
     {
     }
 
-    public static List<PaymentMethodData> Get(long transaction_id, long transaction_payment_type_id)
+    public static List<PaymentMethodData> GetActiveTransactionPaymentMethods(long transaction_id)
     {
       var param = new DynamicParameters();
-      param.Add("transaction_payment_type_id", transaction_payment_type_id);
       param.Add("transaction_id", transaction_id);
 
       var query = @"
-        select 
-
+        SELECT 
           pm.payment_method_data_id
           ,cpm.original_payment_method_data_id
           ,pm.transaction_payment_type_id
@@ -55,14 +53,12 @@ namespace ClayFinancial.Models.Transaction.Data
           ,cpm.modified_on
           ,cpm.modified_by
           ,cpm.reason_for_change
-        from data_payment_method pm
-        left outer join data_changes_payment_method cpm on cpm.new_payment_method_data_id =  pm.payment_method_data_id
-        where transaction_id = @transaction_id
-          AND transaction_payment_type_id = @transaction_payment_type_id
-        order by payment_method_data_id, original_payment_method_data_id
-
-        
-      
+        FROM data_payment_method pm
+        LEFT OUTER JOIN data_changes_payment_method cpm on cpm.new_payment_method_data_id =  pm.payment_method_data_id
+        WHERE 
+          transaction_id = @transaction_id
+          AND is_active = 1
+        ORDER BY payment_method_data_id, original_payment_method_data_id
       ";
 
       var pm = Constants.Get_Data<PaymentMethodData>(query, param, Constants.ConnectionString.ClayFinancial);
@@ -145,7 +141,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool ValidateChange()
     {
      
-      if (prior_payment_method_data_id == -1)
+      if (!prior_payment_method_data_id.HasValue)
       {
         error_text = "There was an issue with the updated payment method";
         return false;

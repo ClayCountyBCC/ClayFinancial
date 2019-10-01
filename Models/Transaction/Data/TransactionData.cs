@@ -7,8 +7,7 @@ using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 using ClayFinancial.Models.Transaction;
-
-
+using System.Text;
 
 namespace ClayFinancial.Models.Transaction.Data
 {
@@ -22,8 +21,6 @@ namespace ClayFinancial.Models.Transaction.Data
     public string transaction_number { get; set; } = "";
     public string transaction_type { get; set; } = "R";
     public long? child_transaction_id { get; set; } = null;
-    public int child_created_by_employee_id { get; set; } = -1;
-    public int gransdchild_created_by_employee_id { get; set; } = -1;
     public int department_id { get; set; } = -1;
     public string department_name { get; set; } = "";
     public List<ControlData> department_control_data { get; set; } = new List<ControlData>();
@@ -52,6 +49,7 @@ namespace ClayFinancial.Models.Transaction.Data
     {
 
     }
+
     public TransactionData(string er)
     {
       error_text = er;
@@ -76,6 +74,17 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       var query = @"
+
+         WITH deposit_receipt_count AS (
+
+          SELECT
+           child_transaction_id,
+           COUNT(*) deposit_receipt_count
+           FROM data_transaction
+           WHERE child_transaction_id IS NOT NULL
+           GROUP BY child_transaction_id
+
+         )
 
         SELECT 
           T.transaction_id
@@ -154,9 +163,12 @@ namespace ClayFinancial.Models.Transaction.Data
     }
     private bool ValidateNewReceipt()
     {
-      Department department = Department.GetCachedDict()[department_id];
-     
-      return department.ValidateTransactionData(this);
+      var departments = Department.GetCachedDict();
+      // wrong
+      //Department department = Department.GetCachedDict()[department_id];
+      // always test dictionaries for the key before you try and use data from the client.
+      if (!departments.ContainsKey(department_id)) return false;
+      return departments[department_id].ValidateTransactionData(this);
     }
 
     private bool ValidateNewDeposit(int selected_employee_id)
@@ -268,6 +280,7 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TV.child_created_by_employee_id
           ,TV.grandchild_created_by_employee_id
           ,TD.created_on
+          ,TV.department_name
           ,TV.county_manager_name
           ,TD.total_cash_amount
           ,TD.total_check_amount
@@ -284,18 +297,22 @@ namespace ClayFinancial.Models.Transaction.Data
       ";
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
       var td = Constants.Get_Data<TransactionData>(query, param, Constants.ConnectionString.ClayFinancial);
-
-      var tr = td.First();
-      tr.department_control_data = ControlData.Get(tr.transaction_id, tr.department_id);
-      tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id);
-
       if (td == null || td.Count() == 0)
       {
         new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query);
         return new TransactionData("There was an issue retrieving the transaction.");
       }
-      // TODO: using statement for call
-      return td.First();
+      var tr = td.First();
+      var controls = ControlData.GetActiveTransactionControls(tr.transaction_id);
+      var payment_methods = PaymentMethodData.GetActiveTransactionPaymentMethods(tr.transaction_id);
+
+      tr.department_control_data = (from c in controls
+                                    where c.department_id.HasValue
+                                    select c).ToList();
+
+      tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id, controls, payment_methods);
+      
+      return tr;
     }
 
     public void SetUserProperties(UserAccess ua)

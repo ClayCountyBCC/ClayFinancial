@@ -13,7 +13,7 @@
 
       </div>
       <div class="navbar-end">
-        <a onclick=""
+        <a onclick="Transaction.Data.TransactionData.RenderTransactionList();"
            class="navbar-item">
           View Transactions
         </a>
@@ -33,34 +33,13 @@
   </div>
 </nav>
 
-<div class="container"
-     id="root">
+<div id="transaction_view"
+     class="container show">
 
-  @*<p>Receipt list here</p>
-    <p>Filters for: </p>
-    <ol>
-      <li>Day</li>
-      <li>Deposited or not</li>
-      <li>Able to search by for control data</li>
-      <li>Deposits versus Receipts</li>
-      <li>By Person?</li>
-      <li>Have to figure out what has to be filtered on the backend versus frontend.</li>
-    </ol>
+</div>
 
-    <hr />
-    <p>Let's make this receipt list the last N transactions, sorted newest to oldest.</p>
-
-    <p>Columns</p>
-    <ol>
-      <li>Transaction Count By Day</li>
-      <li>mm / dd / yyyy hh:mm AMPM </li>
-      <li>Transaction Type </li>
-      <li>Department </li>
-      <li>Check Amount </li>
-      <li>Cash Amount</li>
-    </ol>
-
-    <p>Infinite scroll?</p>*@
+<div id="action_view"
+     class="container hide">
 
 </div>
 
@@ -160,7 +139,7 @@
   <div id="receipt_preview_controls"
        class="level">
     <div class="level-left">
-
+      Please check this against the money you've collected.  Click Save if no changes are needed.
     </div>
     <div class="level-right">
       <div class="level-item buttons">
@@ -223,6 +202,7 @@
   </div>
 
 </div>
+
 <script src="~/scripts/LevelItem.js"></script>
 <script src="~/scripts/Transaction/ControlGroup.js"></script>
 <script src="~/scripts/Transaction/Data/PaymentMethodData.js"></script>

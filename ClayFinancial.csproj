@@ -130,6 +130,23 @@
     </Content>
     <Content Include="lib\ClayCountySeal-64x64.png" />
     <Content Include="lib\fontawesome.min.css" />
+    <Content Include="lib\fontawesome\css\all.css" />
+    <Content Include="lib\fontawesome\css\all.min.css" />
+    <Content Include="lib\fontawesome\css\brands.css" />
+    <Content Include="lib\fontawesome\css\brands.min.css" />
+    <Content Include="lib\fontawesome\css\fontawesome.css" />
+    <Content Include="lib\fontawesome\css\fontawesome.min.css" />
+    <Content Include="lib\fontawesome\css\regular.css" />
+    <Content Include="lib\fontawesome\css\regular.min.css" />
+    <Content Include="lib\fontawesome\css\solid.css" />
+    <Content Include="lib\fontawesome\css\solid.min.css" />
+    <Content Include="lib\fontawesome\css\svg-with-js.css" />
+    <Content Include="lib\fontawesome\css\svg-with-js.min.css" />
+    <Content Include="lib\fontawesome\css\v4-shims.css" />
+    <Content Include="lib\fontawesome\css\v4-shims.min.css" />
+    <Content Include="lib\fontawesome\webfonts\fa-brands-400.svg" />
+    <Content Include="lib\fontawesome\webfonts\fa-regular-400.svg" />
+    <Content Include="lib\fontawesome\webfonts\fa-solid-900.svg" />
     <Content Include="lib\main.css">
       <DependentUpon>main.scss</DependentUpon>
     </Content>
@@ -1866,6 +1883,18 @@
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
     <Content Include="lib\Utilities.scss" />
+    <Content Include="lib\fontawesome\webfonts\fa-brands-400.eot" />
+    <Content Include="lib\fontawesome\webfonts\fa-brands-400.ttf" />
+    <Content Include="lib\fontawesome\webfonts\fa-brands-400.woff" />
+    <Content Include="lib\fontawesome\webfonts\fa-brands-400.woff2" />
+    <Content Include="lib\fontawesome\webfonts\fa-regular-400.eot" />
+    <Content Include="lib\fontawesome\webfonts\fa-regular-400.ttf" />
+    <Content Include="lib\fontawesome\webfonts\fa-regular-400.woff" />
+    <Content Include="lib\fontawesome\webfonts\fa-regular-400.woff2" />
+    <Content Include="lib\fontawesome\webfonts\fa-solid-900.eot" />
+    <Content Include="lib\fontawesome\webfonts\fa-solid-900.ttf" />
+    <Content Include="lib\fontawesome\webfonts\fa-solid-900.woff" />
+    <Content Include="lib\fontawesome\webfonts\fa-solid-900.woff2" />
     <None Include="packages.config" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Transaction\Index.cshtml" />
