@@ -9,8 +9,10 @@ var Transaction;
             let controlgroups = [];
             let controlGroup = new ControlGroup();
             for (let control of controls) {
-                control.rendered_input_element = Transaction.Control.CreateControl(control);
-                controlGroup.controls.push(control);
+                if (control.is_active) {
+                    control.rendered_input_element = Transaction.Control.CreateControl(control);
+                    controlGroup.controls.push(control);
+                }
             }
             controlgroups.push(controlGroup);
             return controlgroups;
@@ -126,7 +128,7 @@ var Transaction;
             }
             return control_data;
         }
-        static CreateInput(input_type, input_length, is_required, placeholder) {
+        static CreateInput(input_type, input_length, is_required, placeholder, input_value = "") {
             let input = document.createElement("input");
             input.type = input_type;
             input.maxLength = input_length;
@@ -137,7 +139,7 @@ var Transaction;
             }
             input.placeholder = placeholder;
             input.required = is_required;
-            input.value = "";
+            input.value = input_value;
             return input;
         }
         static UpdateSelectError(container, error_text = "") {

@@ -21,8 +21,11 @@
       let controlGroup = new ControlGroup();
       for (let control of controls)
       {
-        control.rendered_input_element = Control.CreateControl(control);
-        controlGroup.controls.push(control);
+        if (control.is_active)
+        {
+          control.rendered_input_element = Control.CreateControl(control);
+          controlGroup.controls.push(control);
+        }
       }
       controlgroups.push(controlGroup);
       return controlgroups;
@@ -166,7 +169,7 @@
       return control_data;
     }
 
-    public static CreateInput(input_type: string, input_length: number, is_required: boolean, placeholder: string): HTMLInputElement
+    public static CreateInput(input_type: string, input_length: number, is_required: boolean, placeholder: string, input_value: string = ""): HTMLInputElement
     {
       let input = document.createElement("input");
       input.type = input_type;
@@ -179,7 +182,7 @@
       }
       input.placeholder = placeholder;
       input.required = is_required;
-      input.value = "";
+      input.value = input_value;
       return input;
     }
 

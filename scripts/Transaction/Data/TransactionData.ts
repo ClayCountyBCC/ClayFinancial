@@ -60,13 +60,10 @@
     public selected_department: Department = null;
     private next_payment_type_index: number = 0;
 
-    constructor(transaction_type: string)
+    constructor(transaction_type: string, saved_transaction: TransactionData = null)
     {
-      Utilities.Hide(TransactionData.transaction_view_container);
-      Utilities.Show(TransactionData.action_container);
-      Utilities.Hide(Receipt.receipt_container);
-
       this.transaction_type = transaction_type;
+
       let targetContainer = document.getElementById(TransactionData.action_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer);
@@ -75,14 +72,19 @@
       control_container.classList.add("columns");
       targetContainer.appendChild(control_container);
       this.department_element = <HTMLSelectElement>Transaction.DepartmentControl.cloneNode(true);
-      this.RenderDepartmentSelection(control_container);
-      this.RenderReceivedFromInput(control_container);
+
+      this.RenderDepartmentSelection(control_container, saved_transaction);
+      this.RenderReceivedFromInput(control_container, saved_transaction);
+
+      if (saved_transaction !== null)
+      {
+        this.CloneProperties(saved_transaction);
+      }
+       
       this.transaction_error_element = this.CreateTransactionErrorElement();
       targetContainer.appendChild(this.transaction_error_element);
     }
-
-
-
+       
     private CreateTransactionErrorElement(): HTMLElement
     {
       let e = document.createElement("div");      
@@ -97,14 +99,26 @@
       target.appendChild(title);
     }
 
-    private RenderDepartmentSelection(target: HTMLElement)
+    private RenderDepartmentSelection(target: HTMLElement, saved_transaction: TransactionData)
     {
-      this.department_element.onchange = (event: Event) =>
+      if (saved_transaction === null)
       {
-        this.department_id = parseInt((<HTMLSelectElement>event.target).value);        
+        this.department_element.onchange = (event: Event) =>
+        {
+          this.department_id = parseInt((<HTMLSelectElement>event.target).value);
+          this.selected_department = Department.FindDepartment(this.department_id);
+          this.RenderDepartmentControls();
+          this.RenderPaymentTypes();//sso);
+        }
+      }
+      else
+      {
+        (<HTMLSelectElement>this.department_element).disabled = true;
+        this.department_element.classList.add("disabled"); // see if this does anything
+        this.department_id = saved_transaction.department_id;
         this.selected_department = Department.FindDepartment(this.department_id);
-        this.RenderDepartmentControls();
-        this.RenderPaymentTypes();        
+        this.RenderSavedDepartmentControls(saved_transaction);
+        this.RenderSavedPaymentTypes(saved_transaction);
       }
       this.department_element_container = Department.CreateDepartmentElementField(this.department_element);
       target.appendChild(this.department_element_container);
@@ -129,8 +143,9 @@
       {
         this.department_control_data.push(...group.CreateControlData(departmentControlContainer));
       }
-
     }
+
+
 
     private RenderPaymentTypes()
     {
@@ -192,20 +207,86 @@
 
     }
 
-    private RenderReceivedFromInput(target_container: HTMLElement): void
+    /*
+     * Saved Transaction Rendering functions
+     * 
+     */
+
+    private RenderSavedDepartmentControls(saved_transaction: TransactionData)
     {
-      this.received_from_element = ControlGroup.CreateInput("text", 500, true, "Received From");
-      this.received_from_element.oninput = (event: Event) =>
+      this.department_control_data = [];
+      let departmentControlContainer = document.getElementById(this.department_controls_target);
+      if (departmentControlContainer === null)
       {
-        let e = (<HTMLInputElement>event.target);
-        this.received_from = e.value.trim();
-        this.IsValid();
+        departmentControlContainer = document.createElement("div");
+        departmentControlContainer.id = this.department_controls_target;
+        document.getElementById(TransactionData.action_container).appendChild(departmentControlContainer);
       }
-      this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
-      target_container.appendChild(this.received_from_element_container);
+      Utilities.Clear_Element(departmentControlContainer);
+      if (this.department_id === -1 ||
+        this.selected_department === null ||
+        this.selected_department.controls.length === 0) return;
+
+      for (let group of this.selected_department.control_groups)
+      {
+        this.department_control_data.push(...group.CreateControlData(departmentControlContainer));
+      }
     }
 
-    private AddPaymentType(payment_type: PaymentType, container: HTMLElement): void
+    private RenderSavedPaymentTypes(saved_transaction: TransactionData)
+    {
+      // The primary difference between the RenderSavedPaymentTypes and RenderPaymentTypes functions
+      // is that the RenderPaymentTypes function renders the payment type based on what information
+      // the system is currently set up to expect for that paymenttype.
+      // The RenderSavedPaymentTypes function renders the payment type based on the information
+      // that was saved.  This information may not be vaild for the payment types going forward.
+      this.payment_type_data = saved_transaction.payment_type_data;
+      let paymentTypeContainer = document.getElementById(this.payment_type_target);
+      // if we can't find it, create it.
+      if (paymentTypeContainer === null)
+      {
+        paymentTypeContainer = document.createElement("div");
+        paymentTypeContainer.id = this.payment_type_target;
+        document.getElementById(TransactionData.action_container).appendChild(paymentTypeContainer);
+      }
+
+      Utilities.Clear_Element(paymentTypeContainer);
+      if (this.department_id === -1 || this.selected_department === null) return;
+
+      let ol = document.createElement("ol");
+      ol.classList.add("payment_type");
+
+
+      for (let ptd of this.payment_type_data)
+      {
+        let pt = Transaction.FindPaymentType(ptd.payment_type_id);
+
+        let li = document.createElement("li");
+        li.classList.add("light-function", "is-size-3", "has-background-link");
+        li.style.cursor = "pointer";
+        li.setAttribute("payment_type_id", pt.payment_type_id.toString());
+        let name = document.createElement("span");
+        name.classList.add("name");
+        name.appendChild(document.createTextNode(pt.name));
+        li.appendChild(name);
+
+        let totals = document.createElement("span");
+        totals.classList.add("totals");
+        li.appendChild(totals);
+
+        ol.appendChild(li);
+
+        let controls_container = document.createElement("ol");
+        controls_container.classList.add("control_container");
+
+        ol.appendChild(controls_container);
+        this.AddSavedPaymentType(pt, controls_container);
+      }
+      paymentTypeContainer.appendChild(ol);
+
+    }
+
+    private AddSavedPaymentType(payment_type: PaymentType, container: HTMLElement): void
     {
       let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_index++);
       this.payment_type_data.push(ptd);
@@ -241,6 +322,27 @@
       }
 
     }
+
+
+    private RenderReceivedFromInput(target_container: HTMLElement, saved_transaction: TransactionData): void
+    {
+      let input_value = saved_transaction === null ? "" : saved_transaction.received_from;
+      this.received_from = input_value;
+      this.received_from_element = ControlGroup.CreateInput("text", 500, true, "Received From", input_value);
+      if (saved_transaction === null)
+      {
+        this.received_from_element.oninput = (event: Event) =>
+        {
+          let e = (<HTMLInputElement>event.target);
+          this.received_from = e.value.trim();
+          this.IsValid();
+        }
+      }
+      this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
+      target_container.appendChild(this.received_from_element_container);
+    }
+
+    
        
     private ValidateTransaction(): boolean
     {
@@ -342,7 +444,6 @@
           });
     }
 
-
     /* 
      * Transaction View Code
      */
@@ -351,6 +452,12 @@
     {
       let path = Transaction.GetPath();
       return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString());
+    }
+
+    public static GetSpecificTransaction(transaction_id: number): Promise<TransactionData>
+    {
+      let path = Transaction.GetPath();
+      return Utilities.Get<TransactionData>(path + "API/Transaction/GetTransactionData?transaction_id=" + transaction_id.toString());
     }
 
     public static RenderTransactionList()
@@ -381,10 +488,11 @@
       let tr = document.createElement("tr");
       thead.appendChild(tr);
       tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
-      tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-left", "10%"));
-      tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered", "5%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Number", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", "7.5%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "15%"));
-      tr.appendChild(Utilities.CreateTableCell("th", "No. Checks", "has-text-right", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Checks", "has-text-right", "7.25%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
@@ -397,7 +505,10 @@
     {
       let tr = document.createElement("tr");
       tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
-      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type === "R" ? "Receipt" : "Deposit", "has-text-left"));
+
+      //let transaction_display_value = data.transaction_type + " / " + data.transaction_number;
+      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type, "has-text-centered"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_number, "has-text-left"));
       let status = "";
       if (data.transaction_type === "R")
       {
@@ -440,11 +551,17 @@
       //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
       let listtd = document.createElement("td");
       listtd.classList.add("has-text-right");
-      listtd.appendChild(TransactionData.CreateTableCellIconButton("fa-list", "is-small"));
+      let detailButton = TransactionData.CreateTableCellIconButton("fa-list", "is-small");
+      listtd.appendChild(detailButton);
       tr.appendChild(listtd);
       let printtd = document.createElement("td");
       printtd.classList.add("has-text-right");
-      printtd.appendChild(TransactionData.CreateTableCellIconButton("fa-print", "is-small"));
+      let printButton = TransactionData.CreateTableCellIconButton("fa-print", "is-small");
+      printButton.onclick = () =>
+      {
+        Transaction.ShowReceipt(data.transaction_id);
+      }
+      printtd.appendChild(printButton);
       tr.appendChild(printtd);
 
       //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
@@ -462,6 +579,19 @@
       span.appendChild(i);
       button.appendChild(span);
       return button;
+    }
+
+    /*
+     * Create clientside TransactionData from Serverside Class 
+     */
+
+    public CloneProperties(ss: TransactionData): void
+    {
+      
+      
+
+
+      
     }
 
   }

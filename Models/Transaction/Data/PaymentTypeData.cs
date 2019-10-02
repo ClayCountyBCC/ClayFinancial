@@ -39,11 +39,12 @@ namespace ClayFinancial.Models.Transaction.Data
           CPT.added_on,
           CPT.added_by
         FROM  ClayFinancial.dbo.data_payment_type PT
+        INNER JOIN payment_types P ON P.payment_type_id = PT.payment_type_id
         LEFT OUTER JOIN ClayFinancial.dbo.data_changes_payment_type CPT 
           ON CPT.transaction_payment_type_id = PT.transaction_payment_type_id
         WHERE 
           transaction_id = @transaction_id
-      
+        ORDER BY P.name, PT.payment_type_index;
       ";
 
       var payment_types = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
@@ -53,11 +54,11 @@ namespace ClayFinancial.Models.Transaction.Data
 
         payment_type.control_data = (from c in controls
                                      where c.transaction_payment_type_id.HasValue &&
-                                     c.transaction_payment_type_id.Value == payment_type.payment_type_id
+                                     c.transaction_payment_type_id.Value == payment_type.transaction_payment_type_id
                                      select c).ToList();
 
         payment_type.payment_method_data = (from p in payment_methods
-                                            where p.transaction_payment_type_id == payment_type.payment_type_id
+                                            where p.transaction_payment_type_id == payment_type.transaction_payment_type_id
                                             select p).ToList();
 
       }

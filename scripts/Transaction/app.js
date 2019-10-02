@@ -10,6 +10,8 @@ var Transaction;
 (function (Transaction) {
     Transaction.error_scrolled = false;
     Transaction.departments = [];
+    Transaction.payment_types = [];
+    Transaction.controls = [];
     Transaction.transactions = [];
     Transaction.currentReceipt = null;
     //export let currentTransactionData: Transaction.Data.TransactionData = null;
@@ -19,15 +21,27 @@ var Transaction;
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
                 .then((d) => {
+                Transaction.payment_types = [];
+                Transaction.controls = [];
                 Transaction.departments = d;
                 console.log(d);
                 Transaction.DepartmentControl = Transaction.Department.CreateDepartmentElement(Transaction.departments);
                 for (let department of Transaction.departments) {
+                    let payment_type_ids = Transaction.payment_types.map((pt) => { return pt.payment_type_id; });
+                    Transaction.payment_types = Transaction.payment_types.concat(department.payment_types.filter((pt) => { return payment_type_ids.indexOf(pt.payment_type_id) === -1; }));
+                    let department_control_ids = department.controls.map((c) => { return c.control_id; });
+                    Transaction.controls = Transaction.controls.concat(department.controls.filter((c) => { return department_control_ids.indexOf(c.control_id) === -1; }));
                     department.control_groups = Transaction.ControlGroup.CreateControlGroups(department.controls);
                     for (let paymentType of department.payment_types) {
                         paymentType.control_groups = Transaction.ControlGroup.CreateControlGroups(paymentType.controls);
                     }
                 }
+                for (let payment_type of Transaction.payment_types) {
+                    let control_ids = Transaction.controls.map((c) => { return c.control_id; });
+                    Transaction.controls = Transaction.controls.concat(payment_type.controls.filter((c) => { return control_ids.indexOf(c.control_id) === -1; }));
+                }
+                console.log("all payment types", Transaction.payment_types);
+                console.log("all controls", Transaction.controls);
             });
             yield Transaction.Data.TransactionData.GetTransactionList(1)
                 .then((tv) => {
@@ -39,8 +53,23 @@ var Transaction;
         });
     }
     Transaction.Start = Start;
+    function ShowReceipt(transaction_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (Transaction.currentReceipt === null)
+                Transaction.currentReceipt = new Transaction.Receipt();
+            yield Transaction.Data.TransactionData.GetSpecificTransaction(transaction_id)
+                .then((transaction) => {
+                console.log('transaction to show', transaction);
+                Transaction.currentReceipt.ShowReceipt(transaction);
+            });
+        });
+    }
+    Transaction.ShowReceipt = ShowReceipt;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
+        Utilities.Show(Transaction.Data.TransactionData.action_container);
+        Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.NewReceipt = NewReceipt;
     function NewDeposit() {
@@ -55,5 +84,15 @@ var Transaction;
         return path;
     }
     Transaction.GetPath = GetPath;
+    function FindPaymentType(payment_type_id) {
+        let filtered = Transaction.payment_types.filter((pt) => pt.payment_type_id === payment_type_id);
+        return (filtered.length === 1) ? filtered[0] : null;
+    }
+    Transaction.FindPaymentType = FindPaymentType;
+    function FindControl(control_id) {
+        let filtered = Transaction.controls.filter((c) => c.control_id === control_id);
+        return (filtered.length === 1) ? filtered[0] : null;
+    }
+    Transaction.FindControl = FindControl;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

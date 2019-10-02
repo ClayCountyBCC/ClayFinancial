@@ -50,7 +50,7 @@ var Transaction;
             Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
             Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
             Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
-            this.CreatePaymentTypeDisplay();
+            this.CreatePaymentTypeDisplay(t);
             Utilities.Show(this.receipt_preview_controls_element);
         }
         ShowReceipt(t) {
@@ -64,16 +64,16 @@ var Transaction;
             Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
             Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
             Utilities.Set_Value(this.receipt_department_element, t.department_name);
-            this.CreatePaymentTypeDisplay();
+            this.CreatePaymentTypeDisplay(t);
             Utilities.Hide(this.receipt_preview_controls_element);
         }
-        CreatePaymentTypeDisplay() {
+        CreatePaymentTypeDisplay(t) {
             Utilities.Clear_Element(this.receipt_view_contents_element);
             Utilities.Clear_Element(this.receipt_view_totals_element);
             let check_total = 0;
             let cash_total = 0;
             let check_count = 0;
-            for (let ptd of this.currentTransaction.payment_type_data) {
+            for (let ptd of t.payment_type_data) {
                 let current_check_total = 0;
                 let current_cash_total = 0;
                 let current_check_count = 0;
