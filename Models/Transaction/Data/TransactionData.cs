@@ -66,7 +66,16 @@ namespace ClayFinancial.Models.Transaction.Data
       public NonDepositedReceipts() { }
     }
 
-    public static List<TransactionData> GetTransactionList(UserAccess ua, int page_number)
+
+    public static List<TransactionData> GetTransactionList(
+      UserAccess ua
+      ,int page_number
+      ,string username_filter
+      ,string completed_filter
+      ,string transaction_type_filter
+      ,string transaction_number_filter
+      //,long transaction_id_filter
+      )
     {
       var sb = new StringBuilder();
       var param = new DynamicParameters();
@@ -75,22 +84,21 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var query = @"
 
-         WITH deposit_receipt_count AS (
+        WITH deposit_receipt_count AS (
 
           SELECT
-           child_transaction_id,
-           COUNT(*) deposit_receipt_count
-           FROM data_transaction
-           WHERE child_transaction_id IS NOT NULL
-           GROUP BY child_transaction_id
+            child_transaction_id,
+            COUNT(*) deposit_receipt_count
+            FROM data_transaction
+            WHERE child_transaction_id IS NOT NULL
+            GROUP BY child_transaction_id
 
-         )
-
+        )
+        
         SELECT 
-          T.transaction_id
+           T.transaction_id
           ,T.child_transaction_id
-          ,T.fiscal_year
-          
+          ,T.fiscal_year          
           ,T.transaction_number
           ,T.created_by_display_name
           ,CASE WHEN T.created_by_employee_id = @my_employee_id 
@@ -120,12 +128,61 @@ namespace ClayFinancial.Models.Transaction.Data
           ,T.total_check_count
         FROM ClayFinancial.dbo.data_transaction T
         INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
-        ORDER BY T.transaction_id DESC
+        WHERE 1=1
+
+       
 
       ";
 
       sb.AppendLine(query);
 
+      // set filters
+      if(username_filter.Length > 0)
+      {
+        param.Add("@username_filter", username_filter);
+        sb.AppendLine("AND created_by_display_name = @username_filter");
+      }
+      if(completed_filter.Length > 0)
+      {
+        switch(completed_filter.ToLower())
+        {
+          case "c":
+            sb.AppendLine("AND child_transaction_id IS NOT NULL");
+            break;
+          case "i":
+            sb.AppendLine("AND child_transaction_id IS NULL");
+            break;
+          default:
+            break;
+        }
+      }
+      if(transaction_type_filter.Length > 0)
+      {
+        param.Add("@transaction_type_filter", transaction_type_filter);
+        sb.AppendLine("AND transaction_type = @transaction_type_filter");
+      }
+      if(transaction_number_filter.Length > 0)
+      {
+        var tnp = transaction_number_filter.Split('-');
+
+        param.Add("@fiscal_year", tnp[0]);
+        param.Add("@created_by_employee_id", tnp[1]);
+        param.Add("@employee_transaction_count", tnp[3]);
+
+
+        sb.AppendLine(" AND RIGHT(fiscal_year,2) = @fiscal_year");
+        sb.AppendLine(" AND created_by_employee_id = @created_by_employee_id");
+        sb.AppendLine(" AND employee_transaction_count = CAST(@employee_transaction_count AS SMALLINT)");
+      }
+      /*
+       if(transaction_id_filter > -1)
+       {
+         param.Add("@transaction_id", transaction_id_filter);
+         sb.AppendLine(" AND transaction_id = @transaction_id_filter");
+       }
+       */
+      sb.AppendLine("ORDER BY T.transaction_id DESC");
+      
       if (page_number > 0)
       {
         param.Add("@page_number", (page_number - 1) * page_size);

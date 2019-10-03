@@ -14,10 +14,22 @@ namespace ClayFinancial.Controllers.API
   [RoutePrefix("API/Transaction")]
   public class TransactionDataController : ApiController
   {
-
+    /// <summary>
+    /// 
+    /// 
+    /// </summary>
+    /// <param name="page_number"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("Get")]
-    public IHttpActionResult GetAllTransactionData(int page_number)
+    public IHttpActionResult GetAllTransactionData(
+      int page_number = -1
+      ,string username_filter = ""
+      ,string completed_filter = ""
+      ,string transaction_type_filter = ""
+      ,string transaction_number_filter = ""
+      //,long transaction_id_filter = -1
+    )
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
@@ -26,8 +38,15 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var tr = TransactionData.GetTransactionList(ua, page_number);
-      if(tr == null)
+      var tr = TransactionData.GetTransactionList(ua,
+        page_number
+        ,username_filter
+        ,completed_filter
+        ,transaction_type_filter
+        ,transaction_number_filter
+      //  ,transaction_id_filter
+      );
+      if (tr == null)
       {
         return InternalServerError();
       }
@@ -172,6 +191,8 @@ namespace ClayFinancial.Controllers.API
       return Ok(td);
 
     }
+
+   // edit controls
 
   }
 }
