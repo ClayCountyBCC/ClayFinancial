@@ -25,6 +25,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool added_after_save { get; set; } = false;
     public string modified_by { get; set; } = "";
     public DateTime modified_on { get; set; } = DateTime.MinValue;
+
     public string reason_for_change { get; set; } = "";
     public string error_text { get; set; } = "";
     private string username { get; set; } = "";

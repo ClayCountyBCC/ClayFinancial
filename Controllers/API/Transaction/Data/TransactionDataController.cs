@@ -24,9 +24,9 @@ namespace ClayFinancial.Controllers.API
     [Route("Get")]
     public IHttpActionResult GetAllTransactionData(
       int page_number = -1
-      , string display_name_filter = ""
-      , string completed_filter = ""
-      , int department_id_filter = -1
+      ,string display_name_filter = ""
+      ,string completed_filter = ""
+      ,int department_id_filter = -1
       ,string transaction_type_filter = ""
       ,string transaction_number_filter = ""
       ,bool has_been_modified = false
@@ -41,7 +41,7 @@ namespace ClayFinancial.Controllers.API
       }
 
       var tr = TransactionData.GetTransactionList
-        (ua,
+        (ua
         ,page_number
         ,display_name_filter
         ,completed_filter
@@ -156,6 +156,7 @@ namespace ClayFinancial.Controllers.API
     [Route("EditPaymentMethod")]
     public IHttpActionResult EditPaymentMethod(PaymentMethodData payment_method_data)
     {
+      if (payment_method_data.payment_method_data_id == -1) return Ok("Cannot edit this payment.");
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       //var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       payment_method_data.SetUserName(ua.user_name);
@@ -165,14 +166,14 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
+
       if (!payment_method_data.ValidateChange())
       {
         if(payment_method_data.error_text.Length == 0)
         {
           payment_method_data.error_text = "There was an issue with validating the payment method.";
-
-          return Ok(payment_method_data);
         }
+        return Ok(payment_method_data.error_text);
       }
       else
       {
@@ -185,10 +186,9 @@ namespace ClayFinancial.Controllers.API
           payment_method_data.SaveNewPaymentMethod();
         }
 
-        return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
+        return Ok();
       }
 
-      return InternalServerError();
     }
     [HttpPost]
     [Route("AddPaymentMethod")]
@@ -226,7 +226,7 @@ namespace ClayFinancial.Controllers.API
       //  return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
       //}
 
-      return Ok();
+      return Ok(payment_method_data.error_text);
     }
 
     [HttpPost]
@@ -241,8 +241,6 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      getting only controldataid
-
       control_data.SetUsername(ua.user_name);
 
       if (control_data.control_data_id != -1)
@@ -250,8 +248,9 @@ namespace ClayFinancial.Controllers.API
         if (control_data.department_id != -1)
         {
           control_data.error_text = "Cannot add new department controls";
+          
         }
-
+        return Ok(control_data.error_text);
       }
 
       if (!control_data.ValidateControlData())
@@ -259,14 +258,17 @@ namespace ClayFinancial.Controllers.API
         if (control_data.error_text.Length > 0)
         {
           control_data.error_text = "There was an issue with the control data";
-          return Ok(control_data);
         }
       }
       if(!control_data.UpdateControlData())
       {
-        if(control_data.error_text)
+        if(control_data.error_text.Length == 0)
+        {
+          control_data.error_text = "There was an issue updating the control";
+        }
       }
-      return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
+
+      return Ok(control_data.error_text);
 
     }
 
@@ -295,8 +297,8 @@ namespace ClayFinancial.Controllers.API
 
   }
 
-  control_data return history
+  //control_data return history
 
-  payment_method_data return history
+  //payment_method_data return history
 }
 
