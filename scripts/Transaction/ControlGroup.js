@@ -37,6 +37,7 @@ var Transaction;
             label.classList.add("label", "is-medium");
             if (field_label.length > 0) {
                 if (input.getAttribute("control_data_id") !== null) {
+                    // this is just a test to make sure that I will be able to detect when to add edit value capabilities.
                     label.appendChild(document.createTextNode(field_label + "***"));
                 }
                 else {
