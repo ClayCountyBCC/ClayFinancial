@@ -95,20 +95,15 @@
       {
         console.log('transaction to show', transaction);
         Transaction.currentReceipt = new Receipt(transaction);
-        Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
-        Utilities.Hide(Data.TransactionData.transaction_view_container);
-        Utilities.Show(Data.TransactionData.action_container);
-        Utilities.Hide(Receipt.receipt_container);        
+        Transaction.ViewReceiptDetail();
+
       });
   }
   
   export function NewReceipt()
   {
     Transaction.currentReceipt = new Receipt();
-    Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
-    Utilities.Hide(Data.TransactionData.transaction_view_container);
-    Utilities.Show(Data.TransactionData.action_container);
-    Utilities.Hide(Receipt.receipt_container);
+
   }
 
   export function NewDeposit()
@@ -181,6 +176,38 @@
       });
     //filterRefreshButton
     console.log("Filterin'!");
+  }
+
+  export function ViewReceiptDetail(): void
+  {
+    Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
+    Utilities.Hide(Data.TransactionData.transaction_view_container);
+    Utilities.Show(Data.TransactionData.action_container);
+    Utilities.Hide(Receipt.receipt_container);
+  }
+
+  export function ViewPrintableReceipt(): void
+  {
+    Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
+    Utilities.Hide(Data.TransactionData.transaction_view_container);
+    Utilities.Hide(Data.TransactionData.action_container);
+    Utilities.Show(Receipt.receipt_container);
+  }
+
+  export function ViewTransactions(): void
+  {
+    Utilities.Show(Data.TransactionData.transaction_view_filters_container);
+    Utilities.Show(Data.TransactionData.transaction_view_container);
+    Utilities.Hide(Data.TransactionData.action_container);
+    Utilities.Show(Receipt.receipt_container);
+  }
+
+  export function ViewDeposit(): void
+  {
+    Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
+    Utilities.Hide(Data.TransactionData.transaction_view_container);
+    Utilities.Hide(Data.TransactionData.action_container);
+    Utilities.Hide(Receipt.receipt_container);
   }
 
 }

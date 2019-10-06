@@ -495,10 +495,7 @@
 
     public static RenderTransactionList()
     {
-      Utilities.Show(Data.TransactionData.transaction_view_filters_container);
-      Utilities.Show(TransactionData.transaction_view_container);
-      Utilities.Hide(TransactionData.action_container);
-      Utilities.Hide(Receipt.receipt_container);
+      Transaction.ViewTransactions();
 
       let container = document.getElementById(TransactionData.transaction_view_container);
       Utilities.Clear_Element(container);

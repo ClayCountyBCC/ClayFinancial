@@ -77,20 +77,13 @@ var Transaction;
                 .then((transaction) => {
                 console.log('transaction to show', transaction);
                 Transaction.currentReceipt = new Transaction.Receipt(transaction);
-                Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
-                Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-                Utilities.Show(Transaction.Data.TransactionData.action_container);
-                Utilities.Hide(Transaction.Receipt.receipt_container);
+                Transaction.ViewReceiptDetail();
             });
         });
     }
     Transaction.ShowReceiptDetail = ShowReceiptDetail;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-        Utilities.Show(Transaction.Data.TransactionData.action_container);
-        Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.NewReceipt = NewReceipt;
     function NewDeposit() {
@@ -150,5 +143,33 @@ var Transaction;
         console.log("Filterin'!");
     }
     Transaction.FilterTransactions = FilterTransactions;
+    function ViewReceiptDetail() {
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
+        Utilities.Show(Transaction.Data.TransactionData.action_container);
+        Utilities.Hide(Transaction.Receipt.receipt_container);
+    }
+    Transaction.ViewReceiptDetail = ViewReceiptDetail;
+    function ViewPrintableReceipt() {
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
+        Utilities.Hide(Transaction.Data.TransactionData.action_container);
+        Utilities.Show(Transaction.Receipt.receipt_container);
+    }
+    Transaction.ViewPrintableReceipt = ViewPrintableReceipt;
+    function ViewTransactions() {
+        Utilities.Show(Transaction.Data.TransactionData.transaction_view_filters_container);
+        Utilities.Show(Transaction.Data.TransactionData.transaction_view_container);
+        Utilities.Hide(Transaction.Data.TransactionData.action_container);
+        Utilities.Show(Transaction.Receipt.receipt_container);
+    }
+    Transaction.ViewTransactions = ViewTransactions;
+    function ViewDeposit() {
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
+        Utilities.Hide(Transaction.Data.TransactionData.action_container);
+        Utilities.Hide(Transaction.Receipt.receipt_container);
+    }
+    Transaction.ViewDeposit = ViewDeposit;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map
