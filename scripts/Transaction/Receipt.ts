@@ -52,6 +52,7 @@
     public ShowReceiptPreview(): void
     {
       let t = this.currentTransaction;
+      Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
       Utilities.Hide(Data.TransactionData.transaction_view_container);
       Utilities.Hide(Data.TransactionData.action_container);
       Utilities.Show(this.view_container);
@@ -69,6 +70,7 @@
     public ShowReceipt(t: Transaction.Data.TransactionData): void
     {
       //this.currentTransaction = new Transaction.Data.TransactionData("R", t);
+      Utilities.Hide(Data.TransactionData.transaction_view_filters_container);
       Utilities.Hide(Data.TransactionData.transaction_view_container);
       Utilities.Hide(Data.TransactionData.action_container);
       Utilities.Show(this.view_container);

@@ -17,6 +17,12 @@ var Transaction;
     //export let currentTransactionData: Transaction.Data.TransactionData = null;
     Transaction.DepartmentControl = null;
     Transaction.DepartmentControlContainer = null;
+    Transaction.department_filter = "";
+    Transaction.name_filter = "mine";
+    Transaction.status_filter = "incomplete";
+    Transaction.type_filter = "";
+    Transaction.modified_only_filter = false;
+    Transaction.transaction_number_filter = "";
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
@@ -26,6 +32,7 @@ var Transaction;
                 Transaction.departments = d;
                 console.log(d);
                 Transaction.DepartmentControl = Transaction.Department.CreateDepartmentElement(Transaction.departments);
+                PopulateFilters();
                 for (let department of Transaction.departments) {
                     let payment_type_ids = Transaction.payment_types.map((pt) => { return pt.payment_type_id; });
                     Transaction.payment_types = Transaction.payment_types.concat(department.payment_types.filter((pt) => { return payment_type_ids.indexOf(pt.payment_type_id) === -1; }));
@@ -70,6 +77,7 @@ var Transaction;
                 .then((transaction) => {
                 console.log('transaction to show', transaction);
                 Transaction.currentReceipt = new Transaction.Receipt(transaction);
+                Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
                 Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
                 Utilities.Show(Transaction.Data.TransactionData.action_container);
                 Utilities.Hide(Transaction.Receipt.receipt_container);
@@ -79,6 +87,7 @@ var Transaction;
     Transaction.ShowReceiptDetail = ShowReceiptDetail;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
+        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Show(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
@@ -106,5 +115,39 @@ var Transaction;
         return (filtered.length === 1) ? filtered[0] : null;
     }
     Transaction.FindControl = FindControl;
+    function PopulateFilters() {
+        let departmentSelect = document.getElementById("departmentFilter");
+        departmentSelect.add(Utilities.Create_Option("", "All Departments", true));
+        for (let d of Transaction.departments) {
+            departmentSelect.add(Utilities.Create_Option(d.department_id.toString(), d.name, false));
+        }
+        let nameSelect = document.getElementById("nameFilter");
+        nameSelect.add(Utilities.Create_Option("mine", "My Transactions", true));
+        nameSelect.add(Utilities.Create_Option("", "All Users", false));
+        let statusSelect = document.getElementById("statusFilter");
+        statusSelect.add(Utilities.Create_Option("", "All Statuses", true));
+        statusSelect.add(Utilities.Create_Option("i", "Incomplete", false));
+        statusSelect.add(Utilities.Create_Option("c", "Completed", false));
+        let typeSelect = document.getElementById("typeFilter");
+        typeSelect.add(Utilities.Create_Option("", "All Types", true));
+        typeSelect.add(Utilities.Create_Option("R", "Receipts", false));
+        typeSelect.add(Utilities.Create_Option("D", "Deposits", false));
+    }
+    function FilterTransactions() {
+        Transaction.department_filter = Utilities.Get_Value("departmentFilter");
+        Transaction.name_filter = Utilities.Get_Value("nameFilter");
+        Transaction.status_filter = Utilities.Get_Value("statusFilter");
+        Transaction.type_filter = Utilities.Get_Value("typeFilter");
+        Transaction.modified_only_filter = document.getElementById("modifiedFilter").checked;
+        Transaction.Data.TransactionData.GetTransactionList(1)
+            .then((tv) => {
+            Transaction.transactions = tv;
+            Transaction.Data.TransactionData.RenderTransactionList();
+            console.log('transactions', Transaction.transactions);
+        });
+        //filterRefreshButton
+        console.log("Filterin'!");
+    }
+    Transaction.FilterTransactions = FilterTransactions;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

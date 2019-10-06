@@ -49,6 +49,7 @@
     // client side only stuff
     public static action_container: string = 'action_view';
     public static transaction_view_container: string = 'transaction_view';
+    public static transaction_view_filters_container: string = "transaction_view_filters";
     //public base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
     private department_element_container: HTMLElement = null;
@@ -363,7 +364,7 @@
       }
       else
       {
-        (<HTMLInputElement>this.received_from_element).disabled = true;
+        (<HTMLInputElement>this.received_from_element).readOnly = true;
       }
       this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
       target_container.appendChild(this.received_from_element_container);
@@ -476,7 +477,13 @@
     public static GetTransactionList(page: number): Promise<Array<TransactionData>>
     {
       let path = Transaction.GetPath();
-      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString());
+      let props: Array<string> = [];
+      if (Transaction.name_filter.length > 0) props.push("&displayname=" + Transaction.name_filter);
+      if (Transaction.department_filter.length > 0) props.push("&department=" + Transaction.department_filter);
+      if (Transaction.type_filter.length > 0) props.push("&type=" + Transaction.type_filter);
+      if (Transaction.status_filter.length > 0) props.push("&status=" + Transaction.status_filter);
+      if (Transaction.modified_only_filter) props.push("&modified=true"); 
+      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
     }
 
     public static GetSpecificTransaction(transaction_id: number): Promise<TransactionData>
@@ -487,6 +494,7 @@
 
     public static RenderTransactionList()
     {
+      Utilities.Show(Data.TransactionData.transaction_view_filters_container);
       Utilities.Show(TransactionData.transaction_view_container);
       Utilities.Hide(TransactionData.action_container);
       Utilities.Hide(Receipt.receipt_container);

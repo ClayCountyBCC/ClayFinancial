@@ -37,7 +37,6 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
     public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
-    //public int? number_of_deposit_receipts { get; set; } = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
     public bool has_error { get; set; } = false;
@@ -59,17 +58,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       var query = @"
-
-         WITH deposit_receipt_count AS (
-
-          SELECT
-           child_transaction_id,
-           COUNT(*) deposit_receipt_count
-           FROM data_transaction
-           WHERE child_transaction_id IS NOT NULL
-           GROUP BY child_transaction_id
-
-         )
 
         SELECT 
           T.transaction_id

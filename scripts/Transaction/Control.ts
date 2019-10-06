@@ -65,7 +65,15 @@
     public static CreateSavedControl(control_data: Data.ControlData): HTMLElement
     {
       let control = Control.CreateControl(control_data.control, control_data.value);
-      (<HTMLInputElement>control).disabled = true;
+      if (control.tagName.toLowerCase() !== "select")
+      {
+        (<HTMLInputElement>control).readOnly = true;
+      }
+      else
+      {
+        (<HTMLInputElement>control).disabled = true;
+      }
+      
       control.setAttribute("control_data_id", control_data.control_data_id.toString());
       control.setAttribute("transaction_id", control_data.transaction_id.toString());
       return control;

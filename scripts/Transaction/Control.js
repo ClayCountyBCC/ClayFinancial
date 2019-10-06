@@ -24,7 +24,12 @@ var Transaction;
         }
         static CreateSavedControl(control_data) {
             let control = Control.CreateControl(control_data.control, control_data.value);
-            control.disabled = true;
+            if (control.tagName.toLowerCase() !== "select") {
+                control.readOnly = true;
+            }
+            else {
+                control.disabled = true;
+            }
             control.setAttribute("control_data_id", control_data.control_data_id.toString());
             control.setAttribute("transaction_id", control_data.transaction_id.toString());
             return control;

@@ -263,7 +263,7 @@ var Transaction;
                     };
                 }
                 else {
-                    this.received_from_element.disabled = true;
+                    this.received_from_element.readOnly = true;
                 }
                 this.received_from_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
                 target_container.appendChild(this.received_from_element_container);
@@ -345,13 +345,25 @@ var Transaction;
              */
             static GetTransactionList(page) {
                 let path = Transaction.GetPath();
-                return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString());
+                let props = [];
+                if (Transaction.name_filter.length > 0)
+                    props.push("&displayname=" + Transaction.name_filter);
+                if (Transaction.department_filter.length > 0)
+                    props.push("&department=" + Transaction.department_filter);
+                if (Transaction.type_filter.length > 0)
+                    props.push("&type=" + Transaction.type_filter);
+                if (Transaction.status_filter.length > 0)
+                    props.push("&status=" + Transaction.status_filter);
+                if (Transaction.modified_only_filter)
+                    props.push("&modified=true");
+                return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
             }
             static GetSpecificTransaction(transaction_id) {
                 let path = Transaction.GetPath();
                 return Utilities.Get(path + "API/Transaction/GetTransactionData?transaction_id=" + transaction_id.toString());
             }
             static RenderTransactionList() {
+                Utilities.Show(Data.TransactionData.transaction_view_filters_container);
                 Utilities.Show(TransactionData.transaction_view_container);
                 Utilities.Hide(TransactionData.action_container);
                 Utilities.Hide(Transaction.Receipt.receipt_container);
@@ -461,6 +473,7 @@ var Transaction;
         // client side only stuff
         TransactionData.action_container = 'action_view';
         TransactionData.transaction_view_container = 'transaction_view';
+        TransactionData.transaction_view_filters_container = "transaction_view_filters";
         Data.TransactionData = TransactionData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
 })(Transaction || (Transaction = {}));

@@ -41,6 +41,7 @@ var Transaction;
         }
         ShowReceiptPreview() {
             let t = this.currentTransaction;
+            Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
             Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
             Utilities.Hide(Transaction.Data.TransactionData.action_container);
             Utilities.Show(this.view_container);
@@ -55,6 +56,7 @@ var Transaction;
         }
         ShowReceipt(t) {
             //this.currentTransaction = new Transaction.Data.TransactionData("R", t);
+            Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
             Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
             Utilities.Hide(Transaction.Data.TransactionData.action_container);
             Utilities.Show(this.view_container);
