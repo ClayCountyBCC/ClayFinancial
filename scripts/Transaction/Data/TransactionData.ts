@@ -483,6 +483,7 @@
       if (Transaction.type_filter.length > 0) props.push("&type=" + Transaction.type_filter);
       if (Transaction.status_filter.length > 0) props.push("&status=" + Transaction.status_filter);
       if (Transaction.modified_only_filter) props.push("&modified=true"); 
+      if (Transaction.transaction_number_filter.length > 0) props.push("&transaction_number=" + Transaction.transaction_number_filter);
       return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
     }
 

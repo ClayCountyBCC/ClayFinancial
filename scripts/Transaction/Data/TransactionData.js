@@ -356,6 +356,8 @@ var Transaction;
                     props.push("&status=" + Transaction.status_filter);
                 if (Transaction.modified_only_filter)
                     props.push("&modified=true");
+                if (Transaction.transaction_number_filter.length > 0)
+                    props.push("&transaction_number=" + Transaction.transaction_number_filter);
                 return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
             }
             static GetSpecificTransaction(transaction_id) {

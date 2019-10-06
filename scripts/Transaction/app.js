@@ -138,6 +138,7 @@ var Transaction;
         Transaction.name_filter = Utilities.Get_Value("nameFilter");
         Transaction.status_filter = Utilities.Get_Value("statusFilter");
         Transaction.type_filter = Utilities.Get_Value("typeFilter");
+        Transaction.transaction_number_filter = Utilities.Get_Value("transactionNumberFilter");
         Transaction.modified_only_filter = document.getElementById("modifiedFilter").checked;
         Transaction.Data.TransactionData.GetTransactionList(1)
             .then((tv) => {
