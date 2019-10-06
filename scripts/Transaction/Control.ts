@@ -66,14 +66,6 @@
     {
       let control = Control.CreateControl(control_data.control, control_data.value);
       (<HTMLInputElement>control).disabled = true;
-      //if (control_data.department_id && control_data.department_id > 0)
-      //{
-      //  control.setAttribute("department_id", control_data.control_data_id.toString());
-      //}
-      //if (control_data.transaction_payment_type_id && control_data.transaction_payment_type_id > 0)
-      //{
-      //  control.setAttribute("transaction_payment_type_id", control_data.transaction_payment_type_id.toString());
-      //}
       control.setAttribute("control_data_id", control_data.control_data_id.toString());
       control.setAttribute("transaction_id", control_data.transaction_id.toString());
       return control;
@@ -87,7 +79,27 @@
       input.classList.add("input", "is-medium");      
       input.placeholder = control.label;
       input.required = control.required;
-      input.value = value === null ? "" : value;
+      if (input.type === "date" && value !== null)
+      {
+        let tmp = value.split("/");
+        if (tmp.length === 3)
+        {
+          let v = tmp[2] + '-';
+          v += tmp[0].length === 1 ? "0" + tmp[0] : tmp[0];
+          v += "-";
+          v += tmp[1].length === 1 ? "0" + tmp[1] : tmp[1];
+          input.value = v;
+        }
+        else
+        {
+          input.value = value;// dates need to be in yyyy-mm-dd format
+        }
+      }
+      else
+      {
+        input.value = value === null ? "" : value;
+      }
+      
       input.setAttribute("control_id", control.control_id.toString());
       return input;
     }
@@ -141,17 +153,14 @@
         let option = Utilities.Create_Option(valid_value, valid_value, false);        
         select.appendChild(option);
       }
-      console.log('select value', value, control.valid_values);
       if (value !== null)
       {
-        //select.selectedIndex = -1;
         select.value = value;
       }
       else
       {
         select.value = "-1";
       }
-      console.log("selected value", select, select.value, select.selectedIndex);
       return select;
     }
 

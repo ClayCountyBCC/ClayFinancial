@@ -69,7 +69,7 @@ var Transaction;
                         this.department_id = parseInt(event.target.value);
                         this.selected_department = Transaction.Department.FindDepartment(this.department_id);
                         this.RenderDepartmentControls();
-                        this.RenderPaymentTypes(); //sso);
+                        this.RenderPaymentTypes();
                     };
                 }
                 else {
@@ -219,7 +219,7 @@ var Transaction;
                 let distinct_payment_type_ids = [...new Set(ids)];
                 for (let payment_type_id of distinct_payment_type_ids) {
                     let filtered = saved_transaction.payment_type_data.filter(x => x.payment_type_id === payment_type_id);
-                    let pt = filtered[0].payment_type;
+                    let pt = Transaction.FindPaymentType(filtered[0].payment_type_id); //filtered[0].payment_type;
                     //let pt = Transaction.FindPaymentType(payment_type_id);
                     let li = document.createElement("li");
                     li.classList.add("light-function", "is-size-3", "has-background-link");

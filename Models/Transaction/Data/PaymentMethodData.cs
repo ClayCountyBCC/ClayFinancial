@@ -45,6 +45,7 @@ namespace ClayFinancial.Models.Transaction.Data
           ,pm.transaction_id
           ,pm.cash_amount
           ,pm.check_amount
+          ,pm.check_count
           ,pm.check_number
           ,pm.check_from
           ,pm.paying_for

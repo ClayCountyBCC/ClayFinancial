@@ -43,7 +43,7 @@ var Transaction;
                 }
                 this.RenderPaymentTypeFooter(li);
                 if (saved_payment_type_data !== null)
-                    this.PaymentMethodDataChanged();
+                    this.SavedPaymentMethodDataCalculateTotals(saved_payment_type_data.payment_method_data);
                 this.payment_type_parent_container.appendChild(li);
             }
             Validate() {
@@ -72,7 +72,6 @@ var Transaction;
                 return button;
             }
             RenderPaymentTypeFooter(target_container) {
-                let pt = this.selected_payment_type.name;
                 let items = [];
                 this.total_cash_element = document.createElement("span");
                 this.total_cash_element.classList.add("title");
@@ -83,7 +82,6 @@ var Transaction;
                 this.total_number_checks_element = document.createElement("span");
                 this.total_number_checks_element.classList.add("title");
                 this.total_number_checks_element.appendChild(document.createTextNode("0"));
-                //items.push(new Utilities.LevelItem("", pt, null, "has-text-left"));
                 items.push(new Utilities.LevelItem("Total Cash", "", this.total_cash_element, "has-text-centered"));
                 items.push(new Utilities.LevelItem("Total Checks", "", this.total_checks_element, "has-text-centered"));
                 items.push(new Utilities.LevelItem("# Checks", "", this.total_number_checks_element, "has-text-centered"));
@@ -147,13 +145,25 @@ var Transaction;
                 this.total_checks_element.innerHTML = Utilities.Format_Amount(checks);
                 this.total_number_checks_element.innerHTML = number_checks.toString();
             }
+            SavedPaymentMethodDataCalculateTotals(payment_method_data) {
+                let cash = 0;
+                let checks = 0;
+                let number_checks = 0;
+                for (let pmt of payment_method_data) {
+                    cash += pmt.cash_amount;
+                    checks += pmt.check_amount;
+                    number_checks += pmt.check_count;
+                }
+                this.total_cash_element.innerHTML = Utilities.Format_Amount(cash);
+                this.total_checks_element.innerHTML = Utilities.Format_Amount(checks);
+                this.total_number_checks_element.innerHTML = number_checks.toString();
+            }
             /*
              * Render functions that are for Saved Transactions
              *
              */
             RenderSavedPaymentTypeControls(target_container, saved_payment_type_data) {
                 this.control_groups = Transaction.ControlGroup.CreateSavedControlGroups(saved_payment_type_data.control_data);
-                console.log('saved payment type control groups');
                 for (let group of this.control_groups) {
                     this.control_data.push(...group.CreateControlData(target_container, false));
                 }
@@ -165,9 +175,45 @@ var Transaction;
                 legend.classList.add("label");
                 legend.appendChild(document.createTextNode("Payment Methods"));
                 fieldset.appendChild(legend);
-                this.AddCashPaymentMethod(fieldset);
-                this.AddCheckPaymentMethod(fieldset);
+                let cash_payment_method_data = null;
+                let check_payment_method_data = [];
+                let payment_method_data_copy = [...saved_payment_type_data.payment_method_data];
+                do {
+                    let pmd = payment_method_data_copy.shift();
+                    if (pmd.check_amount > 0 ||
+                        pmd.check_number.length > 0 ||
+                        pmd.check_count > 0 ||
+                        pmd.check_from.length > 0 ||
+                        pmd.paying_for.length > 0) {
+                        check_payment_method_data.push(pmd);
+                    }
+                    else {
+                        if (pmd.cash_amount > 0 || cash_payment_method_data === null) {
+                            cash_payment_method_data = pmd;
+                        }
+                        else {
+                            check_payment_method_data.push(pmd);
+                        }
+                    }
+                } while (payment_method_data_copy.length > 0);
+                this.AddSavedCashPaymentMethod(fieldset, cash_payment_method_data);
+                for (let cpmd of check_payment_method_data) {
+                    this.AddSavedCheckPaymentMethod(fieldset, cpmd);
+                }
                 target_container.appendChild(fieldset);
+            }
+            AddSavedCheckPaymentMethod(target_container, payment_method_data) {
+                let check = new Data.PaymentMethodData(false, false, this.next_payment_method_id++, null, payment_method_data);
+                target_container.appendChild(check.control_to_render);
+                this.payment_method_data.push(check);
+                check.add_check_button_element.onclick = (event) => {
+                    this.AddCheckPaymentMethod(target_container, true);
+                };
+            }
+            AddSavedCashPaymentMethod(target_container, payment_method_data) {
+                let cash = new Data.PaymentMethodData(true, false, this.next_payment_method_id++, null, payment_method_data);
+                target_container.appendChild(cash.control_to_render);
+                this.payment_method_data.push(cash);
             }
         }
         Data.PaymentTypeData = PaymentTypeData;

@@ -73,14 +73,20 @@
 
     public control_to_render: HTMLElement = null;
 
-    constructor(is_cash: boolean, show_cancel: boolean = false, element_id: number, payment_method_amount_change: Function)
+    constructor(
+      is_cash: boolean,
+      show_cancel: boolean = false,
+      element_id: number,
+      payment_method_amount_change: Function,
+      saved_payment_method_data: PaymentMethodData = null)
     {
+      console.log("is_cash", is_cash, "payment_method_data", saved_payment_method_data);
       this.is_cash = is_cash;
       this.show_cancel = show_cancel;
       this.payment_method_data_id = element_id;
       this.payment_method_change = payment_method_amount_change;
-      is_cash ? this.RenderCashControls() : this.RenderCheckControls();
-      
+      is_cash ? this.RenderCashControls(saved_payment_method_data) : this.RenderCheckControls(saved_payment_method_data);
+
     }
 
     public Validate():boolean
@@ -187,120 +193,181 @@
       return e.length === 0;
     }
 
-    private RenderCashControls()
+    private RenderCashControls(payment_method_data: PaymentMethodData)
     {
       let columns = document.createElement("div");
       columns.classList.add("columns");
 
       this.cash_amount_input_element = ControlGroup.CreateInput("number", 15, true, "0");
-      this.cash_amount_input_element.oninput = (event) =>
+      if (payment_method_data === null)
       {
-        this.cash_amount = 0;
-
-        if (this.ValidateCash())
+        this.cash_amount_input_element.oninput = (event) =>
         {
-          this.cash_amount = this.cash_amount_input_element.valueAsNumber;          
-        }
+          this.cash_amount = 0;
 
-        this.payment_method_change();
+          if (this.ValidateCash())
+          {
+            this.cash_amount = this.cash_amount_input_element.valueAsNumber;
+          }
+
+          this.payment_method_change();
+        }
+      }
+      else
+      {
+        this.cash_amount_input_element.value = payment_method_data.cash_amount.toString();
+        this.cash_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.cash_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
       }
       this.cash_amount_input_element_container = ControlGroup.CreateInputFieldContainer(this.cash_amount_input_element, "Cash Amount", true, "is-one-quarter");
       columns.appendChild(this.cash_amount_input_element_container);
       this.control_to_render = columns;
     }
 
-    private RenderCheckControls()
+    private RenderCheckControls(payment_method_data: PaymentMethodData)
     {
       let columns = document.createElement("div");
       columns.classList.add("columns", "is-multiline", "check");
 
       this.check_amount_input_element = ControlGroup.CreateInput("number", 15, false, "0");
-      this.check_amount_input_element.oninput = (event) =>
+
+      if (payment_method_data === null)
       {
-        this.check_amount = 0;
-
-        if (this.ValidateCheckAmount())
+        this.check_amount_input_element.oninput = (event) =>
         {
-          this.check_amount = this.check_amount_input_element.valueAsNumber;
-          if (this.check_amount > 0)
-          {
-            Utilities.Show_Flex(this.check_buttons_container_element);
-            this.check_count_input_element.required = true;
-          }
-          else
-          {
-            Utilities.Hide(this.check_buttons_container_element);
-            this.check_count_input_element.required = false;
-          }
-        }
+          this.check_amount = 0;
 
-        this.payment_method_change();
+          if (this.ValidateCheckAmount())
+          {
+            this.check_amount = this.check_amount_input_element.valueAsNumber;
+            if (this.check_amount > 0)
+            {
+              Utilities.Show_Flex(this.check_buttons_container_element);
+              this.check_count_input_element.required = true;
+            }
+            else
+            {
+              Utilities.Hide(this.check_buttons_container_element);
+              this.check_count_input_element.required = false;
+            }
+          }
+
+          this.payment_method_change();
+        }
+      }
+      else
+      {
+        this.check_amount_input_element.readOnly = true;
+        this.check_amount_input_element.value = payment_method_data.check_amount.toString();
+        this.check_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.check_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
       }
 
       this.check_count_input_element = ControlGroup.CreateInput("number", 5, false, "# of Checks");
       this.check_count_input_element.step = "1";
       this.check_count_input_element.min = "0";
-      this.check_count_input_element.oninput = (event) =>
+      if (payment_method_data === null)
       {
-        if (this.ValidateCheckCount())
+        this.check_count_input_element.oninput = (event) =>
         {
-          this.check_count = (<HTMLInputElement>event.target).valueAsNumber;
-          if (this.check_amount > 0)
+          if (this.ValidateCheckCount())
           {
-            switch (this.check_count)
+            this.check_count = (<HTMLInputElement>event.target).valueAsNumber;
+            if (this.check_amount > 0)
             {
-              case 0:
-                ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Partial Check");
-                break;
+              switch (this.check_count)
+              {
+                case 0:
+                  ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Partial Check");
+                  break;
 
-              case 1:
-                ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Single Check");
-                break;
+                case 1:
+                  ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Single Check");
+                  break;
 
-              default:
-                ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Bulk Check");
+                default:
+                  ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "Bulk Check");
+              }
             }
+            else
+            {
+              ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "");
+            }
+
           }
           else
           {
             ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "");
           }
-
+          this.payment_method_change();
         }
-        else
-        {
-          ControlGroup.UpdateInputGuide(this.check_count_input_element_container, "");
-        }
-        this.payment_method_change();
+      }
+      else
+      {
+        this.check_count_input_element.readOnly = true;
+        this.check_count_input_element.value = payment_method_data.check_count.toString();
+        this.check_count_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.check_count_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
       }
 
+
       this.check_number_input_element = ControlGroup.CreateInput("text", 50, false, "Check Number");
-      this.check_number_input_element.oninput = (event) =>
+      if (payment_method_data === null)
       {
-        if (this.ValidateCheckNumber())
+        this.check_number_input_element.oninput = (event) =>
         {
-          this.check_number = (<HTMLInputElement>event.target).value;
+          if (this.ValidateCheckNumber())
+          {
+            this.check_number = (<HTMLInputElement>event.target).value;
+          }
         }
-        
+      }
+      else
+      {
+        this.check_number_input_element.readOnly = true;
+        this.check_number_input_element.value = payment_method_data.check_number;
+        this.check_number_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.check_number_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
       }
 
       this.paying_for_input_element = ControlGroup.CreateInput("text", 500, false, "Check Paying For");
-      this.paying_for_input_element.oninput = (event) =>
+      if (payment_method_data === null)
       {
-        if (this.ValidatePayingFor())
+        this.paying_for_input_element.oninput = (event) =>
         {
-          this.paying_for = (<HTMLInputElement>event.target).value;
+          if (this.ValidatePayingFor())
+          {
+            this.paying_for = (<HTMLInputElement>event.target).value;
+          }
         }
+      }
+      else
+      {
+        this.paying_for_input_element.readOnly = true;
+        this.paying_for_input_element.value = payment_method_data.paying_for;
+        this.paying_for_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.paying_for_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
       }
 
       this.check_from_input_element = ControlGroup.CreateInput("text", 500, false, "Check From");
-      this.check_from_input_element.oninput = (event) =>
+      if (payment_method_data === null)
       {
-        if (this.ValidateCheckFrom())
+        this.check_from_input_element.oninput = (event) =>
         {
-          this.check_from = (<HTMLInputElement>event.target).value;
+          if (this.ValidateCheckFrom())
+          {
+            this.check_from = (<HTMLInputElement>event.target).value;
+          }
         }
       }
+      else
+      {
+        this.check_from_input_element.readOnly = true;
+        this.check_from_input_element.value = payment_method_data.check_from;
+        this.check_from_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
+        this.check_from_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+      }
+
       this.add_check_button_element = document.createElement("button");
       this.add_check_button_element.classList.add("button", "is-info", "is-medium");
       this.add_check_button_element.appendChild(document.createTextNode("Add Another Check"));

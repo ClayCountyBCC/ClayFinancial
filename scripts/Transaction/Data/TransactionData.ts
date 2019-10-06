@@ -108,7 +108,7 @@
           this.department_id = parseInt((<HTMLSelectElement>event.target).value);
           this.selected_department = Department.FindDepartment(this.department_id);
           this.RenderDepartmentControls();
-          this.RenderPaymentTypes();//sso);
+          this.RenderPaymentTypes();
         }
       }
       else
@@ -300,7 +300,7 @@
       {
         let filtered = saved_transaction.payment_type_data.filter(x => x.payment_type_id === payment_type_id);
 
-        let pt = filtered[0].payment_type;
+        let pt = Transaction.FindPaymentType(filtered[0].payment_type_id); //filtered[0].payment_type;
         //let pt = Transaction.FindPaymentType(payment_type_id);
 
         let li = document.createElement("li");
