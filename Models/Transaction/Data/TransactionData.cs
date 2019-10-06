@@ -37,7 +37,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int created_by_employee_department_id { get; set; } = -1;
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
-    public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
+    //public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
     //public int? number_of_deposit_receipts { get; set; } = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
@@ -73,6 +73,8 @@ namespace ClayFinancial.Models.Transaction.Data
       ,string completed_filter
       ,string transaction_type_filter
       ,string transaction_number_filter
+      ,int department_id_filter
+      ,bool has_been_modified
       //,long transaction_id_filter
       )
     {
@@ -164,14 +166,22 @@ namespace ClayFinancial.Models.Transaction.Data
       {
         var tnp = transaction_number_filter.Split('-');
 
-        param.Add("@fiscal_year", tnp[0]);
-        param.Add("@created_by_employee_id", tnp[1]);
-        param.Add("@employee_transaction_count", tnp[3]);
+        param.Add("@transaction_number", transaction_number_filter);
+        sb.AppendLine(" AND transaction_number = ");
 
 
         sb.AppendLine(" AND RIGHT(fiscal_year,2) = @fiscal_year");
         sb.AppendLine(" AND created_by_employee_id = @created_by_employee_id");
         sb.AppendLine(" AND employee_transaction_count = CAST(@employee_transaction_count AS SMALLINT)");
+      }
+      if(department_id_filter > 0)
+      {
+        param.Add("@department_id", department_id_filter);
+        sb.AppendLine(@"  AND department_id = @department_id");
+      }
+      if(has_been_modified)
+      {
+        sb.AppendLine(" AND has_been_modified = 1");
       }
       /*
        if(transaction_id_filter > -1)
@@ -192,7 +202,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       foreach (var t in td)
       {
-
+        // TODO: ADD ANYTHING THAT NEEDS TO BE DONE BEFORE RETURNING THE LIST FOR EACH TRANSACTION HERE.
       }
 
       return td;

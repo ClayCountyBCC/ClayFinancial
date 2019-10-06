@@ -223,8 +223,8 @@ namespace ClayFinancial.Models.Transaction.Data
         ,@check_number 
         ,@check_from 
         ,@paying_for 
-        ,1
-        ,1
+        ,@is_active
+        ,@added_after_save
       )
 
       SET @payment_method_data_id = SCOPE_IDENTITY();
@@ -255,6 +255,12 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = GetPaymentMethodParameters();
 
       var query = @"
+        DECLARE @original_payment_method_id BIGINT = 
+        (
+          SELECT ISNULL(original_payment_method_data_id, @prior_payment_method_data_id)
+          FROM data_changes_payment_method
+          WHERE new_payment_method_data_id = @prior_payment_method_data_id
+        );
 
         INSERT INTO data_payment_method
         (
@@ -281,15 +287,14 @@ namespace ClayFinancial.Models.Transaction.Data
           ,@check_number 
           ,@check_from 
           ,@paying_for 
-          ,1
-          ,1
+          ,1 -- is_active
+          ,CASE WHEN LEN(reason_for_change) = 0 THEN 1 ELSE 0 END
         )
 
         SET @payment_method_data_id = SCOPE_IDENTITY();
-
+        
         INSERT INTO data_changes_payment_method
         (
-          original_payment_method_data_id
           ,new_payment_method_data_id
           ,modified_by
           ,modified_on

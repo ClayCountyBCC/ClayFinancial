@@ -24,10 +24,12 @@ namespace ClayFinancial.Controllers.API
     [Route("Get")]
     public IHttpActionResult GetAllTransactionData(
       int page_number = -1
-      ,string username_filter = ""
-      ,string completed_filter = ""
+      , string display_name_filter = ""
+      , string completed_filter = ""
+      , int department_id_filter = -1
       ,string transaction_type_filter = ""
       ,string transaction_number_filter = ""
+      ,bool has_been_modified = false
       //,long transaction_id_filter = -1
     )
     {
@@ -38,12 +40,15 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var tr = TransactionData.GetTransactionList(ua,
-        page_number
-        ,username_filter
+      var tr = TransactionData.GetTransactionList
+        (ua,
+        ,page_number
+        ,display_name_filter
         ,completed_filter
         ,transaction_type_filter
         ,transaction_number_filter
+        ,department_id_filter
+        ,has_been_modified //   only true matters
       //  ,transaction_id_filter
       );
       if (tr == null)
@@ -110,7 +115,7 @@ namespace ClayFinancial.Controllers.API
     }
 
     [HttpPost]
-    [Route("AddPaymentType")]
+    [Route("EditPaymentTypes")]
     public IHttpActionResult AddPaymentType(List<PaymentTypeData> payment_types_data)
     {
       if (!payment_types_data.Any()) return Ok(new TransactionData() {error_text = "there are no payment types in the list" }); ;
@@ -132,7 +137,7 @@ namespace ClayFinancial.Controllers.API
           if (pt.error_text.Length > 0)
           {
             pt.error_text = "There was an issue with this payment type.";
-            return Ok(payment_types_data);
+            return Ok("There was an issue with the payment type data");
           }
         }
       }
@@ -148,8 +153,8 @@ namespace ClayFinancial.Controllers.API
     }
 
     [HttpPost]
-    [Route("EditPaymentMethods")]
-    public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
+    [Route("EditPaymentMethod")]
+    public IHttpActionResult EditPaymentMethod(PaymentMethodData payment_method_data)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       //var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -185,9 +190,47 @@ namespace ClayFinancial.Controllers.API
 
       return InternalServerError();
     }
+    [HttpPost]
+    [Route("AddPaymentMethod")]
+    public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
+    {
+      //var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      ////var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      //payment_method_data.SetUserName(ua.user_name);
+
+      //if (ua.current_access == UserAccess.access_type.no_access)
+      //{
+      //  return Unauthorized();
+      //}
+
+      //if (!payment_method_data.ValidateChange())
+      //{
+      //  if (payment_method_data.error_text.Length == 0)
+      //  {
+      //    payment_method_data.error_text = "There was an issue with validating the payment method.";
+
+      //    return Ok(payment_method_data);
+      //  }
+      //}
+      //else
+      //{
+      //  if (payment_method_data.payment_method_data_id > -1)
+      //  {
+      //    payment_method_data.EditPaymentMethod();
+      //  }
+      //  else
+      //  {
+      //    payment_method_data.SaveNewPaymentMethod();
+      //  }
+
+      //  return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
+      //}
+
+      return Ok();
+    }
 
     [HttpPost]
-    [Route("UpdateControl")]
+    [Route("EditControls")]
     public IHttpActionResult UpdateControl(ControlData control_data)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
@@ -197,6 +240,8 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
+
+      getting only controldataid
 
       control_data.SetUsername(ua.user_name);
 
@@ -217,7 +262,11 @@ namespace ClayFinancial.Controllers.API
           return Ok(control_data);
         }
       }
-      return Ok(control_data.UpdateControlData());
+      if(!control_data.UpdateControlData())
+      {
+        if(control_data.error_text)
+      }
+      return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
 
     }
 
@@ -245,5 +294,9 @@ namespace ClayFinancial.Controllers.API
    // edit controls
 
   }
+
+  control_data return history
+
+  payment_method_data return history
 }
 
