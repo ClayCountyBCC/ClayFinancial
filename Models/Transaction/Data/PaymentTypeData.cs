@@ -110,6 +110,7 @@ namespace ClayFinancial.Models.Transaction.Data
       if (!payment_type_data.Any()) return false;
       var transaction_id = payment_type_data.FirstOrDefault().transaction_id;
       var param = new DynamicParameters();
+
       param.Add("@transaction_id", payment_type_data.FirstOrDefault().transaction_id);
       param.Add("@created_by_employee_id", ua.employee_id);
       param.Add("@username", ua.user_name);
@@ -121,7 +122,9 @@ namespace ClayFinancial.Models.Transaction.Data
       StringBuilder query = new StringBuilder();
       query.AppendLine(@"
           USE ClayFinancial;
-     
+          DECLARE @new_payment_type_data_id BIGINT = -1;
+
+
           ");
 
 
@@ -220,7 +223,7 @@ namespace ClayFinancial.Models.Transaction.Data
           payment_type_id,
           payment_type_index
         FROM @PaymentTypeData; 
-              
+        
         ";
 
     }

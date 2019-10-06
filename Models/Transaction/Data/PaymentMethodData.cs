@@ -27,6 +27,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public DateTime modified_on { get; set; } = DateTime.MinValue;
     public string reason_for_change { get; set; } = "";
     public string error_text { get; set; } = "";
+    private string username { get; set; } = "";
 
     public PaymentMethodData()
     {
@@ -91,6 +92,32 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return dt;
     }
+    
+    public bool ValidateChange()
+    {
+
+      if (transaction_id == -1)
+      {
+        error_text = "No transaction id available. Cannot save the payment method.";
+        return false;
+      }
+
+      if (!prior_payment_method_data_id.HasValue)
+      {
+        error_text = "There was an issue with the updated payment method";
+        return false;
+      }
+
+      if (reason_for_change.Length == 0)
+      {
+        error_text = "Please enter a reason for the change to this payment method";
+        return false;
+      }
+
+      //Need to be able to validate the number of checks has now changed from one person to the next.;
+
+      return ValidateNew();
+    }
 
     public bool ValidateNew()
     {
@@ -120,43 +147,13 @@ namespace ClayFinancial.Models.Transaction.Data
         }
       }
 
-
-
       if (check_number.Length > 0 && check_amount <= 0)
       {
-        error_text = "No amount was entered for check number " + check_number ;
+        error_text = "No amount was entered for check number " + check_number;
         return false;
       }
-
-      //if (check_number.Length > 0 && paying_for.Length == 0)
-      //{
-      //  error_text = "A check must have the 'Paying For' field filled out";
-      //  return false;
-      //}
 
       return true;
-    }
-    
-
-    public bool ValidateChange()
-    {
-     
-      if (!prior_payment_method_data_id.HasValue)
-      {
-        error_text = "There was an issue with the updated payment method";
-        return false;
-      }
-
-      if (reason_for_change.Length == 0)
-      {
-        
-        error_text = "Please enter a reason for the change to this payment method";
-        return false;
-      }
-
-      //Need to be able to validate the number of checks has now changed from one person to the next.;
-
-      return ValidateNew();
     }
 
     public static string GetSavePaymentMethodsQuery()
@@ -195,7 +192,146 @@ namespace ClayFinancial.Models.Transaction.Data
                 ";
     }
 
+    public bool SaveNewPaymentMethod()
+    {
+      var param = GetPaymentMethodParameters();
 
+      var query = @"
+
+      INSERT INTO data_payment_method
+      (
+        prior_payment_method_data_id
+        ,transaction_payment_type_id 
+        ,transaction_id 
+        ,cash_amount 
+        ,check_amount 
+        ,check_count 
+        ,check_number 
+        ,check_from 
+        ,paying_for 
+        ,is_active 
+        ,added_after_save
+      )
+      VALUES
+      (
+        NULL
+        ,@transaction_payment_type_id 
+        ,@transaction_id 
+        ,@cash_amount 
+        ,@check_amount 
+        ,@check_count 
+        ,@check_number 
+        ,@check_from 
+        ,@paying_for 
+        ,1
+        ,1
+      )
+
+      SET @payment_method_data_id = SCOPE_IDENTITY();
+
+      INSERT INTO data_changes_payment_method
+      (
+        original_payment_method_data_id
+        ,new_payment_method_data_id
+        ,modified_by
+        ,modified_on
+        ,reason_for_change
+      )
+      VALUES
+      (
+        @payment_method_data_id,
+        @payment_method_data_id, 
+        @username, 
+        GETDATE(),
+        @reason_for_change
+      )
+
+";
+      return Constants.Exec_Scalar<PaymentMethodData>(query, Constants.ConnectionString.ClayFinancial, param) != null;
+    }
+
+    public bool EditPaymentMethod()
+    {
+      var param = GetPaymentMethodParameters();
+
+      var query = @"
+
+        INSERT INTO data_payment_method
+        (
+          prior_payment_method_data_id
+          ,transaction_payment_type_id 
+          ,transaction_id 
+          ,cash_amount 
+          ,check_amount 
+          ,check_count 
+          ,check_number 
+          ,check_from 
+          ,paying_for 
+          ,is_active 
+          ,added_after_save
+        )
+        VALUES
+        (
+          NULL
+          ,@transaction_payment_type_id 
+          ,@transaction_id 
+          ,@cash_amount 
+          ,@check_amount 
+          ,@check_count 
+          ,@check_number 
+          ,@check_from 
+          ,@paying_for 
+          ,1
+          ,1
+        )
+
+        SET @payment_method_data_id = SCOPE_IDENTITY();
+
+        INSERT INTO data_changes_payment_method
+        (
+          original_payment_method_data_id
+          ,new_payment_method_data_id
+          ,modified_by
+          ,modified_on
+          ,reason_for_change
+        )
+        VALUES
+        (
+          @payment_method_data_id,
+          @payment_method_data_id, 
+          @username, 
+          GETDATE(),
+          @reason_for_change
+        )
+
+      ";
+
+      return Constants.Exec_Scalar<PaymentMethodData>(query, Constants.ConnectionString.ClayFinancial, param) != null;
+
+    }
+    private DynamicParameters GetPaymentMethodParameters()
+    {
+      var param = new DynamicParameters();
+      param.Add("@payment_method_data_id", payment_method_data_id);
+      param.Add("@prior_payment_method_data_id", prior_payment_method_data_id);
+      param.Add("@transaction_payment_type_id", transaction_payment_type_id);
+      param.Add("@transaction_id",transaction_id);
+      param.Add("@cash_amount",cash_amount);
+      param.Add("@check_amount",check_amount);
+      param.Add("@check_count",check_count);
+      param.Add("@check_number",check_number);
+      param.Add("@check_from",check_from);
+      param.Add("@paying_for",paying_for);
+      param.Add("@reason_for_change",reason_for_change);
+      param.Add("@username", username);
+      
+      return param;
+    }
+
+    public void SetUserName(string un)
+    {
+      this.username = un;
+    }
   }
 }
  

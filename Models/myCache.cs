@@ -94,8 +94,9 @@ namespace ClayFinancial.Models
         case "payment_types":
           return PaymentType.Get();
 
+        case "controls_dict":
+          return Control.Get_Dict();
 
-        
         case "useraccess":
           return UserAccess.GetAllUserAccess();
 

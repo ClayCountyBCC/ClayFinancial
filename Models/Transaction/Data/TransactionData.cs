@@ -7,7 +7,6 @@ using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 using ClayFinancial.Models.Transaction;
-using System.Text;
 
 namespace ClayFinancial.Models.Transaction.Data
 {

@@ -79,6 +79,10 @@ namespace ClayFinancial.Models.Transaction
 
       return departments;
     }
+    public static List<Department> GetCached()
+    {
+      return (List<Department>)myCache.GetItem("departments");
+    }
 
     public static Dictionary<int, Department> Get_Dict()
     {
@@ -90,12 +94,6 @@ namespace ClayFinancial.Models.Transaction
       }
       return d;
     }
-
-    public static List<Department> GetCached()
-    {
-      return (List<Department>)myCache.GetItem("departments");
-    }
-
     public static Dictionary<int, Department> GetCachedDict()
     {
       return (Dictionary<int, Department>)myCache.GetItem("departments_dict");

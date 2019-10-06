@@ -23,6 +23,9 @@ namespace ClayFinancial.Controllers.MVC
       // test new list of transaction data with pagination (page_number)
       // var tr = TransactionData.GetTransactionList(Models.UserAccess.GetUserAccess(User.Identity.Name),1);
 
+      // test new control; department controls cannot be added. only payment type controls
+      // var control = Control.SaveControl
+
       ViewBag.Development = Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
       return View();
     }

@@ -123,52 +123,102 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var td = new TransactionData();
-
-      td.payment_type_data = payment_types_data;
       // todo add validation check to see if user can add payment type to this transaction
       foreach (var pt in payment_types_data)
       {
         if (!pt.ValidateChangePaymentType())
         {
           // probable should return the entire transaction with a save error
-          td.has_error = true;
-
-          if (pt.error_text.Length > 0) return Ok(td);
-
+          if (pt.error_text.Length > 0)
+          {
+            pt.error_text = "There was an issue with this payment type.";
+            return Ok(payment_types_data);
+          }
         }
       }
 
-      if(td.has_error)
-      {
-        td.error_text = "There was an issue validating the new payment type(s)";
-        return Ok(td);
-      }
 
       if(!PaymentTypeData.SaveChangePaymentTypeData(payment_types_data, ua,user_ip_address))
       {
         return InternalServerError();
       }
 
-      return Ok(td);
+      return Ok(TransactionData.GetTransactionData(payment_types_data.First().transaction_id));
      
     }
 
     [HttpPost]
-    [Route("ChangePaymentMethod")]
-    public IHttpActionResult AddPaymentType(PaymentMethodData payment_method_data)
+    [Route("EditPaymentMethods")]
+    public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      //var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      payment_method_data.SetUserName(ua.user_name);
+
       if (ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
       }
-      if (payment_method_data.ValidateChange())
+
+      if (!payment_method_data.ValidateChange())
       {
+        if(payment_method_data.error_text.Length == 0)
+        {
+          payment_method_data.error_text = "There was an issue with validating the payment method.";
+
+          return Ok(payment_method_data);
+        }
+      }
+      else
+      {
+        if(payment_method_data.payment_method_data_id > -1)
+        {
+          payment_method_data.EditPaymentMethod();
+        }
+        else
+        {
+          payment_method_data.SaveNewPaymentMethod();
+        }
+
         return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
       }
+
       return InternalServerError();
+    }
+
+    [HttpPost]
+    [Route("UpdateControl")]
+    public IHttpActionResult UpdateControl(ControlData control_data)
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      //var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+
+      control_data.SetUsername(ua.user_name);
+
+      if (control_data.control_data_id != -1)
+      {
+        if (control_data.department_id != -1)
+        {
+          control_data.error_text = "Cannot add new department controls";
+        }
+
+      }
+
+      if (!control_data.ValidateControlData())
+      {
+        if (control_data.error_text.Length > 0)
+        {
+          control_data.error_text = "There was an issue with the control data";
+          return Ok(control_data);
+        }
+      }
+      return Ok(control_data.UpdateControlData());
+
     }
 
     [HttpGet]

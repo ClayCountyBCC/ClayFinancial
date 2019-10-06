@@ -22,6 +22,8 @@ namespace ClayFinancial.Models.Transaction
     public string validation_regex { get; set; } = "";
     public string render_hints { get; set; } = "";
     public bool is_printed { get; set; } = true;
+    public Dictionary<int, Control> controls_dict { get; set; } = new Dictionary<int, Control>();
+
 
     public Control() { }
 
@@ -160,5 +162,24 @@ namespace ClayFinancial.Models.Transaction
       return true;
     }
 
+    public bool ValidateUpdatedControl(Data.ControlData cd)
+    {
+      return Validate(cd);
+    }
+
+    public static Dictionary<int, Control> Get_Dict()
+    {
+      var controls = Control.GetCached();
+      var c = new Dictionary<int, Control>();
+      foreach (Control control in controls)
+      {
+        c[control.control_id] = control;
+      }
+      return c;
+    }
+    public static Dictionary<int, Control> GetCachedDict()
+    {
+      return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
+    }
   }
 }

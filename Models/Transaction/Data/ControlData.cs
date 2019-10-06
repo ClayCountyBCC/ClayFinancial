@@ -24,6 +24,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string modified_by { get; set; } = "";
     public string reason_for_change { get; set; } = "";
     public string error_text { get; set; } = "";
+    private string username { get; set; } = "";
     public ControlData()
     {
       
@@ -153,6 +154,100 @@ namespace ClayFinancial.Models.Transaction.Data
       ";
   }
 
+    public bool ValidateControlData()
+    {
+      var controls = Control.GetCachedDict();
+
+      return controls[control_id].Validate(this);
+
+      
+    }
+
+    public bool UpdateControlData()
+    {
+
+      var query = @"
+
+        INSERT INTO data_control
+        (
+          transaction_payment_type_id
+          ,prior_control_data_id
+          ,department_id
+          ,transaction_id
+          ,control_id
+          ,value
+          ,is_active
+        )
+        VALUES
+        (
+          CASE WHEN @transaction_payment_type_id = -1 THEN NULL ELSE @transaction_payment_type_id END
+          ,@prior_control_data_id
+          ,CASE WHEN @department_id = -1 THEN NULL ELSE @department_id END
+          ,@transaction_id
+          ,@control_id
+          ,@value
+          ,1
+        )
+ 
+        SET @new_control_data_id = SCOPE_IDENTITY();
+
+        IF @prior_control_data_id > -1
+          BEGIN
+
+            UPDATE data_control
+            SET is_active = 0
+            WHERE control_data_id = @prior_control_data_id;
+
+            INSERT INTO data_changes_control
+            (
+               original_control_data_id
+               ,new_control_data_id
+               ,modified_by
+               ,modified_on
+               ,reason_for_change
+            )
+
+            VALUES
+            (
+              @prior_control_data_id
+              ,@new_control_data_id
+              ,@username
+              ,GETDATE()
+              ,@reason_for_change
+            )
+          END
+
+      ";
+
+      return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
+    }
+
+    public bool EditControlData()
+    {
+      return false;
+    }
+
+    private DynamicParameters GetControlDataParameters()
+    {
+      var param = new DynamicParameters();
+
+      param.Add("@transaction_id", transaction_id);
+      param.Add("@prior_control_data_id", prior_control_data_id);
+      param.Add("@transaction_payment_type_id", transaction_payment_type_id);
+      param.Add("@department_id", department_id);
+      param.Add("@control_id", control_id);
+      param.Add("@value", value);
+      param.Add("@username", username);
+      param.Add("@reason_for_change",reason_for_change);
+
+
+      return param;
+    }
+
+    public void SetUsername(string un)
+    {
+      username = un;
+    }
     //public TransactionData ValidateTransactionData(TransactionData transactionData)
     //{
     //  // We treat the Data.TransactionData class as a department class because it has all of the
