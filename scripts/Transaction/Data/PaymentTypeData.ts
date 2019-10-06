@@ -6,6 +6,7 @@
     payment_type_id: number;
     payment_type_index: number
     transaction_id: number;
+    payment_type: PaymentType;
     control_data: Array<ControlData>;
     payment_method_data: Array<PaymentMethodData>;
     error_text: string;
@@ -18,7 +19,8 @@
     public transaction_id: number = -1;
     public payment_type_id: number = -1;
     public payment_type_index: number = -1;
-    public control_data: Array<ControlData> = [];
+    public payment_type: PaymentType = null;    
+    public control_data: Array<ControlData> = [];    
     public added_after_save: boolean = false;
     public error_text: string = "";
     public payment_method_data: Array<PaymentMethodData> = [];
@@ -26,10 +28,11 @@
     //clientside controls
     private payment_type_parent_container: HTMLElement = null;
     public payment_type_container: HTMLElement = null;    
-    public selected_payment_type: PaymentType = null;
+    public selected_payment_type: PaymentType = null; // this is used by the new receipt process.  payment_type is used when you view an existing transaction.
     public cancel_payment_type_button: HTMLElement = null;
     public add_another_payment_type_button: HTMLElement = null;
-    public save_button: HTMLElement = null;
+    public save_button: HTMLElement = null;    
+    public control_groups: Array<ControlGroup> = [];
     private total_cash_element: HTMLElement = null;
     private total_checks_element: HTMLElement = null;
     private total_number_checks_element: HTMLElement = null;
@@ -38,21 +41,36 @@
     constructor(
       payment_type: PaymentType,
       target_container: HTMLElement,
-      payment_type_index: number)
+      payment_type_index: number,
+      saved_payment_type_data: PaymentTypeData = null)
     {
       this.selected_payment_type = payment_type;
       this.payment_type_parent_container = target_container;
-      this.payment_type_id = payment_type.payment_type_id;      
-      this.payment_type_index = payment_type_index;
+      this.payment_type_id = payment_type.payment_type_id;
 
+      this.payment_type_index = saved_payment_type_data !== null ? saved_payment_type_data.payment_type_index : payment_type_index;
+           
       let li = document.createElement("li");
       li.style.display = "block";
 
       this.payment_type_container = li;
 
-      this.RenderPaymentTypeControls(li);      
-      this.RenderPaymentMethods(li);
+      console.log("New PaymentTypeData PaymentTypeData", saved_payment_type_data);
+
+      if (saved_payment_type_data !== null)
+      {
+        this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
+        this.RenderSavedPaymentMethods(li, saved_payment_type_data);
+      }
+      else
+      {
+        this.RenderPaymentTypeControls(li);
+        this.RenderPaymentMethods(li);
+      }
       this.RenderPaymentTypeFooter(li);
+
+      if (saved_payment_type_data !== null) this.PaymentMethodDataChanged();
+
       this.payment_type_parent_container.appendChild(li);
     }
 
@@ -185,6 +203,36 @@
       this.total_cash_element.innerHTML = Utilities.Format_Amount(cash);
       this.total_checks_element.innerHTML = Utilities.Format_Amount(checks);
       this.total_number_checks_element.innerHTML = number_checks.toString();
+    }
+
+    /*
+     * Render functions that are for Saved Transactions 
+     * 
+     */
+
+    private RenderSavedPaymentTypeControls(target_container: HTMLLIElement, saved_payment_type_data: PaymentTypeData)
+    {
+
+      this.control_groups = ControlGroup.CreateSavedControlGroups(saved_payment_type_data.control_data);
+      console.log('saved payment type control groups', )
+      for (let group of this.control_groups)
+      {
+        this.control_data.push(...group.CreateControlData(target_container, false));
+      }
+    }
+
+    private RenderSavedPaymentMethods(target_container: HTMLLIElement, saved_payment_type_data: PaymentTypeData)
+    {
+      console.log("RenderSavedPaymentMethods Payment Type Data", saved_payment_type_data);
+      let fieldset = document.createElement("fieldset");
+      let legend = document.createElement("legend");
+      legend.classList.add("label");
+      legend.appendChild(document.createTextNode("Payment Methods"));
+      fieldset.appendChild(legend);
+      this.AddCashPaymentMethod(fieldset);
+      this.AddCheckPaymentMethod(fieldset);
+
+      target_container.appendChild(fieldset);
     }
 
   }

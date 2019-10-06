@@ -22,7 +22,7 @@
     private receipt_preview_save_button_element: HTMLButtonElement = null;
     //receipt_view_contents
 
-    constructor()
+    constructor(saved_transaction: Data.TransactionData = null)
     {
       console.log('New Receipt', Transaction.departments);
       this.view_container = document.getElementById(Receipt.receipt_container);
@@ -34,7 +34,7 @@
       this.receipt_department_element = <HTMLInputElement>document.getElementById("receipt_department");
       this.receipt_view_contents_element = document.getElementById("receipt_view_contents");
       this.receipt_view_totals_element = document.getElementById("receipt_view_totals");
-      this.currentTransaction = new Transaction.Data.TransactionData("R");
+      this.currentTransaction = new Transaction.Data.TransactionData("R", saved_transaction);
       this.receipt_preview_controls_element = document.getElementById("receipt_preview_controls");
       this.receipt_preview_cancel_button_element = <HTMLButtonElement>document.getElementById("receipt_view_cancel");
       this.receipt_preview_save_button_element = <HTMLButtonElement>document.getElementById("receipt_view_save");
@@ -65,12 +65,10 @@
       this.CreatePaymentTypeDisplay(t);
       Utilities.Show(this.receipt_preview_controls_element);
     }
-
-    public 
-
+    
     public ShowReceipt(t: Transaction.Data.TransactionData): void
     {
-      this.currentTransaction = new Transaction.Data.TransactionData("R");
+      //this.currentTransaction = new Transaction.Data.TransactionData("R", t);
       Utilities.Hide(Data.TransactionData.transaction_view_container);
       Utilities.Hide(Data.TransactionData.action_container);
       Utilities.Show(this.view_container);
@@ -106,7 +104,7 @@
         }
         this.receipt_view_contents_element.appendChild(
           this.CreatePaymentTypeRow(
-            ptd.selected_payment_type.name,
+            ptd.selected_payment_type !== undefined ? ptd.selected_payment_type.name : ptd.payment_type.name,
             current_cash_total,
             current_check_total,
             current_check_count));

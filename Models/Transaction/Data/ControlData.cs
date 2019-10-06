@@ -17,6 +17,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public long? transaction_payment_type_id { get; set; }
     public int? department_id { get; set; }
     public long transaction_id { get; set; } = -1;
+    public Control control { get; set; } = null; // the control for this ControlData
     public int control_id { get; set; } = -1;
     public string value { get; set; } = "";
     public bool is_active { get; set; } = true;
@@ -31,26 +32,75 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public static List<ControlData> GetActiveTransactionControls(long transaction_id)
     {
+      var controls = Control.GetCached_Dict();
+
       var param = new DynamicParameters();
       param.Add("@transaction_id", transaction_id);
 
       var query = @"
-      
-        SELECT 
+        WITH ControlData AS (
+
+          SELECT 
+            control_data_id
+            ,LCPT.sort_order
+            ,DC.transaction_payment_type_id
+            ,department_id
+            ,DC.transaction_id
+            ,DC.control_id
+            ,value
+            ,is_active
+          FROM data_control DC
+          INNER JOIN data_payment_type DPT ON DC.transaction_payment_type_id = DPT.transaction_payment_type_id
+          INNER JOIN lookup_control_payment_type LCPT ON DPT.payment_type_id = LCPT.payment_type_id 
+            AND DC.control_id = LCPT.control_id
+          WHERE
+            DC.transaction_id = @transaction_id
+            AND is_active = 1
+
+          UNION
+
+          SELECT 
+            control_data_id
+            ,LCD.sort_order
+            ,DC.transaction_payment_type_id
+            ,DC.department_id
+            ,DC.transaction_id
+            ,DC.control_id
+            ,value
+            ,is_active
+          FROM data_control DC
+          INNER JOIN lookup_control_department LCD ON DC.control_id = LCD.control_id
+            AND DC.department_id = LCD.department_id
+          WHERE
+            DC.transaction_id = @transaction_id
+            AND is_active = 1
+        )
+
+        SELECT
           control_data_id
           ,transaction_payment_type_id
           ,department_id
           ,transaction_id
           ,control_id
           ,value
-          ,is_active
-        FROM data_control
-        where
-          transaction_id = @transaction_id
-          AND is_active = 1";
+          ,is_active     
+        FROM ControlData        
+        ORDER BY transaction_payment_type_id, department_id, sort_order, control_id;
+";
 
 
       var c_data = Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+      foreach(ControlData cd in c_data)
+      {
+        if (controls.ContainsKey(cd.control_id))
+        {
+          cd.control = controls[cd.control_id];
+        }
+        else
+        {
+          new ErrorLog("Missing Control ID - " + cd.control_id, "GetActiveTransactionControls", "", "", "");
+        }
+      }
       return c_data;
 
 

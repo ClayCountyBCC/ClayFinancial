@@ -6,34 +6,49 @@ var Transaction;
             this.valid_values = [];
         }
         Constructor() { }
-        static CreateControl(control) {
+        static CreateControl(control, value = null) {
             switch (control.data_type) {
                 case "date":
                 case "text":
-                    return Control.CreateInput(control);
+                    return Control.CreateInput(control, value);
                 case "number":
                 case "money":
                 case "count":
-                    return Control.CreateNumericInput(control);
+                    return Control.CreateNumericInput(control, value);
                 case "bigtext":
-                    return Control.CreateTextArea(control);
+                    return Control.CreateTextArea(control, value);
                 case "dropdown":
-                    return Control.CreateSelect(control);
+                    return Control.CreateSelect(control, value);
             }
             return null;
         }
-        static CreateInput(control) {
+        static CreateSavedControl(control_data) {
+            let control = Control.CreateControl(control_data.control, control_data.value);
+            control.disabled = true;
+            //if (control_data.department_id && control_data.department_id > 0)
+            //{
+            //  control.setAttribute("department_id", control_data.control_data_id.toString());
+            //}
+            //if (control_data.transaction_payment_type_id && control_data.transaction_payment_type_id > 0)
+            //{
+            //  control.setAttribute("transaction_payment_type_id", control_data.transaction_payment_type_id.toString());
+            //}
+            control.setAttribute("control_data_id", control_data.control_data_id.toString());
+            control.setAttribute("transaction_id", control_data.transaction_id.toString());
+            return control;
+        }
+        static CreateInput(control, value) {
             let input = document.createElement("input");
             input.type = control.data_type;
             input.maxLength = control.max_length;
             input.classList.add("input", "is-medium");
             input.placeholder = control.label;
             input.required = control.required;
-            input.value = "";
+            input.value = value === null ? "" : value;
             input.setAttribute("control_id", control.control_id.toString());
             return input;
         }
-        static CreateNumericInput(control) {
+        static CreateNumericInput(control, value) {
             let input = document.createElement("input");
             input.type = "number";
             input.maxLength = control.max_length;
@@ -48,29 +63,39 @@ var Transaction;
             else {
                 input.step = "any";
             }
-            input.value = "";
+            input.value = value === null ? "" : value;
             input.setAttribute("control_id", control.control_id.toString());
             return input;
         }
-        static CreateTextArea(control) {
+        static CreateTextArea(control, value) {
             let textarea = document.createElement("textarea");
             textarea.maxLength = control.max_length;
             textarea.classList.add("textarea", "is-medium");
             textarea.placeholder = control.label;
             textarea.required = control.required;
             textarea.rows = 4;
-            textarea.value = "";
+            textarea.value = value === null ? "" : value;
             textarea.setAttribute("control_id", control.control_id.toString());
             return textarea;
         }
-        static CreateSelect(control) {
+        static CreateSelect(control, value) {
             control.valid_values = control.value.split("|");
             let select = document.createElement("select");
             select.required = control.required;
-            select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, true));
-            for (let value of control.valid_values) {
-                select.appendChild(Utilities.Create_Option(value, value, false));
+            select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, false));
+            for (let valid_value of control.valid_values) {
+                let option = Utilities.Create_Option(valid_value, valid_value, false);
+                select.appendChild(option);
             }
+            console.log('select value', value, control.valid_values);
+            if (value !== null) {
+                //select.selectedIndex = -1;
+                select.value = value;
+            }
+            else {
+                select.value = "-1";
+            }
+            console.log("selected value", select, select.value, select.selectedIndex);
             return select;
         }
     }

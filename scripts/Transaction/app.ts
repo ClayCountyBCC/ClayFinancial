@@ -72,13 +72,25 @@
 
   export async function ShowReceipt(transaction_id: number)
   {
-    if (Transaction.currentReceipt === null) Transaction.currentReceipt = new Receipt();
-
     await Data.TransactionData.GetSpecificTransaction(transaction_id)
       .then((transaction) =>
       {
         console.log('transaction to show', transaction);
+        Transaction.currentReceipt = new Receipt(transaction);
         Transaction.currentReceipt.ShowReceipt(transaction);
+      });
+  }
+
+  export async function ShowReceiptDetail(transaction_id: number)
+  {
+    await Data.TransactionData.GetSpecificTransaction(transaction_id)
+      .then((transaction) =>
+      {
+        console.log('transaction to show', transaction);
+        Transaction.currentReceipt = new Receipt(transaction);
+        Utilities.Hide(Data.TransactionData.transaction_view_container);
+        Utilities.Show(Data.TransactionData.action_container);
+        Utilities.Hide(Receipt.receipt_container);        
       });
   }
 

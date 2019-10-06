@@ -17,6 +17,16 @@ var Transaction;
             controlgroups.push(controlGroup);
             return controlgroups;
         }
+        static CreateSavedControlGroups(controls) {
+            let controlgroups = [];
+            let controlGroup = new ControlGroup();
+            for (let controldata of controls) {
+                controldata.control.rendered_input_element = Transaction.Control.CreateSavedControl(controldata);
+                controlGroup.controls.push(controldata.control);
+            }
+            controlgroups.push(controlGroup);
+            return controlgroups;
+        }
         static CreateInputFieldContainerByControl(control, input, add_column = false, class_to_add = "") {
             return this.CreateInputFieldContainer(input, control.label, add_column, control.render_hints);
         }
@@ -26,7 +36,12 @@ var Transaction;
             let label = document.createElement("label");
             label.classList.add("label", "is-medium");
             if (field_label.length > 0) {
-                label.appendChild(document.createTextNode(field_label));
+                if (input.getAttribute("control_data_id") !== null) {
+                    label.appendChild(document.createTextNode(field_label + "***"));
+                }
+                else {
+                    label.appendChild(document.createTextNode(field_label));
+                }
             }
             else {
                 label.innerHTML = "&nbsp;";
@@ -116,13 +131,13 @@ var Transaction;
             field.appendChild(error_element);
             return field;
         }
-        CreateControlData(target_container) {
+        CreateControlData(target_container, clone_node = true) {
             let control_data = [];
             let group_element = document.createElement("div");
             group_element.classList.add("columns", "is-multiline");
             target_container.appendChild(group_element);
             for (let control of this.controls) {
-                let cd = new Transaction.Data.ControlData(control, -1);
+                let cd = new Transaction.Data.ControlData(control, -1, clone_node);
                 control_data.push(cd);
                 group_element.appendChild(cd.container_element);
             }

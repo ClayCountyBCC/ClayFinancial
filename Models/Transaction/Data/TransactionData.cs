@@ -44,7 +44,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public TransactionData()
     {
-
     }
 
     public TransactionData(string er)
@@ -127,9 +126,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return td;
     }
-
-
-
+       
     public bool ValidateTransaction()
     {
 
@@ -148,6 +145,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return true;
     }
+
     private bool ValidateNewReceipt()
     {
       var departments = Department.GetCachedDict();

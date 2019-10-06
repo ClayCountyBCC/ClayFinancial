@@ -55,16 +55,28 @@ var Transaction;
     Transaction.Start = Start;
     function ShowReceipt(transaction_id) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (Transaction.currentReceipt === null)
-                Transaction.currentReceipt = new Transaction.Receipt();
             yield Transaction.Data.TransactionData.GetSpecificTransaction(transaction_id)
                 .then((transaction) => {
                 console.log('transaction to show', transaction);
+                Transaction.currentReceipt = new Transaction.Receipt(transaction);
                 Transaction.currentReceipt.ShowReceipt(transaction);
             });
         });
     }
     Transaction.ShowReceipt = ShowReceipt;
+    function ShowReceiptDetail(transaction_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield Transaction.Data.TransactionData.GetSpecificTransaction(transaction_id)
+                .then((transaction) => {
+                console.log('transaction to show', transaction);
+                Transaction.currentReceipt = new Transaction.Receipt(transaction);
+                Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
+                Utilities.Show(Transaction.Data.TransactionData.action_container);
+                Utilities.Hide(Transaction.Receipt.receipt_container);
+            });
+        });
+    }
+    Transaction.ShowReceiptDetail = ShowReceiptDetail;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
