@@ -7,12 +7,13 @@ using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 using ClayFinancial.Models.Transaction;
+using System.Text;
 
 namespace ClayFinancial.Models.Transaction.Data
 {
   public class TransactionData
   {
-    const int page_size = 25;  
+    const int page_size = 25;
     public long transaction_id { get; set; } = -1;
     public int fiscal_year { get; set; } = -1;
     public int created_by_employee_id { get; set; } = -1;
@@ -34,12 +35,14 @@ namespace ClayFinancial.Models.Transaction.Data
     public DateTime created_on { get; set; } = DateTime.MinValue;
     public string created_by_username { get; set; } = "";
     public string created_by_display_name { get; set; } = "";
+    public int created_by_employee_department_id { get; set; } = -1;
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
     public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
     public bool has_error { get; set; } = false;
+    private List<int> departments_can_access { get; set; } = new List<int>();
 
     public TransactionData()
     {
@@ -50,7 +53,27 @@ namespace ClayFinancial.Models.Transaction.Data
       error_text = er;
     }
 
-    public static List<TransactionData> GetTransactionList(UserAccess ua, int page_number)
+    public class NonDepositedReceipts
+    {
+      public long transaction_id { get; set; }
+      public bool my_transaction { get; set; }
+      public int created_by_employee_id { get; set; }
+      public int departement_id { get; set; }
+
+
+      public NonDepositedReceipts() { }
+    }
+
+
+    public static List<TransactionData> GetTransactionList(
+      UserAccess ua
+      ,int page_number
+      ,string username_filter
+      ,string completed_filter
+      ,string transaction_type_filter
+      ,string transaction_number_filter
+      //,long transaction_id_filter
+      )
     {
       var sb = new StringBuilder();
       var param = new DynamicParameters();
@@ -60,10 +83,9 @@ namespace ClayFinancial.Models.Transaction.Data
       var query = @"
 
         SELECT 
-          T.transaction_id
+           T.transaction_id
           ,T.child_transaction_id
-          ,T.fiscal_year
-          
+          ,T.fiscal_year          
           ,T.transaction_number
           ,T.created_by_display_name
           ,CASE WHEN T.created_by_employee_id = @my_employee_id 
@@ -93,12 +115,61 @@ namespace ClayFinancial.Models.Transaction.Data
           ,T.total_check_count
         FROM ClayFinancial.dbo.data_transaction T
         INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
-        ORDER BY T.transaction_id DESC
+        WHERE 1=1
+
+       
 
       ";
 
       sb.AppendLine(query);
 
+      // set filters
+      if(username_filter.Length > 0)
+      {
+        param.Add("@username_filter", username_filter);
+        sb.AppendLine("AND created_by_display_name = @username_filter");
+      }
+      if(completed_filter.Length > 0)
+      {
+        switch(completed_filter.ToLower())
+        {
+          case "c":
+            sb.AppendLine("AND child_transaction_id IS NOT NULL");
+            break;
+          case "i":
+            sb.AppendLine("AND child_transaction_id IS NULL");
+            break;
+          default:
+            break;
+        }
+      }
+      if(transaction_type_filter.Length > 0)
+      {
+        param.Add("@transaction_type_filter", transaction_type_filter);
+        sb.AppendLine("AND transaction_type = @transaction_type_filter");
+      }
+      if(transaction_number_filter.Length > 0)
+      {
+        var tnp = transaction_number_filter.Split('-');
+
+        param.Add("@fiscal_year", tnp[0]);
+        param.Add("@created_by_employee_id", tnp[1]);
+        param.Add("@employee_transaction_count", tnp[3]);
+
+
+        sb.AppendLine(" AND RIGHT(fiscal_year,2) = @fiscal_year");
+        sb.AppendLine(" AND created_by_employee_id = @created_by_employee_id");
+        sb.AppendLine(" AND employee_transaction_count = CAST(@employee_transaction_count AS SMALLINT)");
+      }
+      /*
+       if(transaction_id_filter > -1)
+       {
+         param.Add("@transaction_id", transaction_id_filter);
+         sb.AppendLine(" AND transaction_id = @transaction_id_filter");
+       }
+       */
+      sb.AppendLine("ORDER BY T.transaction_id DESC");
+      
       if (page_number > 0)
       {
         param.Add("@page_number", (page_number - 1) * page_size);
@@ -109,13 +180,14 @@ namespace ClayFinancial.Models.Transaction.Data
 
       foreach (var t in td)
       {
-        t.GetDepositReceiptIds();
+
       }
 
       return td;
     }
-       
-    public bool ValidateTransaction()
+
+
+    public bool ValidateTransaction(int selected_employee_id = -1)
     {
 
       switch (transaction_type)
@@ -125,7 +197,7 @@ namespace ClayFinancial.Models.Transaction.Data
           if (!ValidateNewReceipt()) return false;
           break;
         case "D":
-          if (!ValidateNewDeposit()) return false;
+          if (!ValidateNewDeposit(selected_employee_id)) return false;
           break;
         default:
           return false;
@@ -143,9 +215,91 @@ namespace ClayFinancial.Models.Transaction.Data
       if (!departments.ContainsKey(department_id)) return false;
       return departments[department_id].ValidateTransactionData(this);
     }
-    private bool ValidateNewDeposit()
+
+    private bool ValidateNewDeposit(int selected_employee_id)
     {
-      return false;
+
+      var param = new DynamicParameters();
+      param.Add("@my_employee_id", created_by_employee_id);
+      param.Add("@departments_can_access", departments_can_access);
+
+      var query = @"
+      
+        WITH all_non_deposited_receipts AS (
+
+          SELECT 
+            T.transaction_id
+            ,CASE WHEN T.created_by_employee_id = @my_employee_id 
+              THEN 1 
+              ELSE 0 
+              END my_transaction
+            ,CASE WHEN T.child_transaction_id IS NULL AND T.created_by_employee_id = @my_employee_id
+              THEN 1
+              ELSE 
+                CASE WHEN TV.grandchild_created_by_employee_id IS NULL
+                      AND TV.child_created_by_employee_id = @my_employee_id
+                  THEN 1
+                  ELSE 
+                    CASE WHEN TV.grandchild_created_by_employee_id = @my_employee_id
+                      THEN 1
+                      ELSE 0
+                      END
+                  END
+              END can_modify
+            ,T.created_by_employee_id
+            ,T.department_id
+          FROM ClayFinancial.dbo.data_transaction T
+          INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
+          WHERE child_transaction_id IS NULL
+            AND department_id IN @departments_can_access
+
+        )
+
+        SELECT * FROM all_non_deposited_receipts
+      
+      ";
+
+      //var user_receipt_list = new List<TransactionData>();
+      var receipt_ids = Constants.Get_Data<NonDepositedReceipts>(query, param, Constants.ConnectionString.ClayFinancial);
+      
+      // validate all receipts in the deposit_receipt_ids are from departments the user can access
+      foreach(var r in receipt_ids)
+      {
+        
+      }
+      
+      // LIST OF ALL NON DEPOSITED TRANSACTION_IDS BELONGING TO THE USER
+      List<long> selected_employee_receipt_ids = new List<long>();
+
+
+
+      selected_employee_receipt_ids.AddRange((from r in receipt_ids
+                               where 
+                                r.created_by_employee_id == (selected_employee_id == -1 ? 
+                                  this.created_by_employee_id : selected_employee_id) 
+                               select r.transaction_id).DefaultIfEmpty().ToList());
+
+      if (selected_employee_receipt_ids.Any())
+      {
+        foreach (var d in this.deposit_receipt_ids)
+        {
+          if (!selected_employee_receipt_ids.Contains(d))
+          {
+            error_text = @"All receipts in a deposit must have the same employee id.";
+            return false;
+          }
+        }
+
+
+
+      }
+      else 
+      {
+        error_text = "No receipts to add to the deposit from the selected employee";
+        return false;
+      }
+
+      return true;
     }
 
 
@@ -213,7 +367,7 @@ namespace ClayFinancial.Models.Transaction.Data
       created_by_employee_id = ua.employee_id;
       created_by_username = ua.user_name;
       created_by_display_name = ua.display_name;
-
+      departments_can_access = ua.departments_can_access;
 
     }
 
@@ -241,6 +395,9 @@ namespace ClayFinancial.Models.Transaction.Data
     }
     private bool SaveNewDeposit()
     {
+
+
+
       return true;
     }
     private bool SaveNewReceipt()
@@ -399,13 +556,15 @@ namespace ClayFinancial.Models.Transaction.Data
           -- UPDATE total_cash_amount, total_check_amount, total_check_count FIELDS
           ;WITH PaymentMethodSums AS (
 
-            SELECT
-              transaction_id
-              ,SUM(cash_amount) total_cash
-              ,SUM(check_amount) total_checks
-              ,SUM(CASE WHEN LEN(check_number) > 0 THEN 1 ELSE check_count END) number_of_checks
-            FROM data_payment_method
-            GROUP BY transaction_id
+
+          SELECT
+            transaction_id
+            ,SUM(cash_amount) total_cash
+            ,SUM(check_amount) total_checks
+            ,SUM(check_count) number_of_checks
+          FROM data_payment_method
+          GROUP BY transaction_id
+
 
           )
 
@@ -422,25 +581,22 @@ namespace ClayFinancial.Models.Transaction.Data
       ";
     }
 
+    // this will create a list of non-deposited receipts 
 
-
-    public void GetDepositReceiptIds()
+    private void SetDepositReceipts(int selected_employee_id)
     {
+     
 
-      var param = new DynamicParameters();
-      param.Add("@deposit_transaction_id", transaction_id);
-
-      var query = @"
-      
-        SELECT
-          transaction_id
-        FROM ClayFinancial.dbo.data_transaction T
-        WHERE child_transaction_id = @deposit_transaction_id
-      
-      ";
-
-      deposit_receipt_ids = Constants.Get_Data<long>(query, param, Constants.ConnectionString.ClayFinancial);
 
     }
+
+    // check for receipts a user is not allowed to accept in a deposit.
+    private bool CheckforInvalidReceipts()
+    {
+
+      return false;
+
+    }
+
   }
 }

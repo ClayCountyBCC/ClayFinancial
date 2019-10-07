@@ -14,10 +14,22 @@ namespace ClayFinancial.Controllers.API
   [RoutePrefix("API/Transaction")]
   public class TransactionDataController : ApiController
   {
-
+    /// <summary>
+    /// 
+    /// 
+    /// </summary>
+    /// <param name="page_number"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("Get")]
-    public IHttpActionResult GetAllTransactionData(int page_number)
+    public IHttpActionResult GetAllTransactionData(
+      int page_number = -1
+      ,string username_filter = ""
+      ,string completed_filter = ""
+      ,string transaction_type_filter = ""
+      ,string transaction_number_filter = ""
+      //,long transaction_id_filter = -1
+    )
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
@@ -26,14 +38,45 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var tr = TransactionData.GetTransactionList(ua, page_number);
-      if(tr == null)
+      var tr = TransactionData.GetTransactionList(ua,
+        page_number
+        ,username_filter
+        ,completed_filter
+        ,transaction_type_filter
+        ,transaction_number_filter
+      //  ,transaction_id_filter
+      );
+      if (tr == null)
       {
         return InternalServerError();
       }
 
       return Ok(tr);
     }
+
+    //[HttpGet]
+    //[Route("Get")]
+    //public IHttpActionResult CreateDeposit(TransactionData transactionData)
+    //{
+    //  var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+    //  if (ua.current_access == UserAccess.access_type.no_access)
+    //  {
+    //    return Unauthorized();
+    //  }
+    //  transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+    //  transactionData.SetUserProperties(ua);
+
+    //  var tr = transactionData.CreateDeposit(ua);
+
+    //  if (tr == null)
+    //  {
+    //    return InternalServerError();
+    //  }
+
+    //  return Ok(tr);
+    //}
+
 
     [HttpPost]
     [Route("Save")]
@@ -148,6 +191,8 @@ namespace ClayFinancial.Controllers.API
       return Ok(td);
 
     }
+
+   // edit controls
 
   }
 }
