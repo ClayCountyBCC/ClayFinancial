@@ -160,15 +160,10 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       if(transaction_number_filter.Length > 0)
       {
-        var tnp = transaction_number_filter.Split('-');
 
         param.Add("@transaction_number", transaction_number_filter);
-        sb.AppendLine(" AND transaction_number = ");
+        sb.AppendLine(" AND transaction_number = @transaction_number");
 
-
-        sb.AppendLine(" AND RIGHT(fiscal_year,2) = @fiscal_year");
-        sb.AppendLine(" AND created_by_employee_id = @created_by_employee_id");
-        sb.AppendLine(" AND employee_transaction_count = CAST(@employee_transaction_count AS SMALLINT)");
       }
       if(department_id_filter > 0)
       {
