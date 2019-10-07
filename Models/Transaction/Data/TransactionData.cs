@@ -168,10 +168,10 @@ namespace ClayFinancial.Models.Transaction.Data
         switch(completed_filter.ToLower())
         {
           case "c":
-            sb.AppendLine("AND child_transaction_id IS NOT NULL");
+            sb.AppendLine("AND T.child_transaction_id IS NOT NULL");
             break;
           case "i":
-            sb.AppendLine("AND child_transaction_id IS NULL");
+            sb.AppendLine("AND T.child_transaction_id IS NULL");
             break;
           default:
             break;
