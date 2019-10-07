@@ -47,8 +47,10 @@
     public created_by_ip_address: string = "";
     public created_by_display_name: string = "PREVIEW";
     // client side only stuff
+    public static reload_button: string = 'filterRefreshButton';
     public static action_container: string = 'action_view';
-    public static transaction_view_container: string = 'transaction_view';
+    public static transaction_view_container: string = "transaction_view";
+    public static transaction_list_view_container: string = 'transaction_list_view';
     public static transaction_view_filters_container: string = "transaction_view_filters";
     //public base_container: string = 'root';
     private department_element: HTMLSelectElement = null;
@@ -456,10 +458,11 @@
 
           Transaction.currentReceipt.ShowReceipt(response);
 
-          Transaction.Data.TransactionData.GetTransactionList(1)
+          Transaction.Data.TransactionData.GetTransactionList()
             .then((tv) =>
             {
               Transaction.transactions = tv;
+              Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
             });
 
           // need to reset the current transaction
@@ -474,8 +477,10 @@
      * Transaction View Code
      */
 
-    public static GetTransactionList(page: number): Promise<Array<TransactionData>>
+    public static GetTransactionList(): Promise<Array<TransactionData>>
     {
+      let page = Transaction.current_page;
+      Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
       let path = Transaction.GetPath();
       let props: Array<string> = [];
       if (Transaction.name_filter.length > 0) props.push("&displayname=" + Transaction.name_filter);
@@ -497,7 +502,7 @@
     {
       Transaction.ViewTransactions();
 
-      let container = document.getElementById(TransactionData.transaction_view_container);
+      let container = document.getElementById(TransactionData.transaction_list_view_container);
       Utilities.Clear_Element(container);
       let table = TransactionData.CreateTransactionListTable();
       container.appendChild(table);
@@ -507,7 +512,7 @@
       {
         tbody.appendChild(TransactionData.CreateTransactionListRow(data));
       }
-
+      Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
     }
 
     private static CreateTransactionListTable():HTMLTableElement

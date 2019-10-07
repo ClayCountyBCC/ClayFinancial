@@ -330,9 +330,10 @@ var Transaction;
                     .then(function (response) {
                     console.log("post probably good", response);
                     Transaction.currentReceipt.ShowReceipt(response);
-                    Transaction.Data.TransactionData.GetTransactionList(1)
+                    Transaction.Data.TransactionData.GetTransactionList()
                         .then((tv) => {
                         Transaction.transactions = tv;
+                        Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
                     });
                     // need to reset the current transaction
                     // and display the one that I just downloaded.
@@ -343,7 +344,9 @@ var Transaction;
             /*
              * Transaction View Code
              */
-            static GetTransactionList(page) {
+            static GetTransactionList() {
+                let page = Transaction.current_page;
+                Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
                 let path = Transaction.GetPath();
                 let props = [];
                 if (Transaction.name_filter.length > 0)
@@ -366,7 +369,7 @@ var Transaction;
             }
             static RenderTransactionList() {
                 Transaction.ViewTransactions();
-                let container = document.getElementById(TransactionData.transaction_view_container);
+                let container = document.getElementById(TransactionData.transaction_list_view_container);
                 Utilities.Clear_Element(container);
                 let table = TransactionData.CreateTransactionListTable();
                 container.appendChild(table);
@@ -375,6 +378,7 @@ var Transaction;
                 for (let data of Transaction.transactions) {
                     tbody.appendChild(TransactionData.CreateTransactionListRow(data));
                 }
+                Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
             }
             static CreateTransactionListTable() {
                 let table = document.createElement("table");
@@ -470,8 +474,10 @@ var Transaction;
             }
         }
         // client side only stuff
+        TransactionData.reload_button = 'filterRefreshButton';
         TransactionData.action_container = 'action_view';
-        TransactionData.transaction_view_container = 'transaction_view';
+        TransactionData.transaction_view_container = "transaction_view";
+        TransactionData.transaction_list_view_container = 'transaction_list_view';
         TransactionData.transaction_view_filters_container = "transaction_view_filters";
         Data.TransactionData = TransactionData;
     })(Data = Transaction.Data || (Transaction.Data = {}));

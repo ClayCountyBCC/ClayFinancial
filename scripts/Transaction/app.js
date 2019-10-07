@@ -50,11 +50,12 @@ var Transaction;
                 console.log("all payment types", Transaction.payment_types);
                 console.log("all controls", Transaction.controls);
             });
-            yield Transaction.Data.TransactionData.GetTransactionList(1)
+            yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
                 Transaction.transactions = tv;
                 Transaction.Data.TransactionData.RenderTransactionList();
                 console.log('transactions', Transaction.transactions);
+                Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
             });
             console.log('departments', Transaction.departments);
         });
@@ -84,6 +85,7 @@ var Transaction;
     Transaction.ShowReceiptDetail = ShowReceiptDetail;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
+        Transaction.ViewReceiptDetail();
     }
     Transaction.NewReceipt = NewReceipt;
     function NewDeposit() {
@@ -126,6 +128,14 @@ var Transaction;
         typeSelect.add(Utilities.Create_Option("R", "Receipts", false));
         typeSelect.add(Utilities.Create_Option("D", "Deposits", false));
     }
+    function SearchOnEnter(event) {
+        var e = event || window.event;
+        if (event.keyCode == 13) {
+            console.log('enter');
+            Transaction.FilterTransactions();
+        }
+    }
+    Transaction.SearchOnEnter = SearchOnEnter;
     function FilterTransactions() {
         Transaction.department_filter = Utilities.Get_Value("departmentFilter");
         Transaction.name_filter = Utilities.Get_Value("nameFilter");
@@ -133,39 +143,33 @@ var Transaction;
         Transaction.type_filter = Utilities.Get_Value("typeFilter");
         Transaction.transaction_number_filter = Utilities.Get_Value("transactionNumberFilter");
         Transaction.modified_only_filter = document.getElementById("modifiedFilter").checked;
-        Transaction.Data.TransactionData.GetTransactionList(1)
+        Transaction.Data.TransactionData.GetTransactionList()
             .then((tv) => {
             Transaction.transactions = tv;
             Transaction.Data.TransactionData.RenderTransactionList();
             console.log('transactions', Transaction.transactions);
         });
-        //filterRefreshButton
-        console.log("Filterin'!");
     }
     Transaction.FilterTransactions = FilterTransactions;
     function ViewReceiptDetail() {
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Show(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewReceiptDetail = ViewReceiptDetail;
     function ViewPrintableReceipt() {
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Hide(Transaction.Data.TransactionData.action_container);
         Utilities.Show(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewPrintableReceipt = ViewPrintableReceipt;
     function ViewTransactions() {
-        Utilities.Show(Transaction.Data.TransactionData.transaction_view_filters_container);
         Utilities.Show(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Hide(Transaction.Data.TransactionData.action_container);
-        Utilities.Show(Transaction.Receipt.receipt_container);
+        Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewTransactions = ViewTransactions;
     function ViewDeposit() {
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_filters_container);
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Hide(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
