@@ -175,5 +175,8 @@ var Transaction;
         Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewDeposit = ViewDeposit;
+    function HandlePagination() {
+    }
+    Transaction.HandlePagination = HandlePagination;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

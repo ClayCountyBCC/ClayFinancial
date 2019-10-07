@@ -182,17 +182,6 @@ namespace ClayFinancial.Models.Transaction
     {
       return Validate(cd);
     }
-
-    public static Dictionary<int, Control> Get_Dict()
-    {
-      var controls = Control.GetCached();
-      var c = new Dictionary<int, Control>();
-      foreach (Control control in controls)
-      {
-        c[control.control_id] = control;
-      }
-      return c;
-    }
     public static Dictionary<int, Control> GetCachedDict()
     {
       return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
