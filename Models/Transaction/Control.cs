@@ -63,6 +63,22 @@ namespace ClayFinancial.Models.Transaction
       return (List<Control>)myCache.GetItem("controls");
     }
 
+    public static Dictionary<int, Control> Get_Dict()
+    {
+      var controls = Control.GetCached();
+      var d = new Dictionary<int, Control>();
+      foreach(Control c in controls)
+      {
+        d[c.control_id] = c;
+      }
+      return d;
+    }
+
+    public static Dictionary<int, Control> GetCached_Dict()
+    {
+      return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
+    }
+
     public bool Validate(Data.ControlData cd)
     {
       // Here we use this class' properties to validate our controldata

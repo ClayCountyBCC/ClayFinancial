@@ -20,10 +20,12 @@ var Transaction;
             defaultOption.appendChild(document.createTextNode("Select a Department"));
             select.appendChild(defaultOption);
             for (let d of departments) {
-                let option = document.createElement("option");
-                option.appendChild(document.createTextNode(d.name));
-                option.value = d.department_id.toString();
-                select.appendChild(option);
+                if (d.is_active) {
+                    let option = document.createElement("option");
+                    option.appendChild(document.createTextNode(d.name));
+                    option.value = d.department_id.toString();
+                    select.appendChild(option);
+                }
             }
             select.selectedIndex = -1;
             return select;

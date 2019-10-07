@@ -21,8 +21,25 @@
       let controlGroup = new ControlGroup();
       for (let control of controls)
       {
-        control.rendered_input_element = Control.CreateControl(control);
-        controlGroup.controls.push(control);
+        if (control.is_active)
+        {
+          control.rendered_input_element = Control.CreateControl(control);
+          controlGroup.controls.push(control);
+        }
+      }
+      controlgroups.push(controlGroup);
+      return controlgroups;
+    }
+
+    public static CreateSavedControlGroups(controls: Array<Data.ControlData>): Array<ControlGroup>
+    {
+      let controlgroups: Array<ControlGroup> = [];
+
+      let controlGroup = new ControlGroup();
+      for (let controldata of controls)
+      {
+        controldata.control.rendered_input_element = Control.CreateSavedControl(controldata);
+        controlGroup.controls.push(controldata.control);
       }
       controlgroups.push(controlGroup);
       return controlgroups;
@@ -41,7 +58,16 @@
       label.classList.add("label", "is-medium");
       if (field_label.length > 0)
       {
-        label.appendChild(document.createTextNode(field_label));
+        if (input.getAttribute("control_data_id") !== null)
+        {
+          // this is just a test to make sure that I will be able to detect when to add edit value capabilities.
+          label.appendChild(document.createTextNode(field_label + "***")); 
+        }
+        else
+        {
+          label.appendChild(document.createTextNode(field_label));
+        }
+        
       }
       else
       {
@@ -149,7 +175,7 @@
       return field;
     }
 
-    public CreateControlData(target_container: HTMLElement): Array<Data.ControlData>
+    public CreateControlData(target_container: HTMLElement, clone_node: boolean = true): Array<Data.ControlData>
     {
       let control_data: Array<Data.ControlData> = [];
 
@@ -159,14 +185,14 @@
 
       for (let control of this.controls)
       {
-        let cd = new Data.ControlData(control, -1);
+        let cd = new Data.ControlData(control, -1, clone_node);
         control_data.push(cd);
         group_element.appendChild(cd.container_element);
       }
       return control_data;
     }
 
-    public static CreateInput(input_type: string, input_length: number, is_required: boolean, placeholder: string): HTMLInputElement
+    public static CreateInput(input_type: string, input_length: number, is_required: boolean, placeholder: string, input_value: string = ""): HTMLInputElement
     {
       let input = document.createElement("input");
       input.type = input_type;
@@ -179,7 +205,7 @@
       }
       input.placeholder = placeholder;
       input.required = is_required;
-      input.value = "";
+      input.value = input_value;
       return input;
     }
 
@@ -234,8 +260,7 @@
       }
       Utilities.Set_Text(guide_element, guide_text);
     }
-
-
+    
     public static ValidateDropdown(input: HTMLSelectElement, container: HTMLElement, valid_values: Array<string>): boolean
     {
       let e: string = "";

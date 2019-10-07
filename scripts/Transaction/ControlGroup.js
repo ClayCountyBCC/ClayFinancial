@@ -9,8 +9,20 @@ var Transaction;
             let controlgroups = [];
             let controlGroup = new ControlGroup();
             for (let control of controls) {
-                control.rendered_input_element = Transaction.Control.CreateControl(control);
-                controlGroup.controls.push(control);
+                if (control.is_active) {
+                    control.rendered_input_element = Transaction.Control.CreateControl(control);
+                    controlGroup.controls.push(control);
+                }
+            }
+            controlgroups.push(controlGroup);
+            return controlgroups;
+        }
+        static CreateSavedControlGroups(controls) {
+            let controlgroups = [];
+            let controlGroup = new ControlGroup();
+            for (let controldata of controls) {
+                controldata.control.rendered_input_element = Transaction.Control.CreateSavedControl(controldata);
+                controlGroup.controls.push(controldata.control);
             }
             controlgroups.push(controlGroup);
             return controlgroups;
@@ -24,7 +36,13 @@ var Transaction;
             let label = document.createElement("label");
             label.classList.add("label", "is-medium");
             if (field_label.length > 0) {
-                label.appendChild(document.createTextNode(field_label));
+                if (input.getAttribute("control_data_id") !== null) {
+                    // this is just a test to make sure that I will be able to detect when to add edit value capabilities.
+                    label.appendChild(document.createTextNode(field_label + "***"));
+                }
+                else {
+                    label.appendChild(document.createTextNode(field_label));
+                }
             }
             else {
                 label.innerHTML = "&nbsp;";
@@ -114,19 +132,19 @@ var Transaction;
             field.appendChild(error_element);
             return field;
         }
-        CreateControlData(target_container) {
+        CreateControlData(target_container, clone_node = true) {
             let control_data = [];
             let group_element = document.createElement("div");
             group_element.classList.add("columns", "is-multiline");
             target_container.appendChild(group_element);
             for (let control of this.controls) {
-                let cd = new Transaction.Data.ControlData(control, -1);
+                let cd = new Transaction.Data.ControlData(control, -1, clone_node);
                 control_data.push(cd);
                 group_element.appendChild(cd.container_element);
             }
             return control_data;
         }
-        static CreateInput(input_type, input_length, is_required, placeholder) {
+        static CreateInput(input_type, input_length, is_required, placeholder, input_value = "") {
             let input = document.createElement("input");
             input.type = input_type;
             input.maxLength = input_length;
@@ -137,7 +155,7 @@ var Transaction;
             }
             input.placeholder = placeholder;
             input.required = is_required;
-            input.value = "";
+            input.value = input_value;
             return input;
         }
         static UpdateSelectError(container, error_text = "") {

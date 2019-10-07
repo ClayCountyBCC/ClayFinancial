@@ -40,30 +40,46 @@
 
     Constructor() { }
 
-
-    public static CreateControl(control: Control): HTMLElement
+    public static CreateControl(control: Control, value: string = null): HTMLElement
     {
       switch (control.data_type)
       {
         case "date":          
         case "text":
-          return Control.CreateInput(control);
+          return Control.CreateInput(control, value);
 
         case "number":
         case "money":
         case "count":
-          return Control.CreateNumericInput(control);
+          return Control.CreateNumericInput(control, value);
           
         case "bigtext":
-          return Control.CreateTextArea(control);
+          return Control.CreateTextArea(control, value);
           
         case "dropdown":
-          return Control.CreateSelect(control);
+          return Control.CreateSelect(control, value);
       }
       return null;
     }
 
-    private static CreateInput(control: Control):HTMLInputElement
+    public static CreateSavedControl(control_data: Data.ControlData): HTMLElement
+    {
+      let control = Control.CreateControl(control_data.control, control_data.value);
+      if (control.tagName.toLowerCase() !== "select")
+      {
+        (<HTMLInputElement>control).readOnly = true;
+      }
+      else
+      {
+        (<HTMLInputElement>control).disabled = true;
+      }
+      
+      control.setAttribute("control_data_id", control_data.control_data_id.toString());
+      control.setAttribute("transaction_id", control_data.transaction_id.toString());
+      return control;
+    }
+
+    private static CreateInput(control: Control, value: string):HTMLInputElement
     {
       let input = document.createElement("input");
       input.type = control.data_type;
@@ -71,12 +87,32 @@
       input.classList.add("input", "is-medium");      
       input.placeholder = control.label;
       input.required = control.required;
-      input.value = "";
+      if (input.type === "date" && value !== null)
+      {
+        let tmp = value.split("/");
+        if (tmp.length === 3)
+        {
+          let v = tmp[2] + '-';
+          v += tmp[0].length === 1 ? "0" + tmp[0] : tmp[0];
+          v += "-";
+          v += tmp[1].length === 1 ? "0" + tmp[1] : tmp[1];
+          input.value = v;
+        }
+        else
+        {
+          input.value = value;// dates need to be in yyyy-mm-dd format
+        }
+      }
+      else
+      {
+        input.value = value === null ? "" : value;
+      }
+      
       input.setAttribute("control_id", control.control_id.toString());
       return input;
     }
 
-    private static CreateNumericInput(control: Control): HTMLInputElement
+    private static CreateNumericInput(control: Control, value: string): HTMLInputElement
     {
       let input = document.createElement("input");
       input.type = "number";
@@ -95,12 +131,12 @@
         input.step = "any";
       }
       
-      input.value = "";
+      input.value = value === null ? "" : value;
       input.setAttribute("control_id", control.control_id.toString());
       return input;
     }
 
-    private static CreateTextArea(control: Control)
+    private static CreateTextArea(control: Control, value: string)
     {
       let textarea = document.createElement("textarea");      
       textarea.maxLength = control.max_length;
@@ -108,22 +144,31 @@
       textarea.placeholder = control.label;
       textarea.required = control.required;
       textarea.rows = 4;      
-      textarea.value = "";
+      textarea.value = value === null ? "" : value;
       textarea.setAttribute("control_id", control.control_id.toString());
       return textarea;
     }
 
-    public static CreateSelect(control: Control):HTMLSelectElement
+    public static CreateSelect(control: Control, value: string):HTMLSelectElement
     {
       control.valid_values = control.value.split("|");
 
       let select = document.createElement("select");
       select.required = control.required;
-      select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, true));
-      for (let value of control.valid_values)
+      select.appendChild(Utilities.Create_Option("-1", "Select a " + control.label, false));
+      for (let valid_value of control.valid_values)
       {
-        select.appendChild(Utilities.Create_Option(value, value, false));
-      }      
+        let option = Utilities.Create_Option(valid_value, valid_value, false);        
+        select.appendChild(option);
+      }
+      if (value !== null)
+      {
+        select.value = value;
+      }
+      else
+      {
+        select.value = "-1";
+      }
       return select;
     }
 

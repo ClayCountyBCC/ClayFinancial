@@ -22,8 +22,7 @@ namespace ClayFinancial.Models.Transaction
     public static List<PaymentType> Get()
     {
       var controls = (from c in Control.GetCached()
-                      where c.is_active &&
-                      c.payment_type_id.HasValue
+                      where c.payment_type_id.HasValue
                       select c).ToList();
 
       string sql = @"
@@ -34,14 +33,15 @@ namespace ClayFinancial.Models.Transaction
           ,is_active
         FROM vw_payment_types
         ORDER BY department_id ASC, name ASC";
-      var payment_types = Constants.Get_Data<PaymentType>(sql, Constants.ConnectionString.ClayFinancial);
 
+      var payment_types = Constants.Get_Data<PaymentType>(sql, Constants.ConnectionString.ClayFinancial);
 
       foreach (PaymentType pt in payment_types)
       {
         var tmpControls = from c in controls
                           where c.payment_type_id == pt.payment_type_id
                           select c;
+
         foreach (Control c in tmpControls)
         {
           pt.controls.Add(c);
@@ -49,13 +49,30 @@ namespace ClayFinancial.Models.Transaction
         }
       }
 
-
       return payment_types;
+    }
+
+    public static Dictionary<int, PaymentType> Get_Dict()
+    {
+      var payment_types = PaymentType.GetCached();
+
+      Dictionary<int, PaymentType> d = new Dictionary<int, PaymentType>();
+
+      foreach(PaymentType p in payment_types)
+      {
+        d[p.payment_type_id] = p;
+      }
+      return d;
     }
 
     public static List<PaymentType> GetCached()
     {
       return (List<PaymentType>)myCache.GetItem("payment_types");
+    }
+
+    public static Dictionary<int, PaymentType> GetCached_Dict()
+    {
+      return (Dictionary<int, PaymentType>)myCache.GetItem("payment_types_dict");
     }
 
     public bool ValidatePaymentType(Data.PaymentTypeData ptd)

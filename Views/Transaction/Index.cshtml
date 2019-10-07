@@ -36,6 +36,118 @@
 <div id="transaction_view"
      class="container show">
 
+
+  <div id="transaction_view_filters">
+    <fieldset style="width: 100%;">
+      <legend class="label">Transaction Filters</legend>
+
+      <div class="level">
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <div class="select is-medium">
+                <select onchange="Transaction.FilterTransactions();"
+                        id="nameFilter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <div class="select is-medium">
+                <select onchange="Transaction.FilterTransactions();"
+                        id="statusFilter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <div class="select is-medium">
+                <select onchange="Transaction.FilterTransactions();"
+                        id="departmentFilter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <div class="select is-medium">
+                <select onchange="Transaction.FilterTransactions();"
+                        id="typeFilter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <input onkeydown="Transaction.SearchOnEnter(event);"
+                     class="input is-medium"
+                     id="transactionNumberFilter"
+                     placeholder="Receipt #"
+                     maxlength="13"
+                     value=""
+                     type="text" />
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <label class="checkbox is-medium">
+                <input onchange="Transaction.FilterTransactions();"
+                       id="modifiedFilter"
+                       type="checkbox" />
+                Modified Only
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="level-item">
+          <div class="field">
+            <div class="control">
+              <button id="filterRefreshButton"
+                      onclick="Transaction.FilterTransactions(); return false;"
+                      class="button is-primary is-medium"
+                      type="button">
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+    </fieldset>
+
+
+
+  </div>
+  <div id="transaction_list_view">
+
+  </div>
+
+  <nav class="pagination is-medium" role="navigation" aria-label="pagination">
+    <a id="resultsPreviousPage"
+       class="pagination-previous">Previous</a>
+    <a id="resultsNextPage"
+       class="pagination-next">Next</a>
+    <ul id="resultsPaginationList"
+        class="pagination-list"></ul>
+  </nav>
+
 </div>
 
 <div id="action_view"

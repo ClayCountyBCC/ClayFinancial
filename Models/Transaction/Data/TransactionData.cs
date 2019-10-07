@@ -46,7 +46,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public TransactionData()
     {
-
     }
 
     public TransactionData(string er)
@@ -85,17 +84,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var query = @"
 
-        WITH deposit_receipt_count AS (
-
-          SELECT
-            child_transaction_id,
-            COUNT(*) deposit_receipt_count
-            FROM data_transaction
-            WHERE child_transaction_id IS NOT NULL
-            GROUP BY child_transaction_id
-
-        )
-        
         SELECT 
            T.transaction_id
           ,T.child_transaction_id
@@ -227,6 +215,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return true;
     }
+
     private bool ValidateNewReceipt()
     {
       var departments = Department.GetCachedDict();

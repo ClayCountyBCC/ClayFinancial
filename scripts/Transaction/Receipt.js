@@ -2,7 +2,7 @@ var Transaction;
 (function (Transaction) {
     class Receipt {
         //receipt_view_contents
-        constructor() {
+        constructor(saved_transaction = null) {
             this.currentTransaction = null;
             this.savedTransaction = null;
             this.view_container = null;
@@ -17,7 +17,6 @@ var Transaction;
             this.receipt_preview_controls_element = null;
             this.receipt_preview_cancel_button_element = null;
             this.receipt_preview_save_button_element = null;
-            console.log('New Receipt', Transaction.departments);
             this.view_container = document.getElementById(Receipt.receipt_container);
             this.receipt_number_element = document.getElementById("receipt_view_number");
             this.created_by_element = document.getElementById("receipt_created_by");
@@ -27,13 +26,12 @@ var Transaction;
             this.receipt_department_element = document.getElementById("receipt_department");
             this.receipt_view_contents_element = document.getElementById("receipt_view_contents");
             this.receipt_view_totals_element = document.getElementById("receipt_view_totals");
-            this.currentTransaction = new Transaction.Data.TransactionData("R");
+            this.currentTransaction = new Transaction.Data.TransactionData("R", saved_transaction);
             this.receipt_preview_controls_element = document.getElementById("receipt_preview_controls");
             this.receipt_preview_cancel_button_element = document.getElementById("receipt_view_cancel");
             this.receipt_preview_save_button_element = document.getElementById("receipt_view_save");
             this.receipt_preview_cancel_button_element.onclick = (event) => {
-                Utilities.Hide(this.view_container);
-                Utilities.Show(Transaction.Data.TransactionData.action_container);
+                Transaction.ViewReceiptDetail();
             };
             this.receipt_preview_save_button_element.onclick = (event) => {
                 this.currentTransaction.SaveTransactionData();
@@ -41,39 +39,30 @@ var Transaction;
         }
         ShowReceiptPreview() {
             let t = this.currentTransaction;
-            Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-            Utilities.Hide(Transaction.Data.TransactionData.action_container);
-            Utilities.Show(this.view_container);
-            Utilities.Set_Text(this.created_on_element, Utilities.Format_Date(new Date()));
-            Utilities.Set_Text(this.receipt_number_element, t.transaction_number);
-            Utilities.Set_Text(this.created_by_element, t.created_by_display_name);
-            Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
-            Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
-            Utilities.Set_Value(this.receipt_department_element, t.selected_department.name.toUpperCase());
-            this.CreatePaymentTypeDisplay();
+            this.UpdateReceipt(t);
             Utilities.Show(this.receipt_preview_controls_element);
         }
         ShowReceipt(t) {
-            this.currentTransaction = new Transaction.Data.TransactionData("R");
-            Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-            Utilities.Hide(Transaction.Data.TransactionData.action_container);
-            Utilities.Show(this.view_container);
-            Utilities.Set_Text(this.created_on_element, Utilities.Format_Date(new Date()));
+            this.UpdateReceipt(t);
+            Utilities.Hide(this.receipt_preview_controls_element);
+        }
+        UpdateReceipt(t) {
+            Transaction.ViewPrintableReceipt();
+            Utilities.Set_Text(this.created_on_element, Utilities.Format_Date(t.created_on));
             Utilities.Set_Text(this.receipt_number_element, t.transaction_number);
             Utilities.Set_Text(this.created_by_element, t.created_by_display_name);
             Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
             Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
             Utilities.Set_Value(this.receipt_department_element, t.department_name);
-            this.CreatePaymentTypeDisplay();
-            Utilities.Hide(this.receipt_preview_controls_element);
+            this.CreatePaymentTypeDisplay(t);
         }
-        CreatePaymentTypeDisplay() {
+        CreatePaymentTypeDisplay(t) {
             Utilities.Clear_Element(this.receipt_view_contents_element);
             Utilities.Clear_Element(this.receipt_view_totals_element);
             let check_total = 0;
             let cash_total = 0;
             let check_count = 0;
-            for (let ptd of this.currentTransaction.payment_type_data) {
+            for (let ptd of t.payment_type_data) {
                 let current_check_total = 0;
                 let current_cash_total = 0;
                 let current_check_count = 0;
@@ -82,7 +71,7 @@ var Transaction;
                     current_check_total += pmd.check_amount;
                     current_check_count += pmd.check_count;
                 }
-                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeRow(ptd.selected_payment_type.name, current_cash_total, current_check_total, current_check_count));
+                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeRow(ptd.selected_payment_type !== undefined ? ptd.selected_payment_type.name : ptd.payment_type.name, current_cash_total, current_check_total, current_check_count));
                 check_total += current_check_total;
                 cash_total += current_cash_total;
                 check_count += current_check_count;
