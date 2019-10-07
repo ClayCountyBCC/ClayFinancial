@@ -115,7 +115,7 @@ namespace ClayFinancial.Controllers.API
     }
 
     [HttpPost]
-    [Route("EditPaymentTypes")]
+    [Route("AddPaymentTypes")]
     public IHttpActionResult AddPaymentType(List<PaymentTypeData> payment_types_data)
     {
       if (!payment_types_data.Any()) return Ok(new TransactionData() {error_text = "there are no payment types in the list" }); ;
@@ -145,10 +145,10 @@ namespace ClayFinancial.Controllers.API
 
       if(!PaymentTypeData.SaveChangePaymentTypeData(payment_types_data, ua,user_ip_address))
       {
-        return InternalServerError();
+        return Ok("There was an issue saving the payment type data");
       }
 
-      return Ok(TransactionData.GetTransactionData(payment_types_data.First().transaction_id));
+      return Ok();
      
     }
 
@@ -167,64 +167,68 @@ namespace ClayFinancial.Controllers.API
       }
 
 
+
       if (!payment_method_data.ValidateChange())
       {
+
         if(payment_method_data.error_text.Length == 0)
         {
           payment_method_data.error_text = "There was an issue with validating the payment method.";
         }
-        return Ok(payment_method_data.error_text);
+
       }
       else
       {
-        if(payment_method_data.payment_method_data_id > -1)
+
+        payment_method_data.added_after_save = false;
+        if (!payment_method_data.SavePaymentMethod())
         {
-          payment_method_data.EditPaymentMethod();
-        }
-        else
-        {
-          payment_method_data.SaveNewPaymentMethod();
+          if (payment_method_data.error_text.Length == 0)
+          {
+            payment_method_data.error_text = "There was an issue editing the payment method.";
+          }
         }
 
-        return Ok();
+       
       }
+     return Ok(payment_method_data.error_text);
 
     }
     [HttpPost]
     [Route("AddPaymentMethod")]
     public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
     {
-      //var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      ////var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-      //payment_method_data.SetUserName(ua.user_name);
+      if (payment_method_data.payment_method_data_id > 0) return Ok("This payment method has already been added.");
 
-      //if (ua.current_access == UserAccess.access_type.no_access)
-      //{
-      //  return Unauthorized();
-      //}
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      payment_method_data.SetUserName(ua.user_name);
 
-      //if (!payment_method_data.ValidateChange())
-      //{
-      //  if (payment_method_data.error_text.Length == 0)
-      //  {
-      //    payment_method_data.error_text = "There was an issue with validating the payment method.";
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
 
-      //    return Ok(payment_method_data);
-      //  }
-      //}
-      //else
-      //{
-      //  if (payment_method_data.payment_method_data_id > -1)
-      //  {
-      //    payment_method_data.EditPaymentMethod();
-      //  }
-      //  else
-      //  {
-      //    payment_method_data.SaveNewPaymentMethod();
-      //  }
 
-      //  return Ok(TransactionData.GetTransactionData(payment_method_data.transaction_id));
-      //}
+      if (!payment_method_data.ValidateNew())
+      {
+        if (payment_method_data.error_text.Length == 0)
+        {
+          payment_method_data.error_text = "There was an issue with validating the payment method.";
+
+        }
+      }
+      else
+      {
+        payment_method_data.added_after_save = true;
+
+        if (!payment_method_data.SavePaymentMethod())
+        {
+          if (payment_method_data.error_text.Length == 0)
+          {
+            payment_method_data.error_text = "There was an issue saving the new payment method.";
+          }
+        }
+      }
 
       return Ok(payment_method_data.error_text);
     }
@@ -293,12 +297,59 @@ namespace ClayFinancial.Controllers.API
 
     }
 
-   // edit controls
 
+    [HttpGet]
+    [Route("GetControlDataHistory")]
+    public IHttpActionResult GetControlHistory(long control_data_id = -1)
+    {
+      if(control_data_id == -1)
+      {
+        return Ok("No control data id to get history");
+      }
+
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+
+      var cl = ControlData.GetControlDataHistory(control_data_id);
+
+      if (cl == null)
+      {
+        return InternalServerError();
+      }
+
+      return Ok(cl);
+
+    }
+
+    [HttpGet]
+    [Route("GetPaymentMethodHistory")]
+    public IHttpActionResult GetPaymentMethodHistory(long payment_method_data_id = -1)
+    {
+      if(payment_method_data_id == -1)
+      {
+        return Ok("No payment method to get history");
+      }
+
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+
+      var pm = GetPaymentMethodHistory(payment_method_data_id);
+
+      if (pm == null)
+      {
+        return InternalServerError();
+      }
+      return Ok(pm);
+    }
   }
 
-  //control_data return history
-
-  //payment_method_data return history
 }
 

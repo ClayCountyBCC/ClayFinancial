@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Text;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
@@ -193,75 +194,46 @@ namespace ClayFinancial.Models.Transaction.Data
                 ";
     }
 
-    public bool SaveNewPaymentMethod()
+    public bool SavePaymentMethod()
     {
-      var param = GetPaymentMethodParameters();
+      // AN EDITED METHOD WILL HAVE A REASON AND PRIOR PAYMENT METHOD DATA ID
 
-      var query = @"
+      var param = new DynamicParameters();
+      param.Add("@payment_method_data_id", payment_method_data_id);
+      param.Add("@prior_payment_method_data_id", prior_payment_method_data_id);
+      param.Add("@transaction_payment_type_id", transaction_payment_type_id);
+      param.Add("@transaction_id", transaction_id);
+      param.Add("@cash_amount", cash_amount);
+      param.Add("@check_amount", check_amount);
+      param.Add("@check_count", check_count);
+      param.Add("@check_number", check_number);
+      param.Add("@check_from", check_from);
+      param.Add("@paying_for", paying_for);
+      param.Add("@reason_for_change", reason_for_change);
+      param.Add("@username", username);
+      param.Add("@added_after_save", added_after_save);
 
-      INSERT INTO data_payment_method
-      (
-        prior_payment_method_data_id
-        ,transaction_payment_type_id 
-        ,transaction_id 
-        ,cash_amount 
-        ,check_amount 
-        ,check_count 
-        ,check_number 
-        ,check_from 
-        ,paying_for 
-        ,is_active 
-        ,added_after_save
-      )
-      VALUES
-      (
-        NULL
-        ,@transaction_payment_type_id 
-        ,@transaction_id 
-        ,@cash_amount 
-        ,@check_amount 
-        ,@check_count 
-        ,@check_number 
-        ,@check_from 
-        ,@paying_for 
-        ,@is_active
-        ,@added_after_save
-      )
+      var query = new StringBuilder();
 
-      SET @payment_method_data_id = SCOPE_IDENTITY();
+      query.AppendLine(@"
+    
+        UPDATE data_transaction
+        SET has_been_modified = 1
+        WHERE transaction_id = @transaction_id;
 
-      INSERT INTO data_changes_payment_method
-      (
-        original_payment_method_data_id
-        ,new_payment_method_data_id
-        ,modified_by
-        ,modified_on
-        ,reason_for_change
-      )
-      VALUES
-      (
-        @payment_method_data_id,
-        @payment_method_data_id, 
-        @username, 
-        GETDATE(),
-        @reason_for_change
-      )
 
-";
-      return Constants.Exec_Scalar<PaymentMethodData>(query, Constants.ConnectionString.ClayFinancial, param) != null;
-    }
-
-    public bool EditPaymentMethod()
-    {
-      var param = GetPaymentMethodParameters();
-
-      var query = @"
         DECLARE @original_payment_method_id BIGINT = 
         (
           SELECT ISNULL(original_payment_method_data_id, @prior_payment_method_data_id)
           FROM data_changes_payment_method
           WHERE new_payment_method_data_id = @prior_payment_method_data_id
         );
+
+
+        -- THIS WILL ONLY HAPPEN IF THIS IS AN EDIT BECAUSE @prior ID WILL BE -1 OTHERWISE
+        UPDATE data_payment_method
+        SET is_active = 0
+        WHERE payment_method_data_id = @prior_payment_method_data_id;
 
         INSERT INTO data_payment_method
         (
@@ -279,7 +251,7 @@ namespace ClayFinancial.Models.Transaction.Data
         )
         VALUES
         (
-          NULL
+          CASE WHEN @prior_payment_method_data_id = -1 THEN NULL ELSE @prior_payment_method_data_id END
           ,@transaction_payment_type_id 
           ,@transaction_id 
           ,@cash_amount 
@@ -288,55 +260,87 @@ namespace ClayFinancial.Models.Transaction.Data
           ,@check_number 
           ,@check_from 
           ,@paying_for 
-          ,1 -- is_active
-          ,CASE WHEN LEN(reason_for_change) = 0 THEN 1 ELSE 0 END
+          ,1 -- newest one is always active
+          ,1 -- EDITS AND NEW PAYMENT METHODS ARE ALWAYS ADDED AFTER SAVE
         )
-
+        
+        
         SET @payment_method_data_id = SCOPE_IDENTITY();
         
         INSERT INTO data_changes_payment_method
         (
+          original_payment_method_data_id
           ,new_payment_method_data_id
           ,modified_by
-          ,modified_on
           ,reason_for_change
         )
         VALUES
         (
-          @payment_method_data_id,
-          @payment_method_data_id, 
-          @username, 
-          GETDATE(),
-          @reason_for_change
+          ISNULL(@original_payment_method_id, @payment_method_data_id)
+          ,@payment_method_data_id
+          ,@username
+          ,@reason_for_change
         )
+        
 
-      ";
-
-      return Constants.Exec_Scalar<PaymentMethodData>(query, Constants.ConnectionString.ClayFinancial, param) != null;
-
-    }
-    private DynamicParameters GetPaymentMethodParameters()
-    {
-      var param = new DynamicParameters();
-      param.Add("@payment_method_data_id", payment_method_data_id);
-      param.Add("@prior_payment_method_data_id", prior_payment_method_data_id);
-      param.Add("@transaction_payment_type_id", transaction_payment_type_id);
-      param.Add("@transaction_id",transaction_id);
-      param.Add("@cash_amount",cash_amount);
-      param.Add("@check_amount",check_amount);
-      param.Add("@check_count",check_count);
-      param.Add("@check_number",check_number);
-      param.Add("@check_from",check_from);
-      param.Add("@paying_for",paying_for);
-      param.Add("@reason_for_change",reason_for_change);
-      param.Add("@username", username);
       
-      return param;
+
+      ");
+
+      return Constants.Exec_Scalar<PaymentMethodData>(query.ToString(), Constants.ConnectionString.ClayFinancial, param) != null;
+
     }
 
     public void SetUserName(string un)
     {
       this.username = un;
+    }
+
+    public static List<PaymentMethodData> GetPaymentMethodHistory(long payment_method_data_id)
+    {
+      var param = new DynamicParameters();
+      param.Add("@payment_method_data_id", payment_method_data_id);
+
+      var query = @"
+      
+        USE ClayFinancial;
+
+
+        DECLARE @prior_payment_method_data_id bigint = @payment_method_data_id;
+        DECLARE @original_payment_method_data_id BIGINT = 
+          (SELECT original_payment_method_data_id 
+          FROM data_changes_payment_method 
+          where new_payment_method_data_id = @payment_method_data_id);
+        DECLARE @transaction_id BIGINT = 16;
+        DECLARE @transaction_payment_type_id BIGINT = 
+          (SELECT transaction_payment_type_id
+          FROM data_payment_method 
+          WHERE payment_method_data_id = @payment_method_data_id);
+
+
+        WITH payment_method_id_history AS (
+
+          SELECT DISTINCT 
+            new_payment_method_data_id
+          from data_changes_payment_method 
+          WHERE original_payment_method_data_id = @original_payment_method_data_id
+
+
+        )
+
+        select PM.*
+        FROM data_payment_method PM
+        LEFT OUTER JOIN payment_method_id_history PH ON PH.new_payment_method_data_id = PM.payment_method_data_id
+        INNER JOIN data_transaction T ON T.transaction_id = PM.transaction_id
+        INNER JOIN data_payment_type PT ON PT.transaction_payment_type_id = PM.transaction_payment_type_id
+        WHERE PH.new_payment_method_data_id IS NOT NULL
+            OR PM.payment_method_data_id = @original_payment_method_data_id
+        ORDER BY payment_method_data_id DESC
+
+      ";
+
+      return Constants.Get_Data<PaymentMethodData>(query, param, Constants.ConnectionString.ClayFinancial);
+
     }
   }
 }

@@ -30,6 +30,11 @@ namespace ClayFinancial.Models.Transaction.Data
       
     }
 
+    public void SetUsername(string un)
+    {
+      username = un;
+    }
+
     public static List<ControlData> GetActiveTransactionControls(long transaction_id)
     {
       var param = new DynamicParameters();
@@ -159,14 +164,13 @@ namespace ClayFinancial.Models.Transaction.Data
       var controls = Control.GetCachedDict();
 
       return controls[control_id].Validate(this);
-
-      
     }
 
     public bool UpdateControlData()
     {
 
       var query = @"
+        DECLARE @new_control_data_id BIGINT = -1;
 
         INSERT INTO data_control
         (
@@ -191,12 +195,13 @@ namespace ClayFinancial.Models.Transaction.Data
  
         SET @new_control_data_id = SCOPE_IDENTITY();
 
+        UPDATE data_control
+        SET is_active = 0
+        WHERE control_data_id = @prior_control_data_id;
+
         IF @prior_control_data_id > -1
           BEGIN
 
-            UPDATE data_control
-            SET is_active = 0
-            WHERE control_data_id = @prior_control_data_id;
 
             INSERT INTO data_changes_control
             (
@@ -244,10 +249,26 @@ namespace ClayFinancial.Models.Transaction.Data
       return param;
     }
 
-    public void SetUsername(string un)
+    public static List<ControlData> GetControlDataHistory(long control_data_id)
     {
-      username = un;
+      var param = new DynamicParameters();
+      param.Add("@control_data_id", control_data_id);
+      var query = @"
+
+        DECLARE @transaction_payment_type_id BIGINT = (SELECT transaction_payment_type_id FROM data_control WHERE control_data_id = @control_data_id);
+        DECLARE @control_id BIGINT = (SELECT control_id FROM data_control WHERE control_data_id = @control_data_id);
+
+
+        SELECT *
+        FROM data_control
+        WHERE transaction_payment_type_id = @transaction_payment_type_id AND control_id = @control_id
+        ORDER BY control_data_id DESC
+
+      ";
+
+      return Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
     }
+
     //public TransactionData ValidateTransactionData(TransactionData transactionData)
     //{
     //  // We treat the Data.TransactionData class as a department class because it has all of the

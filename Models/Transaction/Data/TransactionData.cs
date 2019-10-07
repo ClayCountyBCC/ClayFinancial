@@ -131,9 +131,9 @@ namespace ClayFinancial.Models.Transaction.Data
         INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
         WHERE 1=1
 
-       
-
       ";
+
+      //TODO: NEED TO SEND PAGE SIZE
 
       sb.AppendLine(query);
 
