@@ -346,6 +346,7 @@ var Transaction;
              */
             static GetTransactionList() {
                 let page = Transaction.current_page;
+                console.log('page', page);
                 Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
                 let path = Transaction.GetPath();
                 let props = [];

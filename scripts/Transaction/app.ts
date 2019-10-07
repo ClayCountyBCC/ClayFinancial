@@ -9,7 +9,7 @@
   //export let currentTransactionData: Transaction.Data.TransactionData = null;
   export let DepartmentControl: HTMLSelectElement = null;
   export let DepartmentControlContainer: HTMLElement = null;
-  export let current_page: 1;
+  export let current_page: number = 1;
   export let department_filter = "";
   export let name_filter = "mine";
   export let status_filter = "incomplete";
@@ -19,7 +19,6 @@
 
   export async function Start()
   {
-
     await Department.GetDepartments()
       .then((d) =>
       {

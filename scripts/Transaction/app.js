@@ -17,6 +17,7 @@ var Transaction;
     //export let currentTransactionData: Transaction.Data.TransactionData = null;
     Transaction.DepartmentControl = null;
     Transaction.DepartmentControlContainer = null;
+    Transaction.current_page = 1;
     Transaction.department_filter = "";
     Transaction.name_filter = "mine";
     Transaction.status_filter = "incomplete";
