@@ -168,10 +168,10 @@ namespace ClayFinancial.Models.Transaction.Data
         switch(completed_filter.ToLower())
         {
           case "c":
-            sb.AppendLine("AND child_transaction_id IS NOT NULL");
+            sb.AppendLine("AND T.child_transaction_id IS NOT NULL");
             break;
           case "i":
-            sb.AppendLine("AND child_transaction_id IS NULL");
+            sb.AppendLine("AND T.child_transaction_id IS NULL");
             break;
           default:
             break;
@@ -180,13 +180,13 @@ namespace ClayFinancial.Models.Transaction.Data
       if(transaction_type_filter.Length > 0)
       {
         param.Add("@transaction_type_filter", transaction_type_filter);
-        sb.AppendLine("AND transaction_type = @transaction_type_filter");
+        sb.AppendLine("AND T.transaction_type = @transaction_type_filter");
       }
       if(transaction_number_filter.Length > 0)
       {
 
         param.Add("@transaction_number", transaction_number_filter);
-        sb.AppendLine(" AND transaction_number = @transaction_number");
+        sb.AppendLine(" AND T.transaction_number = @transaction_number");
 
       }
       if(department_id_filter > 0)
