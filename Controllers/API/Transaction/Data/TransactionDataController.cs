@@ -58,29 +58,33 @@ namespace ClayFinancial.Controllers.API
 
       return Ok(tr);
     }
+    [HttpGet]
+    [Route("Count")]
+    public IHttpActionResult Count(
+      int page_number = -1
+      , int page_size = 25
+      , string display_name_filter = ""
+      , string completed_filter = ""
+      , int department_id_filter = -1
+      , string transaction_type_filter = ""
+      , string transaction_number_filter = ""
+      , bool has_been_modified = false
+    //,long transaction_id_filter = -1
+    )
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-    //[HttpGet]
-    //[Route("Get")]
-    //public IHttpActionResult CreateDeposit(TransactionData transactionData)
-    //{
-    //  var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+      var count = TransactionData.GetTransactionList(ua, page_number, display_name_filter, completed_filter, transaction_type_filter,
+                                        transaction_number_filter, department_id_filter,
+                                        has_been_modified).Count(); //   only true matters
 
-    //  if (ua.current_access == UserAccess.access_type.no_access)
-    //  {
-    //    return Unauthorized();
-    //  }
-    //  transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-    //  transactionData.SetUserProperties(ua);
+      return Ok(count / page_size);
 
-    //  var tr = transactionData.CreateDeposit(ua);
-
-    //  if (tr == null)
-    //  {
-    //    return InternalServerError();
-    //  }
-
-    //  return Ok(tr);
-    //}
+    }
 
 
     [HttpPost]
@@ -165,9 +169,6 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-
-
-
       if (!payment_method_data.ValidateChange())
       {
 
@@ -179,7 +180,6 @@ namespace ClayFinancial.Controllers.API
       }
       else
       {
-
         payment_method_data.added_after_save = false;
         if (!payment_method_data.SavePaymentMethod())
         {
@@ -188,8 +188,6 @@ namespace ClayFinancial.Controllers.API
             payment_method_data.error_text = "There was an issue editing the payment method.";
           }
         }
-
-       
       }
      return Ok(payment_method_data.error_text);
 
@@ -198,7 +196,17 @@ namespace ClayFinancial.Controllers.API
     [Route("AddPaymentMethod")]
     public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
     {
-      if (payment_method_data.payment_method_data_id > 0) return Ok("This payment method has already been added.");
+      if (payment_method_data.payment_method_data_id > 0)
+      {
+        return Ok("This payment method has already been added.");
+      }
+      else
+      {
+        if (payment_method_data.cash_amount > 0)
+        {
+          return Ok("Cannot add additional cash payment method.");
+        }
+      }
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       payment_method_data.SetUserName(ua.user_name);
@@ -349,6 +357,30 @@ namespace ClayFinancial.Controllers.API
       }
       return Ok(pm);
     }
+
+    //[Httpost]
+    //[Route("NewDeposit")]
+    //public IHttpActionResult CreateDeposit(TransactionData transactionData)
+    //{
+    //  var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+    //  if (ua.current_access == UserAccess.access_type.no_access)
+    //  {
+    //    return Unauthorized();
+    //  }
+    //  transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+    //  transactionData.SetUserProperties(ua);
+
+    //  var tr = transactionData.CreateDeposit(ua);
+
+    //  if (tr == null)
+    //  {
+    //    return InternalServerError();
+    //  }
+
+    //  return Ok(tr);
+    //}
+
   }
 
 }

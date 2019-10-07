@@ -20,6 +20,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public string transaction_number { get; set; } = "";
     public string transaction_type { get; set; } = "R";
     public long? child_transaction_id { get; set; } = null;
+    public string deposit_receipt_transaction_number { get; set; } = "";
     public int department_id { get; set; } = -1;
     public string department_name { get; set; } = "";
     public List<ControlData> department_control_data { get; set; } = new List<ControlData>();
@@ -84,9 +85,30 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var query = @"
 
+        WITH Deposit_transaction_ids AS (
+
+          SELECT 
+            transaction_id,
+            transaction_number,
+            child_transaction_id,
+            transaction_type
+          FROM ClayFinancial.dbo.data_transaction DT
+          WHERE LOWER(transaction_type) = 'd'
+        ), deposit_receipts AS (
+
+          SELECT
+            DTI.child_transaction_id,
+            DT.transaction_type,
+            DT.transaction_number deposit_receipt_transaction_number
+          FROM ClayFinancial.dbo.data_transaction DT
+          LEFT OUTER JOIN Deposit_transaction_ids DTI ON DTI.child_transaction_id = DT.transaction_id
+          WHERE DT.TRANSACTION_ID = DTI.child_transaction_id
+
+        )
         SELECT 
            T.transaction_id
           ,T.child_transaction_id
+          ,DR.deposit_receipt_transaction_number
           ,T.fiscal_year          
           ,T.transaction_number
           ,T.created_by_display_name
@@ -116,8 +138,10 @@ namespace ClayFinancial.Models.Transaction.Data
           ,T.total_check_amount
           ,T.total_check_count
         FROM ClayFinancial.dbo.data_transaction T
+        LEFT OUTER JOIN deposit_receipts DR ON DR.child_transaction_id = T.child_transaction_id
         INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
         WHERE 1=1
+
 
       ";
 
