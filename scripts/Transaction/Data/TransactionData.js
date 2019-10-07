@@ -244,9 +244,11 @@ var Transaction;
             AddSavedPaymentType(payment_type, payment_type_data, container) {
                 let ptd = new Data.PaymentTypeData(payment_type, container, this.next_payment_type_index++, payment_type_data);
                 this.payment_type_data.push(ptd);
-                ptd.add_another_payment_type_button.onclick = (event) => {
-                    this.AddPaymentType(payment_type, container, payment_type_data);
-                };
+                ptd.add_another_payment_type_button.style.display = "none";
+                //ptd.add_another_payment_type_button.onclick = (event: Event) =>
+                //{ // if they click this, I need to capture it so that I can save that particular payment type separately.
+                //  this.AddPaymentType(payment_type, container, payment_type_data);
+                //}
                 ptd.cancel_payment_type_button.style.display = "none";
                 ptd.save_button.style.display = "none";
             }
@@ -360,7 +362,6 @@ var Transaction;
                     props.push("&has_been_modified=true");
                 if (Transaction.transaction_number_filter.length > 0)
                     props.push("&transaction_number_filter=" + Transaction.transaction_number_filter);
-                console.log('GetTransactionList Props', props.join(""));
                 return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
             }
             static GetSpecificTransaction(transaction_id) {

@@ -232,7 +232,6 @@
 
     private RenderSavedPaymentMethods(target_container: HTMLLIElement, saved_payment_type_data: PaymentTypeData)
     {
-      console.log("RenderSavedPaymentMethods Payment Type Data", saved_payment_type_data);
       let fieldset = document.createElement("fieldset");
       let legend = document.createElement("legend");
       legend.classList.add("label");
