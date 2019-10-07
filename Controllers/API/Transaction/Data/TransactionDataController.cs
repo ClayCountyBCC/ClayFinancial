@@ -59,7 +59,7 @@ namespace ClayFinancial.Controllers.API
       return Ok(tr);
     }
     [HttpGet]
-    [Route("Count")]
+    [Route("PageCount")]
     public IHttpActionResult Count(
       int page_number = -1
       , int page_size = 25
