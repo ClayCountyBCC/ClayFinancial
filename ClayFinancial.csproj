@@ -178,8 +178,6 @@
     <Content Include="lib\Utilities.min.css">
       <DependentUpon>Utilities.css</DependentUpon>
     </Content>
-    <Content Include="node_modules\bulma\css\bulma.css" />
-    <Content Include="node_modules\bulma\css\bulma.min.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -208,66 +206,6 @@
     <Content Include="Views\web.config" />
     <Content Include="libman.json" />
     <Content Include="ConnectionStrings.config" />
-    <Content Include="node_modules\bulma\bulma.sass" />
-    <Content Include="node_modules\bulma\CHANGELOG.md" />
-    <Content Include="node_modules\bulma\css\bulma.css.map" />
-    <Content Include="node_modules\bulma\LICENSE" />
-    <Content Include="node_modules\bulma\package.json" />
-    <Content Include="node_modules\bulma\README.md" />
-    <Content Include="node_modules\bulma\sass\.DS_Store" />
-    <Content Include="node_modules\bulma\sass\base\generic.sass" />
-    <Content Include="node_modules\bulma\sass\base\helpers.sass" />
-    <Content Include="node_modules\bulma\sass\base\minireset.sass" />
-    <Content Include="node_modules\bulma\sass\base\_all.sass" />
-    <Content Include="node_modules\bulma\sass\components\breadcrumb.sass" />
-    <Content Include="node_modules\bulma\sass\components\card.sass" />
-    <Content Include="node_modules\bulma\sass\components\dropdown.sass" />
-    <Content Include="node_modules\bulma\sass\components\level.sass" />
-    <Content Include="node_modules\bulma\sass\components\list.sass" />
-    <Content Include="node_modules\bulma\sass\components\media.sass" />
-    <Content Include="node_modules\bulma\sass\components\menu.sass" />
-    <Content Include="node_modules\bulma\sass\components\message.sass" />
-    <Content Include="node_modules\bulma\sass\components\modal.sass" />
-    <Content Include="node_modules\bulma\sass\components\navbar.sass" />
-    <Content Include="node_modules\bulma\sass\components\pagination.sass" />
-    <Content Include="node_modules\bulma\sass\components\panel.sass" />
-    <Content Include="node_modules\bulma\sass\components\tabs.sass" />
-    <Content Include="node_modules\bulma\sass\components\_all.sass" />
-    <Content Include="node_modules\bulma\sass\elements\box.sass" />
-    <Content Include="node_modules\bulma\sass\elements\button.sass" />
-    <Content Include="node_modules\bulma\sass\elements\container.sass" />
-    <Content Include="node_modules\bulma\sass\elements\content.sass" />
-    <Content Include="node_modules\bulma\sass\elements\form.sass" />
-    <Content Include="node_modules\bulma\sass\elements\icon.sass" />
-    <Content Include="node_modules\bulma\sass\elements\image.sass" />
-    <Content Include="node_modules\bulma\sass\elements\notification.sass" />
-    <Content Include="node_modules\bulma\sass\elements\other.sass" />
-    <Content Include="node_modules\bulma\sass\elements\progress.sass" />
-    <Content Include="node_modules\bulma\sass\elements\table.sass" />
-    <Content Include="node_modules\bulma\sass\elements\tag.sass" />
-    <Content Include="node_modules\bulma\sass\elements\title.sass" />
-    <Content Include="node_modules\bulma\sass\elements\_all.sass" />
-    <Content Include="node_modules\bulma\sass\form\checkbox-radio.sass" />
-    <Content Include="node_modules\bulma\sass\form\file.sass" />
-    <Content Include="node_modules\bulma\sass\form\input-textarea.sass" />
-    <Content Include="node_modules\bulma\sass\form\select.sass" />
-    <Content Include="node_modules\bulma\sass\form\shared.sass" />
-    <Content Include="node_modules\bulma\sass\form\tools.sass" />
-    <Content Include="node_modules\bulma\sass\form\_all.sass" />
-    <Content Include="node_modules\bulma\sass\grid\columns.sass" />
-    <Content Include="node_modules\bulma\sass\grid\tiles.sass" />
-    <Content Include="node_modules\bulma\sass\grid\_all.sass" />
-    <Content Include="node_modules\bulma\sass\layout\footer.sass" />
-    <Content Include="node_modules\bulma\sass\layout\hero.sass" />
-    <Content Include="node_modules\bulma\sass\layout\section.sass" />
-    <Content Include="node_modules\bulma\sass\layout\_all.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\animations.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\controls.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\derived-variables.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\functions.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\initial-variables.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\mixins.sass" />
-    <Content Include="node_modules\bulma\sass\utilities\_all.sass" />
     <None Include="bundleconfig.json" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
@@ -303,6 +241,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="node_modules\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="scripts\LevelItem.ts" />
