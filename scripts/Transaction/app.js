@@ -18,10 +18,10 @@ var Transaction;
     Transaction.DepartmentControl = null;
     Transaction.DepartmentControlContainer = null;
     Transaction.current_page = 1;
-    Transaction.department_filter = "";
+    Transaction.department_id_filter = -1;
     Transaction.name_filter = "mine";
-    Transaction.status_filter = "incomplete";
-    Transaction.type_filter = "";
+    Transaction.completed_filter = "";
+    Transaction.transaction_type_filter = "";
     Transaction.modified_only_filter = false;
     Transaction.transaction_number_filter = "";
     function Start() {
@@ -31,7 +31,6 @@ var Transaction;
                 Transaction.payment_types = [];
                 Transaction.controls = [];
                 Transaction.departments = d;
-                console.log(d);
                 Transaction.DepartmentControl = Transaction.Department.CreateDepartmentElement(Transaction.departments);
                 PopulateFilters();
                 for (let department of Transaction.departments) {
@@ -48,8 +47,6 @@ var Transaction;
                     let control_ids = Transaction.controls.map((c) => { return c.control_id; });
                     Transaction.controls = Transaction.controls.concat(payment_type.controls.filter((c) => { return control_ids.indexOf(c.control_id) === -1; }));
                 }
-                console.log("all payment types", Transaction.payment_types);
-                console.log("all controls", Transaction.controls);
             });
             yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
@@ -58,7 +55,6 @@ var Transaction;
                 console.log('transactions', Transaction.transactions);
                 Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
             });
-            console.log('departments', Transaction.departments);
         });
     }
     Transaction.Start = Start;
@@ -138,10 +134,10 @@ var Transaction;
     }
     Transaction.SearchOnEnter = SearchOnEnter;
     function FilterTransactions() {
-        Transaction.department_filter = Utilities.Get_Value("departmentFilter");
+        Transaction.department_id_filter = parseInt(Utilities.Get_Value("departmentFilter"));
         Transaction.name_filter = Utilities.Get_Value("nameFilter");
-        Transaction.status_filter = Utilities.Get_Value("statusFilter");
-        Transaction.type_filter = Utilities.Get_Value("typeFilter");
+        Transaction.completed_filter = Utilities.Get_Value("statusFilter");
+        Transaction.transaction_type_filter = Utilities.Get_Value("typeFilter");
         Transaction.transaction_number_filter = Utilities.Get_Value("transactionNumberFilter");
         Transaction.modified_only_filter = document.getElementById("modifiedFilter").checked;
         Transaction.Data.TransactionData.GetTransactionList()

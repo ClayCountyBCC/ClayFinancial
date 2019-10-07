@@ -32,7 +32,6 @@ var Transaction;
                 let li = document.createElement("li");
                 li.style.display = "block";
                 this.payment_type_container = li;
-                console.log("New PaymentTypeData PaymentTypeData", saved_payment_type_data);
                 if (saved_payment_type_data !== null) {
                     this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
                     this.RenderSavedPaymentMethods(li, saved_payment_type_data);

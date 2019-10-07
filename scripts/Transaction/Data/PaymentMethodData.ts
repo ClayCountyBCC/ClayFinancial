@@ -80,7 +80,6 @@
       payment_method_amount_change: Function,
       saved_payment_method_data: PaymentMethodData = null)
     {
-      console.log("is_cash", is_cash, "payment_method_data", saved_payment_method_data);
       this.is_cash = is_cash;
       this.show_cancel = show_cancel;
       this.payment_method_data_id = element_id;

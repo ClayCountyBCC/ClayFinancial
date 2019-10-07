@@ -201,7 +201,6 @@ var Transaction;
                 // the system is currently set up to expect for that paymenttype.
                 // The RenderSavedPaymentTypes function renders the payment type based on the information
                 // that was saved.  This information may not be vaild for the payment types going forward.
-                console.log("RenderSavedPaymentTypes", saved_transaction);
                 this.payment_type_data = [];
                 let paymentTypeContainer = document.getElementById(this.payment_type_target);
                 // if we can't find it, create it.
@@ -346,22 +345,22 @@ var Transaction;
              */
             static GetTransactionList() {
                 let page = Transaction.current_page;
-                console.log('page', page);
                 Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
                 let path = Transaction.GetPath();
                 let props = [];
                 if (Transaction.name_filter.length > 0)
-                    props.push("&displayname=" + Transaction.name_filter);
-                if (Transaction.department_filter.length > 0)
-                    props.push("&department=" + Transaction.department_filter);
-                if (Transaction.type_filter.length > 0)
-                    props.push("&type=" + Transaction.type_filter);
-                if (Transaction.status_filter.length > 0)
-                    props.push("&status=" + Transaction.status_filter);
+                    props.push("&display_name_filter=" + Transaction.name_filter);
+                if (Transaction.department_id_filter > 0)
+                    props.push("&department_id_filter=" + Transaction.department_id_filter.toString());
+                if (Transaction.transaction_type_filter.length > 0)
+                    props.push("&transaction_type_filter=" + Transaction.transaction_type_filter);
+                if (Transaction.completed_filter.length > 0)
+                    props.push("&completed_filter=" + Transaction.completed_filter);
                 if (Transaction.modified_only_filter)
-                    props.push("&modified=true");
+                    props.push("&has_been_modified=true");
                 if (Transaction.transaction_number_filter.length > 0)
-                    props.push("&transaction_number=" + Transaction.transaction_number_filter);
+                    props.push("&transaction_number_filter=" + Transaction.transaction_number_filter);
+                console.log('GetTransactionList Props', props.join(""));
                 return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
             }
             static GetSpecificTransaction(transaction_id) {

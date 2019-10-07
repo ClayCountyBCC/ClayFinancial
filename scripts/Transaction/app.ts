@@ -10,10 +10,10 @@
   export let DepartmentControl: HTMLSelectElement = null;
   export let DepartmentControlContainer: HTMLElement = null;
   export let current_page: number = 1;
-  export let department_filter = "";
+  export let department_id_filter: number = -1;
   export let name_filter = "mine";
-  export let status_filter = "incomplete";
-  export let type_filter = "";
+  export let completed_filter = "";
+  export let transaction_type_filter = "";
   export let modified_only_filter = false;
   export let transaction_number_filter = "";
 
@@ -26,7 +26,6 @@
         Transaction.controls = [];
 
         Transaction.departments = d;
-        console.log(d);
         Transaction.DepartmentControl = Department.CreateDepartmentElement(Transaction.departments);
 
         PopulateFilters();
@@ -62,8 +61,6 @@
           );
         }
 
-        console.log("all payment types", Transaction.payment_types);
-        console.log("all controls", Transaction.controls);
       });
 
     await Data.TransactionData.GetTransactionList()
@@ -75,7 +72,6 @@
         Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
       });
 
-    console.log('departments', Transaction.departments);
   }
 
   export async function ShowReceipt(transaction_id: number)
@@ -171,10 +167,10 @@
 
   export function FilterTransactions(): void
   {
-    Transaction.department_filter = Utilities.Get_Value("departmentFilter");
+    Transaction.department_id_filter = parseInt(Utilities.Get_Value("departmentFilter"));
     Transaction.name_filter = Utilities.Get_Value("nameFilter");
-    Transaction.status_filter = Utilities.Get_Value("statusFilter");
-    Transaction.type_filter = Utilities.Get_Value("typeFilter");
+    Transaction.completed_filter = Utilities.Get_Value("statusFilter");
+    Transaction.transaction_type_filter = Utilities.Get_Value("typeFilter");
     Transaction.transaction_number_filter = Utilities.Get_Value("transactionNumberFilter");
     Transaction.modified_only_filter = (<HTMLInputElement>document.getElementById("modifiedFilter")).checked;
 

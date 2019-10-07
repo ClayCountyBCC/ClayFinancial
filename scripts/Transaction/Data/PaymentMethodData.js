@@ -41,7 +41,6 @@ var Transaction;
                 this.payment_method_change = () => { };
                 this.validate_money_regex = "(?=.*?\d)^\$?(([1-9]\d{0,2}(,\d{3})*)|\d+)?(\.\d{1,2})?$";
                 this.control_to_render = null;
-                console.log("is_cash", is_cash, "payment_method_data", saved_payment_method_data);
                 this.is_cash = is_cash;
                 this.show_cancel = show_cancel;
                 this.payment_method_data_id = element_id;

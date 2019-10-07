@@ -68,7 +68,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public static List<TransactionData> GetTransactionList(
       UserAccess ua
       ,int page_number
-      ,string username_filter
+      ,string display_name_filter
       ,string completed_filter
       ,string transaction_type_filter
       ,string transaction_number_filter
@@ -126,10 +126,18 @@ namespace ClayFinancial.Models.Transaction.Data
       sb.AppendLine(query);
 
       // set filters
-      if(username_filter.Length > 0)
+      if(display_name_filter.Length > 0)
       {
-        param.Add("@username_filter", username_filter);
-        sb.AppendLine("AND created_by_display_name = @username_filter");
+        if(display_name_filter.ToLower() == "mine")
+        {
+          sb.AppendLine("AND T.created_by_employee_id = @my_employee_id");
+        }
+        else
+        {
+          param.Add("@display_name_filter", display_name_filter);
+          sb.AppendLine("AND created_by_display_name = @username_filter");
+        }
+
       }
       if(completed_filter.Length > 0)
       {

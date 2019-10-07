@@ -134,11 +134,13 @@ namespace ClayFinancial.Models
       {
 
         //case "MISHL05":
-        case "MISSL01":
+        //case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           return true;
 
+        case "CLAYBCCDV10":
+          return false;
         default:
           return false;
       }
