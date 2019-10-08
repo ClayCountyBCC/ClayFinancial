@@ -13,8 +13,6 @@
     private county_manager_element: HTMLElement = null;
     private created_by_element: HTMLElement = null;
     private created_on_element: HTMLElement = null;
-    private received_from_element: HTMLInputElement = null;
-    private receipt_department_element: HTMLInputElement = null;
     private receipt_view_contents_element: HTMLElement = null;
     private receipt_view_totals_element: HTMLElement = null;
     private receipt_preview_controls_element: HTMLElement = null;
@@ -29,8 +27,6 @@
       this.created_by_element = document.getElementById("receipt_created_by");
       this.county_manager_element = document.getElementById("receipt_view_county_manager");
       this.created_on_element = document.getElementById("receipt_view_date");
-      this.received_from_element = <HTMLInputElement>document.getElementById("receipt_received_from");
-      this.receipt_department_element = <HTMLInputElement>document.getElementById("receipt_department");
       this.receipt_view_contents_element = document.getElementById("receipt_view_contents");
       this.receipt_view_totals_element = document.getElementById("receipt_view_totals");
       this.currentTransaction = new Transaction.Data.TransactionData("R", saved_transaction);
@@ -69,8 +65,7 @@
       Utilities.Set_Text(this.receipt_number_element, t.transaction_number);
       Utilities.Set_Text(this.created_by_element, t.created_by_display_name);
       Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
-      Utilities.Set_Value(this.received_from_element, t.received_from.toUpperCase());
-      Utilities.Set_Value(this.receipt_department_element, t.department_name);
+      this.DisplayDepartmentControls(t);
       this.CreatePaymentTypeDisplay(t);
     }
 
@@ -127,7 +122,52 @@
       return tr;
     }
 
+    private DisplayDepartmentControls(t: Data.TransactionData): void
+    {
+      let container = document.getElementById("receipt_department_controls");
+      Utilities.Clear_Element(container);
+      let df = document.createDocumentFragment();
+      df.appendChild(this.CreatePrintableControl("is-half", "Received From", t.received_from));
+      df.appendChild(this.CreatePrintableControl("is-half", "Department", t.department_name));
+      for (let cd of t.department_control_data)
+      {
+        df.appendChild(this.CreateDepartmentControl(cd));
+      }
+      container.appendChild(df);
+    }
 
+    private CreateDepartmentControl(control_data: Data.ControlData): HTMLElement
+    {
+      let size = "";
+      console.log("create departmental control", control_data);
+
+      let c = control_data.control !== null ? control_data.control : control_data.selected_control;
+      if (c.render_hints.length > 0) size = c.render_hints;
+      return this.CreatePrintableControl(size, c.label, control_data.value);
+    }
+
+    private CreatePrintableControl(size: string, label: string, value: string): HTMLElement
+    {
+      let e: HTMLElement = document.createElement("div");
+      e.classList.add("field", "column", size);
+
+      let l = document.createElement("label");
+      l.classList.add("label", "is-medium");
+      l.appendChild(document.createTextNode(label));
+      e.appendChild(l);
+
+      let control = document.createElement("p");
+      control.classList.add("control");
+      e.appendChild(control);
+
+      let input = document.createElement("input");
+      input.classList.add("input", "is-static", "is-medium");
+      input.value = value;
+      input.readOnly = true;
+      control.appendChild(input);
+
+      return e;
+    }
 
   }
 

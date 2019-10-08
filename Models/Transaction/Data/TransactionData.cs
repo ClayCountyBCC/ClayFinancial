@@ -12,7 +12,7 @@ namespace ClayFinancial.Models.Transaction.Data
 {
   public class TransactionData
   {
-    const int page_size = 25;
+    const int page_size = 5;
     public long transaction_id { get; set; } = -1;
     public int fiscal_year { get; set; } = -1;
     public int created_by_employee_id { get; set; } = -1;
@@ -65,6 +65,60 @@ namespace ClayFinancial.Models.Transaction.Data
       public NonDepositedReceipts() { }
     }
 
+    public static int GetTransactionPageCount(
+      UserAccess ua
+      , string display_name_filter
+      , string completed_filter
+      , string transaction_type_filter
+      , string transaction_number_filter
+      , int department_id_filter
+      , bool has_been_modified
+      )
+    {
+      var sb = new StringBuilder();
+      var param = TransactionData.CreateFilterDynamicParameters(
+        ua,
+        -1,
+        display_name_filter,
+        completed_filter,
+        transaction_type_filter,
+        transaction_number_filter,
+        department_id_filter,
+        has_been_modified);
+
+
+
+      var query = @"
+        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+        SELECT
+          COUNT(DISTINCT T.transaction_number) CNT
+        FROM ClayFinancial.dbo.data_transaction T
+        INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
+        WHERE 1=1
+
+      ";
+
+      sb.AppendLine(query);
+
+      sb.AppendLine(TransactionData.CreateFilterWhereClause(
+        ua,
+        -1,
+        display_name_filter,
+        completed_filter,
+        transaction_type_filter,
+        transaction_number_filter,
+        department_id_filter,
+        has_been_modified));
+
+      var count = Constants.Exec_Scalar<int>(sb.ToString(), Constants.ConnectionString.ClayFinancial, param);
+
+      if (count == 0) return 1;
+
+      decimal page_count = count / page_size;
+      return ((int)Math.Ceiling(page_count)); // base 1
+    }
+
+
 
     public static List<TransactionData> GetTransactionList(
       UserAccess ua
@@ -78,8 +132,16 @@ namespace ClayFinancial.Models.Transaction.Data
       )
     {
       var sb = new StringBuilder();
-      var param = new DynamicParameters();
-      param.Add("@my_employee_id", ua.employee_id);
+      var param = TransactionData.CreateFilterDynamicParameters(
+        ua, 
+        page_number, 
+        display_name_filter, 
+        completed_filter, 
+        transaction_type_filter, 
+        transaction_number_filter, 
+        department_id_filter, 
+        has_been_modified);
+      
 
 
       var query = @"
@@ -120,27 +182,93 @@ namespace ClayFinancial.Models.Transaction.Data
 
       ";
 
-      //TODO: NEED TO SEND PAGE SIZE
-
       sb.AppendLine(query);
 
+      sb.AppendLine(TransactionData.CreateFilterWhereClause(
+        ua,
+        page_number,
+        display_name_filter,
+        completed_filter,
+        transaction_type_filter,
+        transaction_number_filter,
+        department_id_filter,
+        has_been_modified));
+
+      var td = Constants.Get_Data<TransactionData>(sb.ToString(), param, Constants.ConnectionString.ClayFinancial);
+
+      return td;
+    }
+
+    private static DynamicParameters CreateFilterDynamicParameters(
+      UserAccess ua,
+      int page_number,       
+      string display_name_filter,
+      string completed_filter,
+      string transaction_type_filter,
+      string transaction_number_filter,
+      int department_id_filter,
+      bool has_been_modified
+      )
+    {
+      var param = new DynamicParameters();
+      param.Add("@my_employee_id", ua.employee_id);
       // set filters
-      if(display_name_filter.Length > 0)
+      if (display_name_filter.Length > 0)
       {
-        if(display_name_filter.ToLower() == "mine")
+        if (display_name_filter.ToLower() != "mine")
+        {
+          param.Add("@display_name_filter", display_name_filter);
+        }
+      }
+      if (transaction_type_filter.Length > 0)
+      {
+        param.Add("@transaction_type_filter", transaction_type_filter);
+      }
+      if (transaction_number_filter.Length > 0)
+      {
+        param.Add("@transaction_number", transaction_number_filter);
+
+      }
+      if (department_id_filter > 0)
+      {
+        param.Add("@department_id", department_id_filter);
+      }
+
+      if (page_number > 0)
+      {
+        param.Add("@page_number", (page_number - 1) * page_size);
+      }
+      return param;
+    }
+
+    private static string CreateFilterWhereClause(
+      UserAccess ua,
+      int page_number,
+      string display_name_filter,
+      string completed_filter,
+      string transaction_type_filter,
+      string transaction_number_filter,
+      int department_id_filter,
+      bool has_been_modified
+      )
+    {
+      var sb = new StringBuilder();
+      // set filters
+      if (display_name_filter.Length > 0)
+      {
+        if (display_name_filter.ToLower() == "mine")
         {
           sb.AppendLine("AND T.created_by_employee_id = @my_employee_id");
         }
         else
         {
-          param.Add("@display_name_filter", display_name_filter);
           sb.AppendLine("AND created_by_display_name = @username_filter");
         }
 
       }
-      if(completed_filter.Length > 0)
+      if (completed_filter.Length > 0)
       {
-        switch(completed_filter.ToLower())
+        switch (completed_filter.ToLower())
         {
           case "c":
             sb.AppendLine("AND T.child_transaction_id IS NOT NULL");
@@ -152,43 +280,31 @@ namespace ClayFinancial.Models.Transaction.Data
             break;
         }
       }
-      if(transaction_type_filter.Length > 0)
+      if (transaction_type_filter.Length > 0)
       {
-        param.Add("@transaction_type_filter", transaction_type_filter);
         sb.AppendLine("AND T.transaction_type = @transaction_type_filter");
       }
-      if(transaction_number_filter.Length > 0)
+      if (transaction_number_filter.Length > 0)
       {
 
-        param.Add("@transaction_number", transaction_number_filter);
         sb.AppendLine(" AND T.transaction_number = @transaction_number");
 
       }
-      if(department_id_filter > 0)
+      if (department_id_filter > 0)
       {
-        param.Add("@department_id", department_id_filter);
         sb.AppendLine(@"  AND department_id = @department_id");
       }
-      if(has_been_modified)
+      if (has_been_modified)
       {
         sb.AppendLine(" AND has_been_modified = 1");
       }
-      sb.AppendLine("ORDER BY T.transaction_id DESC");
-      
+
       if (page_number > 0)
       {
-        param.Add("@page_number", (page_number - 1) * page_size);
+        sb.AppendLine("ORDER BY T.transaction_id DESC");
         sb.AppendLine($"OFFSET @page_number ROWS FETCH NEXT { page_size.ToString() } ROWS ONLY;");
       }
-
-      var td = Constants.Get_Data<TransactionData>(sb.ToString(), param, Constants.ConnectionString.ClayFinancial);
-
-      foreach (var t in td)
-      {
-        // TODO: ADD ANYTHING THAT NEEDS TO BE DONE BEFORE RETURNING THE LIST FOR EACH TRANSACTION HERE.
-      }
-
-      return td;
+      return sb.ToString();
     }
 
 

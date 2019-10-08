@@ -172,11 +172,23 @@
     <Content Include="lib\myBulma.min.css">
       <DependentUpon>myBulma.css</DependentUpon>
     </Content>
+    <Content Include="lib\transaction_bundle.js" />
+    <Content Include="lib\transaction_bundle.min.js">
+      <DependentUpon>transaction_bundle.js</DependentUpon>
+    </Content>
     <Content Include="lib\Utilities.css">
       <DependentUpon>Utilities.scss</DependentUpon>
     </Content>
     <Content Include="lib\Utilities.min.css">
       <DependentUpon>Utilities.css</DependentUpon>
+    </Content>
+    <Content Include="scripts\Transaction\transaction_bundle.js" />
+    <Content Include="scripts\Transaction\transaction_bundle.min.js">
+      <DependentUpon>transaction_bundle.js</DependentUpon>
+    </Content>
+    <Content Include="scripts\transaction_bundle.js" />
+    <Content Include="scripts\transaction_bundle.min.js">
+      <DependentUpon>transaction_bundle.js</DependentUpon>
     </Content>
     <Content Include="Web.config" />
   </ItemGroup>

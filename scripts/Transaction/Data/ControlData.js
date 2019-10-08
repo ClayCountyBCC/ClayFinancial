@@ -33,6 +33,10 @@ var Transaction;
                 }
                 this.payment_type_id = payment_type_id;
                 if (this.input_element.getAttribute("data_control_id") === null) {
+                    let input = this.input_element;
+                    if (input.type === "number") {
+                        input.onwheel = (e) => { e.preventDefault(); };
+                    }
                     this.input_element.oninput = (event) => {
                         let input = event.target;
                         if (this.Validate()) {

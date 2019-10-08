@@ -484,14 +484,29 @@
       let page = Transaction.current_page;
       Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
       let path = Transaction.GetPath();
+      let filters = TransactionData.GetTransactionFilters();
+      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString() + filters);
+    }
+
+    public static GetTransactionPageCount(): Promise<number>
+    {
+      let path = Transaction.GetPath();
+      let props: Array<string> = [];
+      let filters = TransactionData.GetTransactionFilters();
+      if (filters.length > 0) filters = "?" + filters.substr(1);
+      return Utilities.Get<number>(path + "API/Transaction/PageCount" + filters);
+    }
+
+    private static GetTransactionFilters(): string
+    {
       let props: Array<string> = [];
       if (Transaction.name_filter.length > 0) props.push("&display_name_filter=" + Transaction.name_filter);
       if (Transaction.department_id_filter > 0) props.push("&department_id_filter=" + Transaction.department_id_filter.toString());
       if (Transaction.transaction_type_filter.length > 0) props.push("&transaction_type_filter=" + Transaction.transaction_type_filter);
       if (Transaction.completed_filter.length > 0) props.push("&completed_filter=" + Transaction.completed_filter);
-      if (Transaction.modified_only_filter) props.push("&has_been_modified=true"); 
+      if (Transaction.modified_only_filter) props.push("&has_been_modified=true");
       if (Transaction.transaction_number_filter.length > 0) props.push("&transaction_number_filter=" + Transaction.transaction_number_filter);
-      return Utilities.Get<Array<TransactionData>>(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
+      return props.join("");
     }
 
     public static GetSpecificTransaction(transaction_id: number): Promise<TransactionData>
@@ -510,10 +525,18 @@
       container.appendChild(table);
       let tbody = document.createElement("tbody");
       table.appendChild(tbody);
-      for (let data of Transaction.transactions)
+      if (Transaction.transactions.length === 0)
       {
-        tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+        tbody.appendChild(Transaction.CreateMessageRow(11, "No transactions were found to match your filters."));
       }
+      else
+      {
+        for (let data of Transaction.transactions)
+        {
+          tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+        }
+      }
+
       Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
     }
 
@@ -522,6 +545,7 @@
       let table = document.createElement("table");
       table.classList.add("table", "is-fullwidth");
       let thead = document.createElement("thead");
+      thead.id = "transaction_list_view_header";
       table.appendChild(thead);
       let tr = document.createElement("tr");
       thead.appendChild(tr);

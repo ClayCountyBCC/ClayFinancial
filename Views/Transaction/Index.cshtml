@@ -139,10 +139,12 @@
 
   </div>
 
-  <nav class="pagination is-medium hide" role="navigation" aria-label="pagination">
+  <nav class="pagination is-medium" role="navigation" aria-label="pagination">
     <a id="resultsPreviousPage"
+       onclick="Transaction.PreviousPage(this);"
        class="pagination-previous">Previous</a>
     <a id="resultsNextPage"
+       onclick="Transaction.NextPage(this);"
        class="pagination-next">Next</a>
     <ul id="resultsPaginationList"
         class="pagination-list"></ul>
@@ -186,15 +188,14 @@
             </p>
             <p style="font-size: 1.25rem;"
                id="receipt_view_date"
-               class="title">
-              8/20/2019
+               class="title">              
             </p>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="columns">
+  @*<div class="columns">
 
     <div class="field column is-half">
       <label class="label is-medium">Received From</label>
@@ -217,6 +218,10 @@
                readonly />
       </p>
     </div>
+
+  </div>*@
+  <div class="columns is-multiline"
+       id="receipt_department_controls">
 
   </div>
 
@@ -314,8 +319,8 @@
   </div>
 
 </div>
-
-<script src="~/scripts/Transaction/app.js"></script>
+<script src="~/scripts/Transaction/transaction_bundle.js?@DateTime.Today.Date.ToShortDateString().Replace("/", "-")"></script>
+@*<script src="~/scripts/Transaction/app.js"></script>
 <script src="~/scripts/LevelItem.js"></script>
 <script src="~/scripts/Transaction/ControlGroup.js"></script>
 <script src="~/scripts/Transaction/Data/PaymentMethodData.js"></script>
@@ -325,7 +330,7 @@
 <script src="~/scripts/Transaction/Data/ControlData.js"></script>
 <script src="~/scripts/Transaction/Data/PaymentTypeData.js"></script>
 <script src="~/scripts/Transaction/Receipt.js"></script>
-<script src="~/scripts/Transaction/Data/TransactionData.js"></script>
+<script src="~/scripts/Transaction/Data/TransactionData.js"></script>*@
 
 <script type="text/javascript">
 

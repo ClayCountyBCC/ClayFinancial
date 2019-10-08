@@ -38,7 +38,7 @@
     public error_text: string = "";
 
     // client side controls
-    private selected_control: Control = null;
+    public selected_control: Control = null;
     public input_element: HTMLElement = null;
     public container_element: HTMLElement = null;
 
@@ -57,8 +57,14 @@
       this.payment_type_id = payment_type_id;
       if (this.input_element.getAttribute("data_control_id") === null)
       {
+        let input = <HTMLInputElement>this.input_element;
+        if (input.type === "number")
+        {
+          input.onwheel = (e) => { e.preventDefault() };
+        }
         this.input_element.oninput = (event: Event) =>
         {
+
           let input = (<HTMLInputElement>event.target);
           if (this.Validate())
           {

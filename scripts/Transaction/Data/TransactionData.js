@@ -349,6 +349,18 @@ var Transaction;
                 let page = Transaction.current_page;
                 Utilities.Toggle_Loading_Button(TransactionData.reload_button, true);
                 let path = Transaction.GetPath();
+                let filters = TransactionData.GetTransactionFilters();
+                return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + filters);
+            }
+            static GetTransactionPageCount() {
+                let path = Transaction.GetPath();
+                let props = [];
+                let filters = TransactionData.GetTransactionFilters();
+                if (filters.length > 0)
+                    filters = "?" + filters.substr(1);
+                return Utilities.Get(path + "API/Transaction/PageCount" + filters);
+            }
+            static GetTransactionFilters() {
                 let props = [];
                 if (Transaction.name_filter.length > 0)
                     props.push("&display_name_filter=" + Transaction.name_filter);
@@ -362,7 +374,7 @@ var Transaction;
                     props.push("&has_been_modified=true");
                 if (Transaction.transaction_number_filter.length > 0)
                     props.push("&transaction_number_filter=" + Transaction.transaction_number_filter);
-                return Utilities.Get(path + "API/Transaction/Get?page_number=" + page.toString() + props.join(""));
+                return props.join("");
             }
             static GetSpecificTransaction(transaction_id) {
                 let path = Transaction.GetPath();
@@ -376,8 +388,13 @@ var Transaction;
                 container.appendChild(table);
                 let tbody = document.createElement("tbody");
                 table.appendChild(tbody);
-                for (let data of Transaction.transactions) {
-                    tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+                if (Transaction.transactions.length === 0) {
+                    tbody.appendChild(Transaction.CreateMessageRow(11, "No transactions were found to match your filters."));
+                }
+                else {
+                    for (let data of Transaction.transactions) {
+                        tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+                    }
                 }
                 Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
             }
@@ -385,6 +402,7 @@ var Transaction;
                 let table = document.createElement("table");
                 table.classList.add("table", "is-fullwidth");
                 let thead = document.createElement("thead");
+                thead.id = "transaction_list_view_header";
                 table.appendChild(thead);
                 let tr = document.createElement("tr");
                 thead.appendChild(tr);

@@ -1,8 +1,19 @@
 [
   {
-    "outputFileName": "lib/fontawesome.min.css",
+    "outputFileName": "scripts/Transaction/transaction_bundle.js",
     "inputFiles": [
-      "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css"
+      "scripts/Utilities.js",
+      "scripts/Transaction/app.js",
+      "scripts/LevelItem.js",
+      "scripts/Transaction/ControlGroup.js",
+      "scripts/Transaction/Data/PaymentMethodData.js",
+      "scripts/Transaction/PaymentType.js",
+      "scripts/Transaction/Control.js",
+      "scripts/Transaction/Department.js",
+      "scripts/Transaction/Data/ControlData.js",
+      "scripts/Transaction/Data/PaymentTypeData.js",
+      "scripts/Transaction/Receipt.js",
+      "scripts/Transaction/Data/TransactionData.js"
     ]
   }
 ]

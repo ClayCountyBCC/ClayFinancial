@@ -18,6 +18,7 @@ var Transaction;
     Transaction.DepartmentControl = null;
     Transaction.DepartmentControlContainer = null;
     Transaction.current_page = 1;
+    Transaction.page_count = 0;
     Transaction.department_id_filter = -1;
     Transaction.name_filter = "mine";
     Transaction.completed_filter = "";
@@ -48,13 +49,15 @@ var Transaction;
                     Transaction.controls = Transaction.controls.concat(payment_type.controls.filter((c) => { return control_ids.indexOf(c.control_id) === -1; }));
                 }
             });
-            yield Transaction.Data.TransactionData.GetTransactionList()
-                .then((tv) => {
-                Transaction.transactions = tv;
-                Transaction.Data.TransactionData.RenderTransactionList();
-                console.log('transactions', Transaction.transactions);
-                Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
-            });
+            yield Transaction.GetTransactionList(1);
+            //await Data.TransactionData.GetTransactionList()
+            //  .then((tv) =>
+            //  {
+            //    Transaction.transactions = tv;
+            //    Data.TransactionData.RenderTransactionList();
+            //    console.log('transactions', Transaction.transactions);
+            //    Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+            //  });
         });
     }
     Transaction.Start = Start;
@@ -80,6 +83,25 @@ var Transaction;
         });
     }
     Transaction.ShowReceiptDetail = ShowReceiptDetail;
+    function GetTransactionList(page) {
+        return __awaiter(this, void 0, void 0, function* () {
+            Transaction.current_page = page;
+            yield Transaction.Data.TransactionData.GetTransactionList()
+                .then((tv) => {
+                Transaction.transactions = tv;
+                Transaction.Data.TransactionData.RenderTransactionList();
+                console.log('transactions', Transaction.transactions);
+                Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
+            });
+            yield Transaction.Data.TransactionData.GetTransactionPageCount()
+                .then((pagecount) => {
+                Transaction.page_count = pagecount;
+                console.log("page count", pagecount);
+                HandlePagination();
+            });
+        });
+    }
+    Transaction.GetTransactionList = GetTransactionList;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
         Transaction.ViewReceiptDetail();
@@ -140,12 +162,7 @@ var Transaction;
         Transaction.transaction_type_filter = Utilities.Get_Value("typeFilter");
         Transaction.transaction_number_filter = Utilities.Get_Value("transactionNumberFilter");
         Transaction.modified_only_filter = document.getElementById("modifiedFilter").checked;
-        Transaction.Data.TransactionData.GetTransactionList()
-            .then((tv) => {
-            Transaction.transactions = tv;
-            Transaction.Data.TransactionData.RenderTransactionList();
-            console.log('transactions', Transaction.transactions);
-        });
+        Transaction.GetTransactionList(1);
     }
     Transaction.FilterTransactions = FilterTransactions;
     function ViewReceiptDetail() {
@@ -172,8 +189,146 @@ var Transaction;
         Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewDeposit = ViewDeposit;
-    function HandlePagination() {
+    function PreviousPage(element) {
+        if (element.getAttribute("disabled") === null)
+            GetTransactionList(Transaction.current_page - 1);
     }
-    Transaction.HandlePagination = HandlePagination;
+    Transaction.PreviousPage = PreviousPage;
+    function NextPage(element) {
+        if (element.getAttribute("disabled") === null)
+            GetTransactionList(Transaction.current_page + 1);
+    }
+    Transaction.NextPage = NextPage;
+    function HandlePagination() {
+        // Handle next/previous pages
+        let previousPage = document.getElementById("resultsPreviousPage");
+        let nextPage = document.getElementById("resultsNextPage");
+        if (Transaction.current_page === 1) {
+            previousPage.setAttribute("disabled", "");
+        }
+        else {
+            previousPage.removeAttribute("disabled");
+        }
+        if (Transaction.current_page === Transaction.page_count) {
+            nextPage.setAttribute("disabled", "");
+        }
+        else {
+            nextPage.removeAttribute("disabled");
+        }
+        // now that we've handled the next/previous buttons, let's reset the current page in the hash.
+        let pageList = document.getElementById("resultsPaginationList");
+        Utilities.Clear_Element(pageList);
+        pageList.appendChild(CreatePaginationLinks());
+    }
+    function CreatePaginationLinks() {
+        // Scenarios
+        // if the number of pages is 7 or less
+        //    create a link for every page
+        //    nothing else to worry about
+        // if the number of pages is > 7 
+        //    if the current page is 2 or less or total pages - 2 or more
+        //      show pages 1 through 3 an ellipsis, and then last page - 3 to last page
+        //    if the current page is 3 or total pages - 3 
+        //      show pages 1 through 4 an ellipsis, and then last page - 2 to last page
+        // Otherwise
+        //    show page 1 then an ellipsis then currentpage - 1 through current page + 1 then last page
+        let currentPage = Transaction.current_page;
+        let totalPages = Transaction.page_count;
+        let df = document.createDocumentFragment();
+        if (currentPage < 1)
+            Transaction.current_page = 1;
+        if (currentPage > totalPages)
+            currentPage = totalPages;
+        if (totalPages < 8) {
+            // add a link to every page
+            for (let i = 1; i <= totalPages; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            return df;
+        }
+        if (currentPage === 3) {
+            for (let i = 1; i <= 4; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            df.appendChild(CreatePaginationEllipsis());
+            for (let i = totalPages - 1; i <= totalPages; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            return df;
+        }
+        if (currentPage === (totalPages - 2)) {
+            for (let i = 1; i <= 2; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            df.appendChild(CreatePaginationEllipsis());
+            for (let i = totalPages - 3; i <= totalPages; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            return df;
+        }
+        if (currentPage < 3 || currentPage > totalPages - 3) {
+            // add links to the first 3 pages and last 3 pages
+            for (let i = 1; i <= 3; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            df.appendChild(CreatePaginationEllipsis());
+            for (let i = totalPages - 2; i <= totalPages; i++) {
+                df.appendChild(CreatePaginationLink(i, i === currentPage));
+            }
+            return df;
+        }
+        // add links to the first page, currentpage -1 through currentpage + 1, and last page
+        df.appendChild(CreatePaginationLink(1, false));
+        df.appendChild(CreatePaginationEllipsis());
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            df.appendChild(CreatePaginationLink(i, i === currentPage));
+        }
+        df.appendChild(CreatePaginationEllipsis());
+        df.appendChild(CreatePaginationLink(totalPages, false));
+        return df;
+    }
+    function CreatePaginationLink(page, isSelected) {
+        // scroll back up to the top when a page is clicked
+        //currentHash.page = page.toString();
+        //currentHash.permit_display = "";
+        //currentHash.permit_print = "";
+        let li = document.createElement("li");
+        let a = document.createElement("a");
+        a.classList.add("pagination-link");
+        a.setAttribute("aria-label", "Goto page " + page.toString());
+        if (isSelected) {
+            a.classList.add("is-current");
+            a.setAttribute("aria-current", "page");
+            a.style.cursor = "default";
+        }
+        else {
+            a.onclick = () => {
+                Transaction.GetTransactionList(page);
+                let header = document.getElementById("transaction_list_view_header");
+                if (header !== null)
+                    header.scrollIntoView(true);
+            };
+        }
+        a.appendChild(document.createTextNode(page.toString()));
+        li.appendChild(a);
+        return li;
+    }
+    function CreatePaginationEllipsis() {
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        span.classList.add("pagination-ellipsis");
+        span.innerHTML = "&hellip;";
+        li.appendChild(span);
+        return li;
+    }
+    function CreateMessageRow(colspan, message) {
+        let tr = document.createElement("tr");
+        let td = document.createElement("td");
+        td.colSpan = colspan;
+        td.appendChild(document.createTextNode(message));
+        tr.appendChild(td);
+        return tr;
+    }
+    Transaction.CreateMessageRow = CreateMessageRow;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

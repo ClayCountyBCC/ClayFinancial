@@ -115,7 +115,7 @@
     private static CreateNumericInput(control: Control, value: string): HTMLInputElement
     {
       let input = document.createElement("input");
-      input.type = "number";
+      input.type = "number";      
       input.maxLength = control.max_length;
       input.classList.add("input", "is-medium");
       input.placeholder = "0";

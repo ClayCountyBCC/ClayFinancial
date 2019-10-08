@@ -197,6 +197,7 @@
     {
       let input = document.createElement("input");
       input.type = input_type;
+      input.onwheel = (e) => { e.preventDefault() };
       input.maxLength = input_length;
       input.classList.add("input", "is-medium");
       if (input.type === "number")

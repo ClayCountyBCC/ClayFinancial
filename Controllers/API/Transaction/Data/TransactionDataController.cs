@@ -61,14 +61,12 @@ namespace ClayFinancial.Controllers.API
     [HttpGet]
     [Route("PageCount")]
     public IHttpActionResult Count(
-      int page_number = -1
-      , int page_size = 25
-      , string display_name_filter = ""
-      , string completed_filter = ""
-      , int department_id_filter = -1
-      , string transaction_type_filter = ""
-      , string transaction_number_filter = ""
-      , bool has_been_modified = false
+      string display_name_filter = "",
+      string completed_filter = "",
+      int department_id_filter = -1,
+      string transaction_type_filter = "",
+      string transaction_number_filter = "",
+      bool has_been_modified = false
     //,long transaction_id_filter = -1
     )
     {
@@ -78,11 +76,16 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      var count = TransactionData.GetTransactionList(ua, page_number, display_name_filter, completed_filter, transaction_type_filter,
-                                        transaction_number_filter, department_id_filter,
-                                        has_been_modified).Count(); //   only true matters
+      var count = TransactionData.GetTransactionPageCount(
+        ua,
+        display_name_filter,
+        completed_filter,
+        transaction_type_filter,
+        transaction_number_filter,
+        department_id_filter, 
+        has_been_modified); 
 
-      return Ok(count / page_size);
+      return Ok(count); 
 
     }
 
