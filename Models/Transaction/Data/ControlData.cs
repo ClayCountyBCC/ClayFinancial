@@ -273,8 +273,9 @@ namespace ClayFinancial.Models.Transaction.Data
           END
 
       ";
-
-      return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
+      var i = Constants.Exec_Query(query, GetControlDataParameters(), Constants.ConnectionString.ClayFinancial);
+      return i > -1;
+      //return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
     }
 
     public bool EditControlData()
@@ -299,19 +300,43 @@ namespace ClayFinancial.Models.Transaction.Data
       return param;
     }
 
-    public static List<ControlData> GetControlDataHistory(long control_data_id)
+    public static List<ControlData> GetControlDataHistory(long control_data_id, long transaction_id)
     {
+      // this should work for both Department and Payment Type Controls
       var param = new DynamicParameters();
       param.Add("@control_data_id", control_data_id);
+      param.Add("@transaction_id", transaction_id);
       var query = @"
 
-        DECLARE @transaction_payment_type_id BIGINT = (SELECT transaction_payment_type_id FROM data_control WHERE control_data_id = @control_data_id);
-        DECLARE @control_id BIGINT = (SELECT control_id FROM data_control WHERE control_data_id = @control_data_id);
+        WITH QueryData AS (
+          
+          SELECT
+            ISNULL(transaction_payment_type_id, 0) transaction_payment_type_id
+            ,ISNULL(department_id, 0) department_id
+            ,control_id
+          FROM data_control
+          WHERE
+            transaction_id = 26
+            AND control_data_id = 87
+        )
 
-
-        SELECT *
-        FROM data_control
-        WHERE transaction_payment_type_id = @transaction_payment_type_id AND control_id = @control_id
+        SELECT 
+          DC.control_data_id
+          ,DC.prior_control_data_id
+          ,DC.transaction_payment_type_id
+          ,DC.department_id
+          ,DC.transaction_id
+          ,DC.control_id
+          ,DC.value
+          ,DC.is_active
+          ,DCC.modified_on
+          ,DCC.modified_by
+          ,DCC.reason_for_change
+        FROM data_control DC
+        INNER JOIN QueryData Q ON DC.control_id = Q.control_id 
+          AND ISNULL(DC.transaction_payment_type_id, 0) = Q.transaction_payment_type_id
+          AND ISNULL(DC.department_id, 0) = Q.department_id
+        LEFT OUTER JOIN data_changes_control DCC ON DCC.new_control_data_id = DC.control_data_id
         ORDER BY control_data_id DESC
 
       ";

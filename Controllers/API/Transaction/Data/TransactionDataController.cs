@@ -311,13 +311,8 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetControlDataHistory")]
-    public IHttpActionResult GetControlHistory(long control_data_id = -1)
+    public IHttpActionResult GetControlHistory(long control_data_id = -1, long transaction_id = -1)
     {
-      if(control_data_id == -1)
-      {
-        return Ok("No control data id to get history");
-      }
-
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
       if (ua.current_access == UserAccess.access_type.no_access)
@@ -325,7 +320,12 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var cl = ControlData.GetControlDataHistory(control_data_id);
+      if (control_data_id == -1 || transaction_id == -1)
+      {
+        return BadRequest();
+      }
+
+      var cl = ControlData.GetControlDataHistory(control_data_id, transaction_id);
 
       if (cl == null)
       {
@@ -338,18 +338,18 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetPaymentMethodHistory")]
-    public IHttpActionResult GetPaymentMethodHistory(long payment_method_data_id = -1)
+    public IHttpActionResult GetPaymentMethodHistory(long payment_method_data_id = -1, long transaction_id = -1)
     {
-      if(payment_method_data_id == -1)
-      {
-        return Ok("No payment method to get history");
-      }
-
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
+      }
+
+      if (payment_method_data_id == -1 || transaction_id == -1)
+      {
+        return BadRequest();
       }
 
       var pm = GetPaymentMethodHistory(payment_method_data_id);
