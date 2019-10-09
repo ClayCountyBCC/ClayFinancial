@@ -38,7 +38,7 @@ var Transaction;
             let input = document.createElement("input");
             input.type = control.data_type;
             input.maxLength = control.max_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", Transaction.app_input_size);
             input.placeholder = control.label;
             input.required = control.required;
             if (input.type === "date" && value !== null) {
@@ -64,7 +64,7 @@ var Transaction;
             let input = document.createElement("input");
             input.type = "number";
             input.maxLength = control.max_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", Transaction.app_input_size);
             input.placeholder = "0";
             input.required = control.required;
             if (control.data_type === "count") {
@@ -82,7 +82,7 @@ var Transaction;
         static CreateTextArea(control, value) {
             let textarea = document.createElement("textarea");
             textarea.maxLength = control.max_length;
-            textarea.classList.add("textarea", "is-medium");
+            textarea.classList.add("textarea", Transaction.app_input_size);
             textarea.placeholder = control.label;
             textarea.required = control.required;
             textarea.rows = 4;

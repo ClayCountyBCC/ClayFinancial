@@ -139,6 +139,7 @@ var Transaction;
                     this.cash_amount_input_element.value = payment_method_data.cash_amount.toString();
                     this.cash_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.cash_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.cash_amount_input_element.setAttribute("is_cash", "true");
                 }
                 this.cash_amount_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.cash_amount_input_element, "Cash Amount", true, "is-one-quarter");
                 columns.appendChild(this.cash_amount_input_element_container);
@@ -170,6 +171,7 @@ var Transaction;
                     this.check_amount_input_element.value = payment_method_data.check_amount.toString();
                     this.check_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_amount_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_count_input_element = Transaction.ControlGroup.CreateInput("number", 5, false, "# of Checks");
                 this.check_count_input_element.step = "1";
@@ -205,6 +207,7 @@ var Transaction;
                     this.check_count_input_element.value = payment_method_data.check_count.toString();
                     this.check_count_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_count_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_count_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_number_input_element = Transaction.ControlGroup.CreateInput("text", 50, false, "Check Number");
                 if (payment_method_data === null) {
@@ -219,6 +222,7 @@ var Transaction;
                     this.check_number_input_element.value = payment_method_data.check_number;
                     this.check_number_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_number_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_number_input_element.setAttribute("is_cash", "false");
                 }
                 this.paying_for_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check Paying For");
                 if (payment_method_data === null) {
@@ -233,6 +237,7 @@ var Transaction;
                     this.paying_for_input_element.value = payment_method_data.paying_for;
                     this.paying_for_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.paying_for_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.paying_for_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_from_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check From");
                 if (payment_method_data === null) {
@@ -247,6 +252,7 @@ var Transaction;
                     this.check_from_input_element.value = payment_method_data.check_from;
                     this.check_from_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_from_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_from_input_element.setAttribute("is_cash", "false");
                 }
                 this.add_check_button_element = document.createElement("button");
                 this.add_check_button_element.classList.add("button", "is-info", "is-medium");

@@ -1,5 +1,6 @@
 ﻿namespace Transaction
 {
+  export let app_input_size: string = "is-normal";
   export let error_scrolled: boolean = false;
   export let departments: Array<Department> = [];
   export let payment_types: Array<PaymentType> = [];
@@ -17,6 +18,8 @@
   export let transaction_type_filter = "";
   export let modified_only_filter = false;
   export let transaction_number_filter = "";
+  export let editing_control_data: Data.ControlData = null;
+  export let editing_payment_method_data: Data.PaymentMethodData = null;
 
   export async function Start()
   {
@@ -65,15 +68,6 @@
       });
 
     await Transaction.GetTransactionList(1);
-
-    //await Data.TransactionData.GetTransactionList()
-    //  .then((tv) =>
-    //  {
-    //    Transaction.transactions = tv;
-    //    Data.TransactionData.RenderTransactionList();
-    //    console.log('transactions', Transaction.transactions);
-    //    Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-    //  });
 
   } 
 
@@ -401,5 +395,66 @@
     tr.appendChild(td);
     return tr;
   }
+
+  export function ShowChangeModal()
+  {
+    Transaction.editing_control_data = null;
+    Transaction.editing_payment_method_data = null;
+
+    document.getElementById("change_transaction").classList.add("is-active");
+  }
+
+  export function CloseChangeModal()
+  {
+    document.getElementById("change_transaction").classList.remove("is-active");
+  }
+
+  export function LoadControlDataChange(control_data_id: string, transaction_id: string, field_label: string): void
+  {
+    Utilities.Set_Text("change_field_label", field_label);
+    Transaction.ShowChangeModal();
+    Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
+      .then(() =>
+      {
+        console.log('we good', Transaction.editing_control_data);
+        if (Transaction.editing_control_data === null) return; // we have a problem
+        CreateHistoryTableHeader(true);
+
+      });
+  }
+
+  export function LoadPaymentTypeDataChange(payment_method_data_id: string, is_cash: boolean, transaction_id: string, field_label: string): void
+  {
+    Utilities.Set_Text("change_field_label", field_label);
+    Transaction.ShowChangeModal();
+
+  }
+
+  function CreateHistoryTableHeader(is_control_data: boolean)
+  {
+    let container = document.getElementById("change_transaction_history_header");
+    Utilities.Clear_Element(container);
+    if (is_control_data)
+    {
+      container.appendChild(CreateControlDataHistoryHeader());
+    }
+    else
+    {
+      container.appendChild(CreatePaymentMethodDataHistoryHeader());
+    }
+  }
+
+  function CreateControlDataHistoryHeader(): HTMLTableRowElement
+  {
+    let tr = document.createElement("tr");
+    return tr;
+  }
+
+  function CreatePaymentMethodDataHistoryHeader(): HTMLTableRowElement
+  {
+    let tr = document.createElement("tr");
+    return tr;
+  }
+
 
 }

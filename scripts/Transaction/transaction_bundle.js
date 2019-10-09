@@ -464,6 +464,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var Transaction;
 (function (Transaction) {
+    Transaction.app_input_size = "is-normal";
     Transaction.error_scrolled = false;
     Transaction.departments = [];
     Transaction.payment_types = [];
@@ -481,6 +482,8 @@ var Transaction;
     Transaction.transaction_type_filter = "";
     Transaction.modified_only_filter = false;
     Transaction.transaction_number_filter = "";
+    Transaction.editing_control_data = null;
+    Transaction.editing_payment_method_data = null;
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
@@ -506,14 +509,6 @@ var Transaction;
                 }
             });
             yield Transaction.GetTransactionList(1);
-            //await Data.TransactionData.GetTransactionList()
-            //  .then((tv) =>
-            //  {
-            //    Transaction.transactions = tv;
-            //    Data.TransactionData.RenderTransactionList();
-            //    console.log('transactions', Transaction.transactions);
-            //    Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-            //  });
         });
     }
     Transaction.Start = Start;
@@ -786,6 +781,51 @@ var Transaction;
         return tr;
     }
     Transaction.CreateMessageRow = CreateMessageRow;
+    function ShowChangeModal() {
+        Transaction.editing_control_data = null;
+        Transaction.editing_payment_method_data = null;
+        document.getElementById("change_transaction").classList.add("is-active");
+    }
+    Transaction.ShowChangeModal = ShowChangeModal;
+    function CloseChangeModal() {
+        document.getElementById("change_transaction").classList.remove("is-active");
+    }
+    Transaction.CloseChangeModal = CloseChangeModal;
+    function LoadControlDataChange(control_data_id, transaction_id, field_label) {
+        Utilities.Set_Text("change_field_label", field_label);
+        Transaction.ShowChangeModal();
+        Transaction.Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
+            .then(() => {
+            console.log('we good', Transaction.editing_control_data);
+            if (Transaction.editing_control_data === null)
+                return; // we have a problem
+            CreateHistoryTableHeader(true);
+        });
+    }
+    Transaction.LoadControlDataChange = LoadControlDataChange;
+    function LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label) {
+        Utilities.Set_Text("change_field_label", field_label);
+        Transaction.ShowChangeModal();
+    }
+    Transaction.LoadPaymentTypeDataChange = LoadPaymentTypeDataChange;
+    function CreateHistoryTableHeader(is_control_data) {
+        let container = document.getElementById("change_transaction_history_header");
+        Utilities.Clear_Element(container);
+        if (is_control_data) {
+            container.appendChild(CreateControlDataHistoryHeader());
+        }
+        else {
+            container.appendChild(CreatePaymentMethodDataHistoryHeader());
+        }
+    }
+    function CreateControlDataHistoryHeader() {
+        let tr = document.createElement("tr");
+        return tr;
+    }
+    function CreatePaymentMethodDataHistoryHeader() {
+        let tr = document.createElement("tr");
+        return tr;
+    }
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map
 var Utilities;
@@ -842,25 +882,48 @@ var Transaction;
             return this.CreateInputFieldContainer(input, control.label, add_column, control.render_hints);
         }
         static CreateInputFieldContainer(input, field_label, add_column = false, class_to_add = "", guide_message_capable = false) {
+            let editFunction = null;
+            if (input.getAttribute("transaction_id") !== null) {
+                // payment_method_data_id
+                // department id?
+                let transaction_id = input.getAttribute("transaction_id");
+                let control_data_id = input.getAttribute("control_data_id");
+                if (control_data_id !== null) {
+                    editFunction = () => {
+                        Transaction.LoadControlDataChange(control_data_id, transaction_id, field_label);
+                    };
+                }
+                else {
+                    let payment_method_data_id = input.getAttribute("payment_method_data_id");
+                    let is_cash = input.getAttribute("is_cash").toLowerCase() === "true";
+                    editFunction = () => {
+                        Transaction.LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label);
+                    };
+                }
+            }
+            input.onclick = () => {
+                editFunction();
+            };
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
             label.classList.add("label", "is-medium");
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
-                //if (input.getAttribute("control_data_id") !== null)
-                //{
-                //  // this is just a test to make sure that I will be able to detect when to add edit value capabilities.
-                //  label.appendChild(document.createTextNode(field_label + "***")); 
-                //}
-                //else
-                //{
-                //}
             }
             else {
                 label.innerHTML = "&nbsp;";
             }
             field.appendChild(label);
+            if (input.getAttribute("transaction_id") !== null) {
+                let edit = document.createElement("a");
+                edit.style.marginLeft = ".5em";
+                edit.style.fontSize = ".75em";
+                edit.style.fontWeight = "400";
+                edit.onclick = () => { editFunction(); };
+                edit.appendChild(document.createTextNode("edit"));
+                label.appendChild(edit);
+            }
             let control_element = document.createElement("div");
             control_element.classList.add("control");
             control_element.appendChild(input);
@@ -930,13 +993,13 @@ var Transaction;
                     field.classList.add(class_to_add);
             }
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", "is-normal");
             label.appendChild(document.createTextNode(field_label));
             field.appendChild(label);
             let control_element = document.createElement("div");
             control_element.classList.add("control");
             let selectContainer = document.createElement("div");
-            selectContainer.classList.add("select", "is-medium");
+            selectContainer.classList.add("select", "is-normal");
             selectContainer.appendChild(select);
             control_element.appendChild(selectContainer);
             field.appendChild(control_element);
@@ -962,7 +1025,7 @@ var Transaction;
             input.type = input_type;
             input.onwheel = (e) => { e.preventDefault(); };
             input.maxLength = input_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", "is-normal");
             if (input.type === "number") {
                 input.step = "0.01";
                 input.min = "0";
@@ -1232,6 +1295,7 @@ var Transaction;
                     this.cash_amount_input_element.value = payment_method_data.cash_amount.toString();
                     this.cash_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.cash_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.cash_amount_input_element.setAttribute("is_cash", "true");
                 }
                 this.cash_amount_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.cash_amount_input_element, "Cash Amount", true, "is-one-quarter");
                 columns.appendChild(this.cash_amount_input_element_container);
@@ -1263,6 +1327,7 @@ var Transaction;
                     this.check_amount_input_element.value = payment_method_data.check_amount.toString();
                     this.check_amount_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_amount_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_amount_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_count_input_element = Transaction.ControlGroup.CreateInput("number", 5, false, "# of Checks");
                 this.check_count_input_element.step = "1";
@@ -1298,6 +1363,7 @@ var Transaction;
                     this.check_count_input_element.value = payment_method_data.check_count.toString();
                     this.check_count_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_count_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_count_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_number_input_element = Transaction.ControlGroup.CreateInput("text", 50, false, "Check Number");
                 if (payment_method_data === null) {
@@ -1312,6 +1378,7 @@ var Transaction;
                     this.check_number_input_element.value = payment_method_data.check_number;
                     this.check_number_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_number_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_number_input_element.setAttribute("is_cash", "false");
                 }
                 this.paying_for_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check Paying For");
                 if (payment_method_data === null) {
@@ -1326,6 +1393,7 @@ var Transaction;
                     this.paying_for_input_element.value = payment_method_data.paying_for;
                     this.paying_for_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.paying_for_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.paying_for_input_element.setAttribute("is_cash", "false");
                 }
                 this.check_from_input_element = Transaction.ControlGroup.CreateInput("text", 500, false, "Check From");
                 if (payment_method_data === null) {
@@ -1340,6 +1408,7 @@ var Transaction;
                     this.check_from_input_element.value = payment_method_data.check_from;
                     this.check_from_input_element.setAttribute("payment_method_data_id", payment_method_data.payment_method_data_id.toString());
                     this.check_from_input_element.setAttribute("transaction_id", payment_method_data.transaction_id.toString());
+                    this.check_from_input_element.setAttribute("is_cash", "false");
                 }
                 this.add_check_button_element = document.createElement("button");
                 this.add_check_button_element.classList.add("button", "is-info", "is-medium");
@@ -1426,7 +1495,7 @@ var Transaction;
             let input = document.createElement("input");
             input.type = control.data_type;
             input.maxLength = control.max_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", Transaction.app_input_size);
             input.placeholder = control.label;
             input.required = control.required;
             if (input.type === "date" && value !== null) {
@@ -1452,7 +1521,7 @@ var Transaction;
             let input = document.createElement("input");
             input.type = "number";
             input.maxLength = control.max_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", Transaction.app_input_size);
             input.placeholder = "0";
             input.required = control.required;
             if (control.data_type === "count") {
@@ -1470,7 +1539,7 @@ var Transaction;
         static CreateTextArea(control, value) {
             let textarea = document.createElement("textarea");
             textarea.maxLength = control.max_length;
-            textarea.classList.add("textarea", "is-medium");
+            textarea.classList.add("textarea", Transaction.app_input_size);
             textarea.placeholder = control.label;
             textarea.required = control.required;
             textarea.rows = 4;
@@ -1577,6 +1646,14 @@ var Transaction;
     Transaction.Department = Department;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=Department.js.map
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var Transaction;
 (function (Transaction) {
     var Data;
@@ -1602,16 +1679,17 @@ var Transaction;
                 this.selected_control = null;
                 this.input_element = null;
                 this.container_element = null;
+                let saved_control_data_id = control.rendered_input_element ? control.rendered_input_element.getAttribute("control_data_id") : null;
                 this.selected_control = control;
                 this.control_id = control.control_id;
                 if (clone_node) {
                     this.input_element = control.rendered_input_element.cloneNode(true);
                 }
                 else {
-                    this.input_element = control.rendered_input_element;
+                    this.input_element = control.rendered_input_element ? control.rendered_input_element : Transaction.Control.CreateControl(control);
                 }
                 this.payment_type_id = payment_type_id;
-                if (this.input_element.getAttribute("data_control_id") === null) {
+                if (saved_control_data_id === null) {
                     let input = this.input_element;
                     if (input.type === "number") {
                         input.onwheel = (e) => { e.preventDefault(); };
@@ -1683,6 +1761,39 @@ var Transaction;
             }
             ValidateMoney() {
                 return Transaction.ControlGroup.ValidateMoney(this.input_element, this.container_element);
+            }
+            static GetControlHistory(control_data_id, transaction_id) {
+                let path = Transaction.GetPath();
+                return Utilities.Get(path + "API/Transaction/GetControlDataHistory?control_data_id=" + control_data_id + "&transaction_id=" + transaction_id);
+            }
+            static GetAndDisplayControlHistory(control_data_id, transaction_id) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
+                    yield ControlData.GetControlHistory(control_data_id, transaction_id)
+                        .then((control_data_history) => {
+                        console.log('control data history', control_data_history);
+                        this.MarkControlDataToEdit(control_data_history);
+                        ControlData.DisplayControlHistory(control_data_history);
+                    });
+                });
+            }
+            static MarkControlDataToEdit(control_data) {
+                let filtered = control_data.filter(x => x.is_active);
+                if (filtered.length === 1) {
+                    let c = filtered[0];
+                    let cd = new Data.ControlData(c.control, c.payment_type_id, false);
+                    cd.transaction_payment_type_id = c.transaction_payment_type_id;
+                    cd.department_id = c.department_id;
+                    cd.is_active = c.is_active;
+                    cd.control_data_id = c.control_data_id;
+                    cd.value = c.value;
+                    Transaction.editing_control_data = c;
+                }
+                else {
+                    alert("Invalid data stored in database for this transaction.");
+                }
+            }
+            static DisplayControlHistory(control_data) {
             }
         }
         Data.ControlData = ControlData;

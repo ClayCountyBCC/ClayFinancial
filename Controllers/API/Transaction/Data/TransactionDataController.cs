@@ -258,15 +258,23 @@ namespace ClayFinancial.Controllers.API
 
       control_data.SetUsername(ua.user_name);
 
-      if (control_data.control_data_id != -1)
-      {
-        if (control_data.department_id != -1)
-        {
-          control_data.error_text = "Cannot add new department controls";
-          
-        }
-        return Ok(control_data.error_text);
-      }
+
+
+      // I think this is doing something wrong
+      // we need to make sure that control_data.control_data_id is not equal to -1
+      // In this if statement, if it is anything other than -1 we return an error.
+      //if (control_data.control_data_id != -1)
+      //{
+      //  if (control_data.department_id != -1)
+      //  {
+      //    control_data.error_text = "Cannot add new department controls";
+
+      //  }
+      //  return Ok(control_data.error_text);
+      //}
+      // replacing above
+      if (control_data.control_data_id == -1) return BadRequest();
+      // this works because the clientside UI should never attempt this
 
       if (!control_data.ValidateControlData())
       {

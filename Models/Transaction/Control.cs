@@ -79,7 +79,7 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
     }
 
-    public bool Validate(Data.ControlData cd)
+    public bool Validate(Data.ControlData cd, bool is_new = true)
     {
       // Here we use this class' properties to validate our controldata
       // you'll notice it doesn't matter if it's a department control
@@ -87,7 +87,7 @@ namespace ClayFinancial.Models.Transaction
 
       // if there is anything to validate that is not specific to it's data type,
       // do it before this step.
-      if (!is_active)
+      if (!is_active && is_new)
       {
         cd.error_text = "This is no longer a valid control";
         return false;
@@ -149,9 +149,7 @@ namespace ClayFinancial.Models.Transaction
 
     private bool ValidateText(Data.ControlData cd)
     {
-
       return true;
-
     }
 
     private bool ValidateCount(Data.ControlData cd)

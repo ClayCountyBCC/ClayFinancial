@@ -31,25 +31,48 @@ var Transaction;
             return this.CreateInputFieldContainer(input, control.label, add_column, control.render_hints);
         }
         static CreateInputFieldContainer(input, field_label, add_column = false, class_to_add = "", guide_message_capable = false) {
+            let editFunction = null;
+            if (input.getAttribute("transaction_id") !== null) {
+                // payment_method_data_id
+                // department id?
+                let transaction_id = input.getAttribute("transaction_id");
+                let control_data_id = input.getAttribute("control_data_id");
+                if (control_data_id !== null) {
+                    editFunction = () => {
+                        Transaction.LoadControlDataChange(control_data_id, transaction_id, field_label);
+                    };
+                }
+                else {
+                    let payment_method_data_id = input.getAttribute("payment_method_data_id");
+                    let is_cash = input.getAttribute("is_cash").toLowerCase() === "true";
+                    editFunction = () => {
+                        Transaction.LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label);
+                    };
+                }
+            }
+            input.onclick = () => {
+                editFunction();
+            };
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
             label.classList.add("label", "is-medium");
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
-                //if (input.getAttribute("control_data_id") !== null)
-                //{
-                //  // this is just a test to make sure that I will be able to detect when to add edit value capabilities.
-                //  label.appendChild(document.createTextNode(field_label + "***")); 
-                //}
-                //else
-                //{
-                //}
             }
             else {
                 label.innerHTML = "&nbsp;";
             }
             field.appendChild(label);
+            if (input.getAttribute("transaction_id") !== null) {
+                let edit = document.createElement("a");
+                edit.style.marginLeft = ".5em";
+                edit.style.fontSize = ".75em";
+                edit.style.fontWeight = "400";
+                edit.onclick = () => { editFunction(); };
+                edit.appendChild(document.createTextNode("edit"));
+                label.appendChild(edit);
+            }
             let control_element = document.createElement("div");
             control_element.classList.add("control");
             control_element.appendChild(input);
@@ -119,13 +142,13 @@ var Transaction;
                     field.classList.add(class_to_add);
             }
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", "is-normal");
             label.appendChild(document.createTextNode(field_label));
             field.appendChild(label);
             let control_element = document.createElement("div");
             control_element.classList.add("control");
             let selectContainer = document.createElement("div");
-            selectContainer.classList.add("select", "is-medium");
+            selectContainer.classList.add("select", "is-normal");
             selectContainer.appendChild(select);
             control_element.appendChild(selectContainer);
             field.appendChild(control_element);
@@ -151,7 +174,7 @@ var Transaction;
             input.type = input_type;
             input.onwheel = (e) => { e.preventDefault(); };
             input.maxLength = input_length;
-            input.classList.add("input", "is-medium");
+            input.classList.add("input", "is-normal");
             if (input.type === "number") {
                 input.step = "0.01";
                 input.min = "0";

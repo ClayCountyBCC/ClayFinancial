@@ -44,18 +44,20 @@
 
     constructor(control: Control, payment_type_id: number, clone_node: boolean)
     {
+      let saved_control_data_id = control.rendered_input_element ? control.rendered_input_element.getAttribute("control_data_id") : null;
       this.selected_control = control;
       this.control_id = control.control_id;
+      
       if (clone_node)
       {
         this.input_element = <HTMLElement>control.rendered_input_element.cloneNode(true);
       }
       else
       {
-        this.input_element = <HTMLInputElement>control.rendered_input_element;
+        this.input_element = control.rendered_input_element ? <HTMLInputElement>control.rendered_input_element : Control.CreateControl(control);
       }
       this.payment_type_id = payment_type_id;
-      if (this.input_element.getAttribute("data_control_id") === null)
+      if (saved_control_data_id === null)
       {
         let input = <HTMLInputElement>this.input_element;
         if (input.type === "number")
@@ -167,6 +169,49 @@
     private ValidateMoney(): boolean
     {
       return ControlGroup.ValidateMoney(<HTMLInputElement>this.input_element, this.container_element);
+    }
+
+    private static GetControlHistory(control_data_id: string, transaction_id: string): Promise<Array<ControlData>>
+    {
+      let path = Transaction.GetPath();
+      return Utilities.Get<Array<ControlData>>(path + "API/Transaction/GetControlDataHistory?control_data_id=" + control_data_id + "&transaction_id=" + transaction_id );
+    }
+
+    public static async GetAndDisplayControlHistory(control_data_id: string, transaction_id: string)
+    {
+      console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
+      await ControlData.GetControlHistory(control_data_id, transaction_id)
+        .then((control_data_history) =>
+        {
+          console.log('control data history', control_data_history);
+          this.MarkControlDataToEdit(control_data_history);
+          ControlData.DisplayControlHistory(control_data_history);
+        });
+    }
+
+    private static MarkControlDataToEdit(control_data: Array<ControlData>)
+    {
+      let filtered = control_data.filter(x => x.is_active);
+      if (filtered.length === 1)
+      {
+        let c = filtered[0];
+        let cd = new Data.ControlData(c.control, c.payment_type_id, false);
+        cd.transaction_payment_type_id = c.transaction_payment_type_id;
+        cd.department_id = c.department_id;
+        cd.is_active = c.is_active;
+        cd.control_data_id = c.control_data_id;
+        cd.value = c.value;
+        Transaction.editing_control_data = c;
+      }
+      else
+      {
+        alert("Invalid data stored in database for this transaction.");
+      }
+    }
+
+    private static DisplayControlHistory(control_data: Array<ControlData>): void
+    {
+
     }
   }
 }

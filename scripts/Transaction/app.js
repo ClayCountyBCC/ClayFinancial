@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var Transaction;
 (function (Transaction) {
+    Transaction.app_input_size = "is-normal";
     Transaction.error_scrolled = false;
     Transaction.departments = [];
     Transaction.payment_types = [];
@@ -25,6 +26,8 @@ var Transaction;
     Transaction.transaction_type_filter = "";
     Transaction.modified_only_filter = false;
     Transaction.transaction_number_filter = "";
+    Transaction.editing_control_data = null;
+    Transaction.editing_payment_method_data = null;
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
@@ -50,14 +53,6 @@ var Transaction;
                 }
             });
             yield Transaction.GetTransactionList(1);
-            //await Data.TransactionData.GetTransactionList()
-            //  .then((tv) =>
-            //  {
-            //    Transaction.transactions = tv;
-            //    Data.TransactionData.RenderTransactionList();
-            //    console.log('transactions', Transaction.transactions);
-            //    Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-            //  });
         });
     }
     Transaction.Start = Start;
@@ -330,5 +325,50 @@ var Transaction;
         return tr;
     }
     Transaction.CreateMessageRow = CreateMessageRow;
+    function ShowChangeModal() {
+        Transaction.editing_control_data = null;
+        Transaction.editing_payment_method_data = null;
+        document.getElementById("change_transaction").classList.add("is-active");
+    }
+    Transaction.ShowChangeModal = ShowChangeModal;
+    function CloseChangeModal() {
+        document.getElementById("change_transaction").classList.remove("is-active");
+    }
+    Transaction.CloseChangeModal = CloseChangeModal;
+    function LoadControlDataChange(control_data_id, transaction_id, field_label) {
+        Utilities.Set_Text("change_field_label", field_label);
+        Transaction.ShowChangeModal();
+        Transaction.Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
+            .then(() => {
+            console.log('we good', Transaction.editing_control_data);
+            if (Transaction.editing_control_data === null)
+                return; // we have a problem
+            CreateHistoryTableHeader(true);
+        });
+    }
+    Transaction.LoadControlDataChange = LoadControlDataChange;
+    function LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label) {
+        Utilities.Set_Text("change_field_label", field_label);
+        Transaction.ShowChangeModal();
+    }
+    Transaction.LoadPaymentTypeDataChange = LoadPaymentTypeDataChange;
+    function CreateHistoryTableHeader(is_control_data) {
+        let container = document.getElementById("change_transaction_history_header");
+        Utilities.Clear_Element(container);
+        if (is_control_data) {
+            container.appendChild(CreateControlDataHistoryHeader());
+        }
+        else {
+            container.appendChild(CreatePaymentMethodDataHistoryHeader());
+        }
+    }
+    function CreateControlDataHistoryHeader() {
+        let tr = document.createElement("tr");
+        return tr;
+    }
+    function CreatePaymentMethodDataHistoryHeader() {
+        let tr = document.createElement("tr");
+        return tr;
+    }
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

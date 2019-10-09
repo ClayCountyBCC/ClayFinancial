@@ -213,7 +213,7 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       var controls = Control.GetCachedDict();
 
-      return controls[control_id].Validate(this);
+      return controls[control_id].Validate(this, false);
     }
 
     public bool UpdateControlData()
@@ -303,6 +303,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public static List<ControlData> GetControlDataHistory(long control_data_id, long transaction_id)
     {
       // this should work for both Department and Payment Type Controls
+      var controls = Control.GetCached_Dict();
       var param = new DynamicParameters();
       param.Add("@control_data_id", control_data_id);
       param.Add("@transaction_id", transaction_id);
@@ -314,10 +315,11 @@ namespace ClayFinancial.Models.Transaction.Data
             ISNULL(transaction_payment_type_id, 0) transaction_payment_type_id
             ,ISNULL(department_id, 0) department_id
             ,control_id
+            ,transaction_id
           FROM data_control
           WHERE
-            transaction_id = 26
-            AND control_data_id = 87
+            transaction_id = @transaction_id
+            AND control_data_id = @control_data_id
         )
 
         SELECT 
@@ -333,15 +335,27 @@ namespace ClayFinancial.Models.Transaction.Data
           ,DCC.modified_by
           ,DCC.reason_for_change
         FROM data_control DC
-        INNER JOIN QueryData Q ON DC.control_id = Q.control_id 
+        INNER JOIN QueryData Q ON DC.control_id = Q.control_id
+          AND DC.transaction_id = Q.transaction_id
           AND ISNULL(DC.transaction_payment_type_id, 0) = Q.transaction_payment_type_id
           AND ISNULL(DC.department_id, 0) = Q.department_id
         LEFT OUTER JOIN data_changes_control DCC ON DCC.new_control_data_id = DC.control_data_id
         ORDER BY control_data_id DESC
 
       ";
-
-      return Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+      var control_data = Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+      foreach(ControlData cd in control_data)
+      {
+        if (controls.ContainsKey(cd.control_id))
+        {
+          cd.control = controls[cd.control_id];
+        }
+        else
+        {
+          new ErrorLog("Missing Control ID - " + cd.control_id, "GetControlDataHistory", "", "", "");
+        }
+      }
+      return control_data;
     }
 
     //public TransactionData ValidateTransactionData(TransactionData transactionData)

@@ -319,18 +319,52 @@
   </div>
 
 </div>
+
+
+
+<div id="change_transaction"
+     class="modal">
+
+  <div onclick="Transaction.CloseChangeModal();"
+       class="modal-background">
+  </div>
+
+  <div class="modal-card container">
+
+    <header class="modal-card-head">
+      <p class="modal-card-title">Editing Saved Data - <span id="change_field_label"></span></p>
+      <button onclick="Transaction.CloseChangeModal();"
+              class="delete" aria-label="close"></button>
+    </header>
+
+    <section class="modal-card-body">
+
+      <table class="table is-fullwidth">
+        <thead id="change_transaction_history_header">
+          
+        </thead>
+        <tbody id="change_transaction_history_table">
+
+        </tbody>
+      </table>
+    </section>
+
+    <footer style="justify-content: flex-end;"
+            class="modal-card-foot">
+      <button onclick="Transaction.CloseChangeModal();"
+              class="button">
+        Cancel
+      </button>
+      <button class="button is-success">Save changes</button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+
 <script src="~/scripts/Transaction/transaction_bundle.js?@DateTime.Today.Date.ToShortDateString().Replace("/", "-")"></script>
-@*<script src="~/scripts/Transaction/app.js"></script>
-<script src="~/scripts/LevelItem.js"></script>
-<script src="~/scripts/Transaction/ControlGroup.js"></script>
-<script src="~/scripts/Transaction/Data/PaymentMethodData.js"></script>
-<script src="~/scripts/Transaction/PaymentType.js"></script>
-<script src="~/scripts/Transaction/Control.js"></script>
-<script src="~/scripts/Transaction/Department.js"></script>
-<script src="~/scripts/Transaction/Data/ControlData.js"></script>
-<script src="~/scripts/Transaction/Data/PaymentTypeData.js"></script>
-<script src="~/scripts/Transaction/Receipt.js"></script>
-<script src="~/scripts/Transaction/Data/TransactionData.js"></script>*@
 
 <script type="text/javascript">
 
