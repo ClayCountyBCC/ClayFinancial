@@ -77,15 +77,19 @@
         }
 
       }
-      input.onclick = () =>
+      if (editFunction !== null)
       {
-        editFunction();
+        input.onclick = () =>
+        {
+          editFunction();
+        }
       }
+
 
       let field = document.createElement("div");
       field.classList.add("field");
       let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
+      label.classList.add("label", Transaction.app_input_size);
       if (field_label.length > 0)
       {
         label.appendChild(document.createTextNode(field_label));
@@ -140,7 +144,7 @@
       let field = document.createElement("div");
       field.classList.add("field");
       let label = document.createElement("label");
-      label.classList.add("label", "is-medium");
+      label.classList.add("label", Transaction.app_input_size);
       if (field_label.length > 0)
       {
         label.appendChild(document.createTextNode(field_label));

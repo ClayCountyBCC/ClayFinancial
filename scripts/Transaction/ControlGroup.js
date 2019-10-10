@@ -50,13 +50,15 @@ var Transaction;
                     };
                 }
             }
-            input.onclick = () => {
-                editFunction();
-            };
+            if (editFunction !== null) {
+                input.onclick = () => {
+                    editFunction();
+                };
+            }
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", Transaction.app_input_size);
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
             }
@@ -101,7 +103,7 @@ var Transaction;
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", Transaction.app_input_size);
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
             }

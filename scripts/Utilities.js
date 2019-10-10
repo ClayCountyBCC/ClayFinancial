@@ -329,7 +329,7 @@ var Utilities;
         if (menuItem.icon.length > 0) {
             let span = document.createElement("span");
             span.classList.add("icon");
-            span.classList.add("is-medium");
+            span.classList.add(Transaction.app_input_size);
             let i = document.createElement("i");
             let icons = menuItem.icon.split(" ");
             for (let icon of icons) {

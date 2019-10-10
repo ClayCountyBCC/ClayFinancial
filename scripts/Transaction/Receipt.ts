@@ -152,7 +152,7 @@
       e.classList.add("field", "column", size);
 
       let l = document.createElement("label");
-      l.classList.add("label", "is-medium");
+      l.classList.add("label", Transaction.app_input_size);
       l.appendChild(document.createTextNode(label));
       e.appendChild(l);
 
@@ -161,7 +161,7 @@
       e.appendChild(control);
 
       let input = document.createElement("input");
-      input.classList.add("input", "is-static", "is-medium");
+      input.classList.add("input", "is-static", Transaction.app_input_size);
       input.value = value;
       input.readOnly = true;
       control.appendChild(input);

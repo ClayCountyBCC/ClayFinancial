@@ -255,7 +255,7 @@ var Transaction;
                     this.check_from_input_element.setAttribute("is_cash", "false");
                 }
                 this.add_check_button_element = document.createElement("button");
-                this.add_check_button_element.classList.add("button", "is-info", "is-medium");
+                this.add_check_button_element.classList.add("button", "is-info", Transaction.app_input_size);
                 this.add_check_button_element.appendChild(document.createTextNode("Add Another Check"));
                 this.check_amount_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_amount_input_element, "Check Amount", true, "is-one-quarter");
                 columns.appendChild(this.check_amount_input_element_container);
@@ -266,7 +266,7 @@ var Transaction;
                 if (this.show_cancel) {
                     let buttons = [];
                     this.cancel_check_button_element = document.createElement("button");
-                    this.cancel_check_button_element.classList.add("button", "is-warning", "is-medium");
+                    this.cancel_check_button_element.classList.add("button", "is-warning", Transaction.app_input_size);
                     this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
                     buttons.push(this.add_check_button_element);
                     buttons.push(this.cancel_check_button_element);

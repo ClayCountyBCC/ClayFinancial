@@ -21,6 +21,12 @@
            class="navbar-item">
           New Receipt
         </a>
+        <a id="linkReceiptInProgress"           
+           class="navbar-item has-background-grey-light has-text-grey has-text-warning"
+           style="cursor: default;"
+           onclick="Transaction.ViewReceiptInProgress();">
+          Current Receipt
+        </a>
         <a onclick="Transaction.NewDeposit();"
            class="navbar-item">
           New Deposit
@@ -46,7 +52,7 @@
         <div class="level-item">
           <div class="field">
             <div class="control">
-              <div class="select is-medium">
+              <div class="select">
                 <select onchange="Transaction.FilterTransactions();"
                         id="nameFilter"></select>
               </div>
@@ -57,7 +63,7 @@
         <div class="level-item">
           <div class="field">
             <div class="control">
-              <div class="select is-medium">
+              <div class="select">
                 <select onchange="Transaction.FilterTransactions();"
                         id="statusFilter"></select>
               </div>
@@ -68,7 +74,7 @@
         <div class="level-item">
           <div class="field">
             <div class="control">
-              <div class="select is-medium">
+              <div class="select">
                 <select onchange="Transaction.FilterTransactions();"
                         id="departmentFilter"></select>
               </div>
@@ -79,7 +85,7 @@
         <div class="level-item">
           <div class="field">
             <div class="control">
-              <div class="select is-medium">
+              <div class="select">
                 <select onchange="Transaction.FilterTransactions();"
                         id="typeFilter"></select>
               </div>
@@ -91,7 +97,7 @@
           <div class="field">
             <div class="control">
               <input onkeydown="Transaction.SearchOnEnter(event);"
-                     class="input is-medium"
+                     class="input"
                      id="transactionNumberFilter"
                      placeholder="Receipt #"
                      maxlength="13"
@@ -104,7 +110,7 @@
         <div class="level-item">
           <div class="field">
             <div class="control">
-              <label class="checkbox is-medium">
+              <label class="checkbox">
                 <input onchange="Transaction.FilterTransactions();"
                        id="modifiedFilter"
                        type="checkbox" />
@@ -119,7 +125,7 @@
             <div class="control">
               <button id="filterRefreshButton"
                       onclick="Transaction.FilterTransactions(); return false;"
-                      class="button is-primary is-medium"
+                      class="button is-primary"
                       type="button">
                 Refresh
               </button>
@@ -139,7 +145,7 @@
 
   </div>
 
-  <nav class="pagination is-medium" role="navigation" aria-label="pagination">
+  <nav class="pagination " role="navigation" aria-label="pagination">
     <a id="resultsPreviousPage"
        onclick="Transaction.PreviousPage(this);"
        class="pagination-previous">Previous</a>

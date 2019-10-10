@@ -99,9 +99,20 @@ var Transaction;
     Transaction.GetTransactionList = GetTransactionList;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
+        let current_receipt_link = document.getElementById("linkReceiptInProgress");
+        current_receipt_link.classList.remove("has-background-grey-light", "has-text-grey");
+        current_receipt_link.style.cursor = "pointer";
         Transaction.ViewReceiptDetail();
     }
     Transaction.NewReceipt = NewReceipt;
+    function ResetReceipt() {
+        Transaction.currentReceipt = new Transaction.Receipt();
+        Transaction.currentReceipt = null;
+        let current_receipt_link = document.getElementById("linkReceiptInProgress");
+        current_receipt_link.classList.add("has-background-grey-light", "has-text-grey");
+        current_receipt_link.style.cursor = "default";
+    }
+    Transaction.ResetReceipt = ResetReceipt;
     function NewDeposit() {
     }
     Transaction.NewDeposit = NewDeposit;
@@ -160,6 +171,12 @@ var Transaction;
         Transaction.GetTransactionList(1);
     }
     Transaction.FilterTransactions = FilterTransactions;
+    function ViewReceiptInProgress() {
+        if (!Transaction.currentReceipt === null) {
+            ViewReceiptDetail();
+        }
+    }
+    Transaction.ViewReceiptInProgress = ViewReceiptInProgress;
     function ViewReceiptDetail() {
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Show(Transaction.Data.TransactionData.action_container);

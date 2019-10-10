@@ -329,7 +329,7 @@ var Utilities;
         if (menuItem.icon.length > 0) {
             let span = document.createElement("span");
             span.classList.add("icon");
-            span.classList.add("is-medium");
+            span.classList.add(Transaction.app_input_size);
             let i = document.createElement("i");
             let icons = menuItem.icon.split(" ");
             for (let icon of icons) {
@@ -555,9 +555,20 @@ var Transaction;
     Transaction.GetTransactionList = GetTransactionList;
     function NewReceipt() {
         Transaction.currentReceipt = new Transaction.Receipt();
+        let current_receipt_link = document.getElementById("linkReceiptInProgress");
+        current_receipt_link.classList.remove("has-background-grey-light", "has-text-grey");
+        current_receipt_link.style.cursor = "pointer";
         Transaction.ViewReceiptDetail();
     }
     Transaction.NewReceipt = NewReceipt;
+    function ResetReceipt() {
+        Transaction.currentReceipt = new Transaction.Receipt();
+        Transaction.currentReceipt = null;
+        let current_receipt_link = document.getElementById("linkReceiptInProgress");
+        current_receipt_link.classList.add("has-background-grey-light", "has-text-grey");
+        current_receipt_link.style.cursor = "default";
+    }
+    Transaction.ResetReceipt = ResetReceipt;
     function NewDeposit() {
     }
     Transaction.NewDeposit = NewDeposit;
@@ -616,6 +627,12 @@ var Transaction;
         Transaction.GetTransactionList(1);
     }
     Transaction.FilterTransactions = FilterTransactions;
+    function ViewReceiptInProgress() {
+        if (!Transaction.currentReceipt === null) {
+            ViewReceiptDetail();
+        }
+    }
+    Transaction.ViewReceiptInProgress = ViewReceiptInProgress;
     function ViewReceiptDetail() {
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
         Utilities.Show(Transaction.Data.TransactionData.action_container);
@@ -901,13 +918,15 @@ var Transaction;
                     };
                 }
             }
-            input.onclick = () => {
-                editFunction();
-            };
+            if (editFunction !== null) {
+                input.onclick = () => {
+                    editFunction();
+                };
+            }
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", Transaction.app_input_size);
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
             }
@@ -952,7 +971,7 @@ var Transaction;
             let field = document.createElement("div");
             field.classList.add("field");
             let label = document.createElement("label");
-            label.classList.add("label", "is-medium");
+            label.classList.add("label", Transaction.app_input_size);
             if (field_label.length > 0) {
                 label.appendChild(document.createTextNode(field_label));
             }
@@ -1411,7 +1430,7 @@ var Transaction;
                     this.check_from_input_element.setAttribute("is_cash", "false");
                 }
                 this.add_check_button_element = document.createElement("button");
-                this.add_check_button_element.classList.add("button", "is-info", "is-medium");
+                this.add_check_button_element.classList.add("button", "is-info", Transaction.app_input_size);
                 this.add_check_button_element.appendChild(document.createTextNode("Add Another Check"));
                 this.check_amount_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_amount_input_element, "Check Amount", true, "is-one-quarter");
                 columns.appendChild(this.check_amount_input_element_container);
@@ -1422,7 +1441,7 @@ var Transaction;
                 if (this.show_cancel) {
                     let buttons = [];
                     this.cancel_check_button_element = document.createElement("button");
-                    this.cancel_check_button_element.classList.add("button", "is-warning", "is-medium");
+                    this.cancel_check_button_element.classList.add("button", "is-warning", Transaction.app_input_size);
                     this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
                     buttons.push(this.add_check_button_element);
                     buttons.push(this.cancel_check_button_element);
@@ -1626,13 +1645,13 @@ var Transaction;
             //let field = document.createElement("div");
             //field.classList.add("field");
             //let label = document.createElement("label");
-            //label.classList.add("label", "is-medium");
+            //label.classList.add("label", Transaction.app_input_size);
             //label.appendChild(document.createTextNode("Department"));
             //field.appendChild(label);
             //let control = document.createElement("div");
             //control.classList.add("control");
             //let selectContainer = document.createElement("div");
-            //selectContainer.classList.add("select", "is-medium");
+            //selectContainer.classList.add("select", Transaction.app_input_size);
             //selectContainer.appendChild(department);
             //control.appendChild(selectContainer);
             //field.appendChild(control);
@@ -2127,14 +2146,14 @@ var Transaction;
             let e = document.createElement("div");
             e.classList.add("field", "column", size);
             let l = document.createElement("label");
-            l.classList.add("label", "is-medium");
+            l.classList.add("label", Transaction.app_input_size);
             l.appendChild(document.createTextNode(label));
             e.appendChild(l);
             let control = document.createElement("p");
             control.classList.add("control");
             e.appendChild(control);
             let input = document.createElement("input");
-            input.classList.add("input", "is-static", "is-medium");
+            input.classList.add("input", "is-static", Transaction.app_input_size);
             input.value = value;
             input.readOnly = true;
             control.appendChild(input);
@@ -2194,9 +2213,6 @@ var Transaction;
                 this.department_element = Transaction.DepartmentControl.cloneNode(true);
                 this.RenderDepartmentSelection(control_container, saved_transaction);
                 this.RenderReceivedFromInput(control_container, saved_transaction);
-                if (saved_transaction !== null) {
-                    this.CloneProperties(saved_transaction);
-                }
                 this.transaction_error_element = this.CreateTransactionErrorElement();
                 targetContainer.appendChild(this.transaction_error_element);
             }
@@ -2265,7 +2281,7 @@ var Transaction;
                 ol.classList.add("payment_type");
                 for (let pt of this.selected_department.payment_types) {
                     let li = document.createElement("li");
-                    li.classList.add("light-function", "is-size-3", "has-background-link");
+                    li.classList.add("light-function", "is-size-4", "has-background-link");
                     li.style.cursor = "pointer";
                     li.setAttribute("payment_type_id", pt.payment_type_id.toString());
                     let name = document.createElement("span");
@@ -2369,7 +2385,7 @@ var Transaction;
                     let pt = Transaction.FindPaymentType(filtered[0].payment_type_id); //filtered[0].payment_type;
                     //let pt = Transaction.FindPaymentType(payment_type_id);
                     let li = document.createElement("li");
-                    li.classList.add("light-function", "is-size-3", "has-background-link");
+                    li.classList.add("light-function", "is-size-4", "has-background-link");
                     li.style.cursor = "pointer";
                     li.setAttribute("payment_type_id", pt.payment_type_id.toString());
                     let name = document.createElement("span");
@@ -2454,10 +2470,11 @@ var Transaction;
                 Transaction.error_scrolled = false;
                 this.ResetErrorElements();
                 let is_valid = true;
-                if (this.department_id === -1) {
-                    Transaction.ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
-                    is_valid = false;
-                }
+                //if (this.department_id === -1)
+                //{
+                //  //ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
+                //  is_valid = false;
+                //}
                 if (this.received_from.length === 0) {
                     Transaction.ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "This field is required.");
                     is_valid = false;
@@ -2479,6 +2496,7 @@ var Transaction;
                     .then(function (response) {
                     console.log("post probably good", response);
                     Transaction.currentReceipt.ShowReceipt(response);
+                    Transaction.ResetReceipt();
                     Transaction.Data.TransactionData.GetTransactionList()
                         .then((tv) => {
                         Transaction.transactions = tv;
@@ -2633,11 +2651,6 @@ var Transaction;
                 span.appendChild(i);
                 button.appendChild(span);
                 return button;
-            }
-            /*
-             * Create clientside TransactionData from Serverside Class
-             */
-            CloneProperties(ss) {
             }
         }
         // client side only stuff

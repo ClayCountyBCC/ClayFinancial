@@ -119,7 +119,19 @@
   export function NewReceipt()
   {
     Transaction.currentReceipt = new Receipt();
+    let current_receipt_link = <HTMLAnchorElement>document.getElementById("linkReceiptInProgress");
+    current_receipt_link.classList.remove("has-background-grey-light", "has-text-grey");
+    current_receipt_link.style.cursor = "pointer";
     Transaction.ViewReceiptDetail();
+  }
+
+  export function ResetReceipt()
+  {
+    Transaction.currentReceipt = new Receipt();
+    Transaction.currentReceipt = null;
+    let current_receipt_link = <HTMLAnchorElement>document.getElementById("linkReceiptInProgress");
+    current_receipt_link.classList.add("has-background-grey-light", "has-text-grey");
+    current_receipt_link.style.cursor = "default";
   }
 
   export function NewDeposit()
@@ -194,6 +206,14 @@
     Transaction.modified_only_filter = (<HTMLInputElement>document.getElementById("modifiedFilter")).checked;
 
     Transaction.GetTransactionList(1);
+  }
+
+  export function ViewReceiptInProgress(): void
+  {
+    if (!Transaction.currentReceipt === null)
+    {
+      ViewReceiptDetail();
+    }
   }
 
   export function ViewReceiptDetail(): void

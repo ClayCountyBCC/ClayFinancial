@@ -77,12 +77,7 @@
       this.department_element = <HTMLSelectElement>Transaction.DepartmentControl.cloneNode(true);
       this.RenderDepartmentSelection(control_container, saved_transaction);
       this.RenderReceivedFromInput(control_container, saved_transaction);
-
-      if (saved_transaction !== null)
-      {
-        this.CloneProperties(saved_transaction);
-      }
-       
+      
       this.transaction_error_element = this.CreateTransactionErrorElement();
       targetContainer.appendChild(this.transaction_error_element);
     }
@@ -171,7 +166,7 @@
       for (let pt of this.selected_department.payment_types)
       {
         let li = document.createElement("li");
-        li.classList.add("light-function", "is-size-3", "has-background-link");
+        li.classList.add("light-function", "is-size-4", "has-background-link");
         li.style.cursor = "pointer";        
         li.setAttribute("payment_type_id", pt.payment_type_id.toString());
         let name = document.createElement("span");
@@ -306,7 +301,7 @@
         //let pt = Transaction.FindPaymentType(payment_type_id);
 
         let li = document.createElement("li");
-        li.classList.add("light-function", "is-size-3", "has-background-link");
+        li.classList.add("light-function", "is-size-4", "has-background-link");
         li.style.cursor = "pointer";
         li.setAttribute("payment_type_id", pt.payment_type_id.toString());
         let name = document.createElement("span");
@@ -426,11 +421,11 @@
 
       let is_valid = true;
 
-      if (this.department_id === -1)
-      {
-        ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
-        is_valid = false;
-      }
+      //if (this.department_id === -1)
+      //{
+      //  //ControlGroup.UpdateSelectError(this.department_element_container, "Invalid Department Selected");
+      //  is_valid = false;
+      //}
       if (this.received_from.length === 0)
       {
         ControlGroup.UpdateInputError(this.received_from_element, this.received_from_element_container, "This field is required.");
@@ -459,6 +454,7 @@
           console.log("post probably good", response);
 
           Transaction.currentReceipt.ShowReceipt(response);
+          Transaction.ResetReceipt();
 
           Transaction.Data.TransactionData.GetTransactionList()
             .then((tv) =>
@@ -645,19 +641,6 @@
       span.appendChild(i);
       button.appendChild(span);
       return button;
-    }
-
-    /*
-     * Create clientside TransactionData from Serverside Class 
-     */
-
-    public CloneProperties(ss: TransactionData): void
-    {
-      
-      
-
-
-      
     }
 
   }
