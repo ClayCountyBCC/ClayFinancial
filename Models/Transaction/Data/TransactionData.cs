@@ -12,7 +12,7 @@ namespace ClayFinancial.Models.Transaction.Data
 {
   public class TransactionData
   {
-    const int page_size = 5;
+    const int page_size = 25;
     public long transaction_id { get; set; } = -1;
     public int fiscal_year { get; set; } = -1;
     public int created_by_employee_id { get; set; } = -1;

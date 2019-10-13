@@ -111,8 +111,6 @@
       }
       else
       {
-        //this.department_element.classList.add("disabled"); // see if this does anything
-
         this.department_id = saved_transaction.department_id;
         this.selected_department = Department.FindDepartment(this.department_id);
         this.RenderSavedDepartmentControls(saved_transaction);
@@ -554,8 +552,10 @@
       tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
       tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
-      tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
-      tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
+      let page = Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "has-text-centered", "10%");
+      page.colSpan = 2;
+      tr.appendChild(page);
+      //tr.appendChild(Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "", "5%"));
       return table;
     }
 

@@ -484,6 +484,11 @@ var Transaction;
     Transaction.transaction_number_filter = "";
     Transaction.editing_control_data = null;
     Transaction.editing_payment_method_data = null;
+    Transaction.reason_for_change_input = "reason_for_change";
+    Transaction.reason_for_change_input_container = "reason_for_change_container";
+    Transaction.change_edit_container = "change_edit_container";
+    Transaction.change_transaction_history_table_header = "change_transaction_history_header";
+    Transaction.change_transaction_history_table_body = "change_transaction_history_table";
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
@@ -547,7 +552,6 @@ var Transaction;
             yield Transaction.Data.TransactionData.GetTransactionPageCount()
                 .then((pagecount) => {
                 Transaction.page_count = pagecount;
-                console.log("page count", pagecount);
                 HandlePagination();
             });
         });
@@ -677,7 +681,7 @@ var Transaction;
         else {
             previousPage.removeAttribute("disabled");
         }
-        if (Transaction.current_page === Transaction.page_count) {
+        if (Transaction.page_count <= Transaction.current_page) {
             nextPage.setAttribute("disabled", "");
         }
         else {
@@ -816,7 +820,6 @@ var Transaction;
             console.log('we good', Transaction.editing_control_data);
             if (Transaction.editing_control_data === null)
                 return; // we have a problem
-            CreateHistoryTableHeader(true);
         });
     }
     Transaction.LoadControlDataChange = LoadControlDataChange;
@@ -825,24 +828,32 @@ var Transaction;
         Transaction.ShowChangeModal();
     }
     Transaction.LoadPaymentTypeDataChange = LoadPaymentTypeDataChange;
-    function CreateHistoryTableHeader(is_control_data) {
-        let container = document.getElementById("change_transaction_history_header");
-        Utilities.Clear_Element(container);
-        if (is_control_data) {
-            container.appendChild(CreateControlDataHistoryHeader());
+    function SaveChanges() {
+        Utilities.Toggle_Loading_Button("change_transaction_save", true);
+        let reason = Utilities.Get_Value(Transaction.reason_for_change_input).trim();
+        if (reason.length === 0) {
+            let input = document.getElementById(Transaction.reason_for_change_input);
+            let container = document.getElementById(Transaction.reason_for_change_input_container);
+            Transaction.ControlGroup.UpdateInputError(input, container, "This value is required.");
+            Utilities.Toggle_Loading_Button("change_transaction_save", false);
+            return;
+        }
+        if (Transaction.editing_control_data !== null) {
+            if (!Transaction.editing_control_data.Validate()) {
+                Utilities.Toggle_Loading_Button("change_transaction_save", false);
+                return;
+            }
+            Transaction.editing_control_data.reason_for_change = reason;
+            Transaction.editing_control_data.SaveControlChanges();
         }
         else {
-            container.appendChild(CreatePaymentMethodDataHistoryHeader());
+            if (!Transaction.editing_payment_method_data.Validate()) {
+                Utilities.Toggle_Loading_Button("change_transaction_save", false);
+                return;
+            }
         }
     }
-    function CreateControlDataHistoryHeader() {
-        let tr = document.createElement("tr");
-        return tr;
-    }
-    function CreatePaymentMethodDataHistoryHeader() {
-        let tr = document.createElement("tr");
-        return tr;
-    }
+    Transaction.SaveChanges = SaveChanges;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map
 var Utilities;
@@ -1015,6 +1026,17 @@ var Transaction;
             label.classList.add("label", "is-normal");
             label.appendChild(document.createTextNode(field_label));
             field.appendChild(label);
+            if (select.getAttribute("transaction_id") !== null) {
+                let edit = document.createElement("a");
+                edit.style.marginLeft = ".5em";
+                edit.style.fontSize = ".75em";
+                edit.style.fontWeight = "400";
+                let transaction_id = select.getAttribute("transaction_id");
+                let control_data_id = select.getAttribute("control_data_id");
+                edit.onclick = () => { Transaction.LoadControlDataChange(control_data_id, transaction_id, field_label); };
+                edit.appendChild(document.createTextNode("edit"));
+                label.appendChild(edit);
+            }
             let control_element = document.createElement("div");
             control_element.classList.add("control");
             let selectContainer = document.createElement("div");
@@ -1785,18 +1807,36 @@ var Transaction;
                 let path = Transaction.GetPath();
                 return Utilities.Get(path + "API/Transaction/GetControlDataHistory?control_data_id=" + control_data_id + "&transaction_id=" + transaction_id);
             }
+            SaveControlChanges() {
+                let path = Transaction.GetPath();
+                Utilities.Post(path + "API/Transaction/EditControls", this)
+                    .then(response => {
+                    if (response.length > 0) {
+                        alert("There was a problem saving this change." + '\r\n' + response);
+                    }
+                    else {
+                        Transaction.CloseChangeModal();
+                        Transaction.ShowReceiptDetail(this.transaction_id);
+                        Transaction.editing_control_data = null;
+                    }
+                    Utilities.Toggle_Loading_Button("change_transaction_save", false);
+                });
+            }
             static GetAndDisplayControlHistory(control_data_id, transaction_id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
                     yield ControlData.GetControlHistory(control_data_id, transaction_id)
                         .then((control_data_history) => {
                         console.log('control data history', control_data_history);
-                        this.MarkControlDataToEdit(control_data_history);
+                        ControlData.MarkControlDataToEdit(control_data_history);
                         ControlData.DisplayControlHistory(control_data_history);
+                        ControlData.DisplayControlToEdit();
                     });
                 });
             }
             static MarkControlDataToEdit(control_data) {
+                Transaction.editing_control_data = null;
+                Transaction.editing_payment_method_data = null;
                 let filtered = control_data.filter(x => x.is_active);
                 if (filtered.length === 1) {
                     let c = filtered[0];
@@ -1805,14 +1845,57 @@ var Transaction;
                     cd.department_id = c.department_id;
                     cd.is_active = c.is_active;
                     cd.control_data_id = c.control_data_id;
+                    cd.transaction_id = c.transaction_id;
                     cd.value = c.value;
-                    Transaction.editing_control_data = c;
+                    cd.input_element.value = c.value;
+                    cd.control = cd.selected_control;
+                    Transaction.editing_control_data = cd;
                 }
                 else {
                     alert("Invalid data stored in database for this transaction.");
                 }
             }
+            static DisplayControlToEdit() {
+                if (Transaction.editing_control_data === null)
+                    return;
+                let container = document.getElementById(Transaction.change_edit_container);
+                Utilities.Clear_Element(container);
+                let e = Transaction.editing_control_data;
+                container.appendChild(e.container_element);
+                Utilities.Set_Value(Transaction.reason_for_change_input, "");
+            }
+            static CreateControlDataHistoryHeader() {
+                let tr = document.createElement("tr");
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "20%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Value", "has-text-left", "50%"));
+                return tr;
+            }
             static DisplayControlHistory(control_data) {
+                let header = document.getElementById(Transaction.change_transaction_history_table_header);
+                Utilities.Clear_Element(header);
+                header.appendChild(ControlData.CreateControlDataHistoryHeader());
+                let body = document.getElementById(Transaction.change_transaction_history_table_body);
+                Utilities.Clear_Element(body);
+                for (let cd of control_data) {
+                    body.appendChild(ControlData.CreateControlDataHistoryRow(cd));
+                }
+            }
+            static CreateControlDataHistoryRow(control_data) {
+                let tr = document.createElement("tr");
+                if (new Date(control_data.modified_on).getFullYear() < 1000) {
+                    let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+                    original.colSpan = 3;
+                    tr.appendChild(original);
+                }
+                else {
+                    tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(control_data.modified_on), "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", control_data.modified_by, "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", control_data.reason_for_change, "has-text-left"));
+                }
+                tr.appendChild(Utilities.CreateTableCell("td", control_data.value, "has-text-left"));
+                return tr;
             }
         }
         Data.ControlData = ControlData;
@@ -2237,7 +2320,6 @@ var Transaction;
                     };
                 }
                 else {
-                    //this.department_element.classList.add("disabled"); // see if this does anything
                     this.department_id = saved_transaction.department_id;
                     this.selected_department = Transaction.Department.FindDepartment(this.department_id);
                     this.RenderSavedDepartmentControls(saved_transaction);
@@ -2581,8 +2663,10 @@ var Transaction;
                 tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "", "", "5%"));
+                let page = Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "has-text-centered", "10%");
+                page.colSpan = 2;
+                tr.appendChild(page);
+                //tr.appendChild(Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "", "5%"));
                 return table;
             }
             static CreateTransactionListRow(data) {

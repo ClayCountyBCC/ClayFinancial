@@ -248,29 +248,26 @@ namespace ClayFinancial.Models.Transaction.Data
         UPDATE data_control
         SET is_active = 0
         WHERE control_data_id = @prior_control_data_id;
+        
+        BEGIN
+          INSERT INTO data_changes_control
+          (
+              original_control_data_id
+              ,new_control_data_id
+              ,modified_by
+              ,modified_on
+              ,reason_for_change
+          )
 
-        IF @prior_control_data_id > -1
-          BEGIN
-
-
-            INSERT INTO data_changes_control
-            (
-               original_control_data_id
-               ,new_control_data_id
-               ,modified_by
-               ,modified_on
-               ,reason_for_change
-            )
-
-            VALUES
-            (
-              @prior_control_data_id
-              ,@new_control_data_id
-              ,@username
-              ,GETDATE()
-              ,@reason_for_change
-            )
-          END
+          VALUES
+          (
+            @prior_control_data_id
+            ,@new_control_data_id
+            ,@username
+            ,GETDATE()
+            ,@reason_for_change
+          )
+        END
 
       ";
       var i = Constants.Exec_Query(query, GetControlDataParameters(), Constants.ConnectionString.ClayFinancial);
@@ -288,7 +285,7 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = new DynamicParameters();
 
       param.Add("@transaction_id", transaction_id);
-      param.Add("@prior_control_data_id", prior_control_data_id);
+      param.Add("@prior_control_data_id", control_data_id); // This should always be this.
       param.Add("@transaction_payment_type_id", transaction_payment_type_id);
       param.Add("@department_id", department_id);
       param.Add("@control_id", control_id);

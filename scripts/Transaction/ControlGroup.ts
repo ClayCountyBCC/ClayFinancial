@@ -196,6 +196,20 @@
       label.classList.add("label", "is-normal");
       label.appendChild(document.createTextNode(field_label));
       field.appendChild(label);
+
+      if (select.getAttribute("transaction_id") !== null)
+      {
+        let edit = document.createElement("a");
+        edit.style.marginLeft = ".5em";
+        edit.style.fontSize = ".75em";
+        edit.style.fontWeight = "400";
+        let transaction_id = select.getAttribute("transaction_id");
+        let control_data_id = select.getAttribute("control_data_id");
+        edit.onclick = () => { Transaction.LoadControlDataChange(control_data_id, transaction_id, field_label); };
+        edit.appendChild(document.createTextNode("edit"));
+        label.appendChild(edit);
+      }
+
       let control_element = document.createElement("div");
       control_element.classList.add("control");
       let selectContainer = document.createElement("div");

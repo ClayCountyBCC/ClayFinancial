@@ -20,6 +20,11 @@
   export let transaction_number_filter = "";
   export let editing_control_data: Data.ControlData = null;
   export let editing_payment_method_data: Data.PaymentMethodData = null;
+  export let reason_for_change_input: string = "reason_for_change";
+  export let reason_for_change_input_container: string = "reason_for_change_container";
+  export let change_edit_container = "change_edit_container";
+  export let change_transaction_history_table_header = "change_transaction_history_header";
+  export let change_transaction_history_table_body = "change_transaction_history_table";
 
   export async function Start()
   {
@@ -110,7 +115,6 @@
       .then((pagecount) =>
       {
         Transaction.page_count = pagecount;
-        console.log("page count", pagecount);
         HandlePagination();
       });
 
@@ -269,7 +273,7 @@
       previousPage.removeAttribute("disabled");
     }
 
-    if (Transaction.current_page === Transaction.page_count)
+    if (Transaction.page_count <= Transaction.current_page)
     {
       nextPage.setAttribute("disabled", "");
     }
@@ -438,7 +442,6 @@
       {
         console.log('we good', Transaction.editing_control_data);
         if (Transaction.editing_control_data === null) return; // we have a problem
-        CreateHistoryTableHeader(true);
 
       });
   }
@@ -450,31 +453,38 @@
 
   }
 
-  function CreateHistoryTableHeader(is_control_data: boolean)
+  export function SaveChanges()
   {
-    let container = document.getElementById("change_transaction_history_header");
-    Utilities.Clear_Element(container);
-    if (is_control_data)
+    Utilities.Toggle_Loading_Button("change_transaction_save", true);
+    let reason = Utilities.Get_Value(Transaction.reason_for_change_input).trim();
+    if (reason.length === 0)
     {
-      container.appendChild(CreateControlDataHistoryHeader());
+      let input = document.getElementById(Transaction.reason_for_change_input);
+      let container = document.getElementById(Transaction.reason_for_change_input_container);
+      ControlGroup.UpdateInputError(input, container, "This value is required.");
+      Utilities.Toggle_Loading_Button("change_transaction_save", false);
+      return;
+    }
+
+
+    if (Transaction.editing_control_data !== null)
+    {
+      if (!Transaction.editing_control_data.Validate())
+      {
+        Utilities.Toggle_Loading_Button("change_transaction_save", false);
+        return;
+      }
+      Transaction.editing_control_data.reason_for_change = reason;
+      Transaction.editing_control_data.SaveControlChanges();
     }
     else
     {
-      container.appendChild(CreatePaymentMethodDataHistoryHeader());
+      if (!Transaction.editing_payment_method_data.Validate())
+      {
+        Utilities.Toggle_Loading_Button("change_transaction_save", false);
+        return;
+      }
     }
   }
-
-  function CreateControlDataHistoryHeader(): HTMLTableRowElement
-  {
-    let tr = document.createElement("tr");
-    return tr;
-  }
-
-  function CreatePaymentMethodDataHistoryHeader(): HTMLTableRowElement
-  {
-    let tr = document.createElement("tr");
-    return tr;
-  }
-
 
 }

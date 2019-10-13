@@ -118,18 +118,36 @@ var Transaction;
                 let path = Transaction.GetPath();
                 return Utilities.Get(path + "API/Transaction/GetControlDataHistory?control_data_id=" + control_data_id + "&transaction_id=" + transaction_id);
             }
+            SaveControlChanges() {
+                let path = Transaction.GetPath();
+                Utilities.Post(path + "API/Transaction/EditControls", this)
+                    .then(response => {
+                    if (response.length > 0) {
+                        alert("There was a problem saving this change." + '\r\n' + response);
+                    }
+                    else {
+                        Transaction.CloseChangeModal();
+                        Transaction.ShowReceiptDetail(this.transaction_id);
+                        Transaction.editing_control_data = null;
+                    }
+                    Utilities.Toggle_Loading_Button("change_transaction_save", false);
+                });
+            }
             static GetAndDisplayControlHistory(control_data_id, transaction_id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
                     yield ControlData.GetControlHistory(control_data_id, transaction_id)
                         .then((control_data_history) => {
                         console.log('control data history', control_data_history);
-                        this.MarkControlDataToEdit(control_data_history);
+                        ControlData.MarkControlDataToEdit(control_data_history);
                         ControlData.DisplayControlHistory(control_data_history);
+                        ControlData.DisplayControlToEdit();
                     });
                 });
             }
             static MarkControlDataToEdit(control_data) {
+                Transaction.editing_control_data = null;
+                Transaction.editing_payment_method_data = null;
                 let filtered = control_data.filter(x => x.is_active);
                 if (filtered.length === 1) {
                     let c = filtered[0];
@@ -138,14 +156,57 @@ var Transaction;
                     cd.department_id = c.department_id;
                     cd.is_active = c.is_active;
                     cd.control_data_id = c.control_data_id;
+                    cd.transaction_id = c.transaction_id;
                     cd.value = c.value;
-                    Transaction.editing_control_data = c;
+                    cd.input_element.value = c.value;
+                    cd.control = cd.selected_control;
+                    Transaction.editing_control_data = cd;
                 }
                 else {
                     alert("Invalid data stored in database for this transaction.");
                 }
             }
+            static DisplayControlToEdit() {
+                if (Transaction.editing_control_data === null)
+                    return;
+                let container = document.getElementById(Transaction.change_edit_container);
+                Utilities.Clear_Element(container);
+                let e = Transaction.editing_control_data;
+                container.appendChild(e.container_element);
+                Utilities.Set_Value(Transaction.reason_for_change_input, "");
+            }
+            static CreateControlDataHistoryHeader() {
+                let tr = document.createElement("tr");
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "20%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Value", "has-text-left", "50%"));
+                return tr;
+            }
             static DisplayControlHistory(control_data) {
+                let header = document.getElementById(Transaction.change_transaction_history_table_header);
+                Utilities.Clear_Element(header);
+                header.appendChild(ControlData.CreateControlDataHistoryHeader());
+                let body = document.getElementById(Transaction.change_transaction_history_table_body);
+                Utilities.Clear_Element(body);
+                for (let cd of control_data) {
+                    body.appendChild(ControlData.CreateControlDataHistoryRow(cd));
+                }
+            }
+            static CreateControlDataHistoryRow(control_data) {
+                let tr = document.createElement("tr");
+                if (new Date(control_data.modified_on).getFullYear() < 1000) {
+                    let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+                    original.colSpan = 3;
+                    tr.appendChild(original);
+                }
+                else {
+                    tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(control_data.modified_on), "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", control_data.modified_by, "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", control_data.reason_for_change, "has-text-left"));
+                }
+                tr.appendChild(Utilities.CreateTableCell("td", control_data.value, "has-text-left"));
+                return tr;
             }
         }
         Data.ControlData = ControlData;
