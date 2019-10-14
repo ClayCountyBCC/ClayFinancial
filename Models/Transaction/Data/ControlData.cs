@@ -220,6 +220,10 @@ namespace ClayFinancial.Models.Transaction.Data
     {
 
       var query = @"
+        UPDATE data_transaction
+        SET has_been_modified = 1
+        WHERE transaction_id = @transaction_id;
+
         DECLARE @new_control_data_id BIGINT = -1;
 
         INSERT INTO data_control
@@ -234,9 +238,9 @@ namespace ClayFinancial.Models.Transaction.Data
         )
         VALUES
         (
-          CASE WHEN @transaction_payment_type_id = -1 THEN NULL ELSE @transaction_payment_type_id END
+          @transaction_payment_type_id 
           ,@prior_control_data_id
-          ,CASE WHEN @department_id = -1 THEN NULL ELSE @department_id END
+          ,@department_id
           ,@transaction_id
           ,@control_id
           ,@value

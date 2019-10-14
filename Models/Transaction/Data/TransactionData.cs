@@ -670,9 +670,9 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public static string GetUpdateTransactionTotals()
+    public static string GetUpdateTransactionTotals(bool add_has_been_modified = false)
     {
-      return @"
+      return $@"
 
           -- UPDATE total_cash_amount, total_check_amount, total_check_count FIELDS
           ;WITH PaymentMethodSums AS (
@@ -684,6 +684,7 @@ namespace ClayFinancial.Models.Transaction.Data
             ,SUM(check_amount) total_checks
             ,SUM(check_count) number_of_checks
           FROM data_payment_method
+          WHERE is_active=1
           GROUP BY transaction_id
 
 
@@ -694,6 +695,7 @@ namespace ClayFinancial.Models.Transaction.Data
             DT.Total_cash_amount = PMS.total_cash, 
             DT.total_check_amount = PMS.total_checks, 
             DT.total_check_count = PMS.number_of_checks
+            { (add_has_been_modified ? ", has_been_modified=1" : "")}
           FROM 
           data_transaction DT
           INNER JOIN PaymentMethodSums PMS ON PMS.transaction_id = DT.transaction_id

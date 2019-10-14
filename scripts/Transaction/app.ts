@@ -440,8 +440,6 @@
     Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
       .then(() =>
       {
-        console.log('we good', Transaction.editing_control_data);
-        if (Transaction.editing_control_data === null) return; // we have a problem
 
       });
   }
@@ -450,7 +448,11 @@
   {
     Utilities.Set_Text("change_field_label", field_label);
     Transaction.ShowChangeModal();
-
+    Data.PaymentMethodData.GetAndDisplayHistory(payment_method_data_id, transaction_id, is_cash)
+      .then(() =>
+      {
+        
+      });
   }
 
   export function SaveChanges()
@@ -461,7 +463,7 @@
     {
       let input = document.getElementById(Transaction.reason_for_change_input);
       let container = document.getElementById(Transaction.reason_for_change_input_container);
-      ControlGroup.UpdateInputError(input, container, "This value is required.");
+      ControlGroup.UpdateInputError(input, container, "This is required.");
       Utilities.Toggle_Loading_Button("change_transaction_save", false);
       return;
     }
@@ -476,6 +478,7 @@
       }
       Transaction.editing_control_data.reason_for_change = reason;
       Transaction.editing_control_data.SaveControlChanges();
+      Transaction.GetTransactionList(Transaction.current_page);
     }
     else
     {
@@ -484,6 +487,9 @@
         Utilities.Toggle_Loading_Button("change_transaction_save", false);
         return;
       }
+      Transaction.editing_payment_method_data.reason_for_change = reason;
+      Transaction.editing_payment_method_data.SaveChanges();
+      Transaction.GetTransactionList(Transaction.current_page);
     }
   }
 

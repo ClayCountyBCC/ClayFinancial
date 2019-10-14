@@ -361,7 +361,8 @@ namespace Utilities
     {
       return date.toLocaleDateString('en-us');
     }
-    return new Date(date).toLocaleDateString('en-US');
+    var d = new Date(date);
+    return d.toLocaleDateString('en-US');
   }
 
   export function Format_DateTime(date: Date): string

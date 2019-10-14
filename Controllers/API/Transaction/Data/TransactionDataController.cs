@@ -360,7 +360,7 @@ namespace ClayFinancial.Controllers.API
         return BadRequest();
       }
 
-      var pm = GetPaymentMethodHistory(payment_method_data_id);
+      var pm = PaymentMethodData.GetPaymentMethodHistory(payment_method_data_id, transaction_id);
 
       if (pm == null)
       {

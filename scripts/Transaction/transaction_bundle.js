@@ -280,7 +280,8 @@ var Utilities;
         if (date instanceof Date) {
             return date.toLocaleDateString('en-us');
         }
-        return new Date(date).toLocaleDateString('en-US');
+        var d = new Date(date);
+        return d.toLocaleDateString('en-US');
     }
     Utilities.Format_Date = Format_Date;
     function Format_DateTime(date) {
@@ -817,15 +818,15 @@ var Transaction;
         Transaction.ShowChangeModal();
         Transaction.Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
             .then(() => {
-            console.log('we good', Transaction.editing_control_data);
-            if (Transaction.editing_control_data === null)
-                return; // we have a problem
         });
     }
     Transaction.LoadControlDataChange = LoadControlDataChange;
     function LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label) {
         Utilities.Set_Text("change_field_label", field_label);
         Transaction.ShowChangeModal();
+        Transaction.Data.PaymentMethodData.GetAndDisplayHistory(payment_method_data_id, transaction_id, is_cash)
+            .then(() => {
+        });
     }
     Transaction.LoadPaymentTypeDataChange = LoadPaymentTypeDataChange;
     function SaveChanges() {
@@ -834,7 +835,7 @@ var Transaction;
         if (reason.length === 0) {
             let input = document.getElementById(Transaction.reason_for_change_input);
             let container = document.getElementById(Transaction.reason_for_change_input_container);
-            Transaction.ControlGroup.UpdateInputError(input, container, "This value is required.");
+            Transaction.ControlGroup.UpdateInputError(input, container, "This is required.");
             Utilities.Toggle_Loading_Button("change_transaction_save", false);
             return;
         }
@@ -845,12 +846,16 @@ var Transaction;
             }
             Transaction.editing_control_data.reason_for_change = reason;
             Transaction.editing_control_data.SaveControlChanges();
+            Transaction.GetTransactionList(Transaction.current_page);
         }
         else {
             if (!Transaction.editing_payment_method_data.Validate()) {
                 Utilities.Toggle_Loading_Button("change_transaction_save", false);
                 return;
             }
+            Transaction.editing_payment_method_data.reason_for_change = reason;
+            Transaction.editing_payment_method_data.SaveChanges();
+            Transaction.GetTransactionList(Transaction.current_page);
         }
     }
     Transaction.SaveChanges = SaveChanges;
@@ -1195,6 +1200,14 @@ var Transaction;
     Transaction.ControlGroup = ControlGroup;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=ControlGroup.js.map
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var Transaction;
 (function (Transaction) {
     var Data;
@@ -1480,6 +1493,157 @@ var Transaction;
                 columns.appendChild(this.check_from_input_element_container);
                 this.control_to_render = columns;
             }
+            static GetHistory(payment_method_data_id, transaction_id) {
+                let path = Transaction.GetPath();
+                return Utilities.Get(path + "API/Transaction/GetPaymentMethodHistory?payment_method_data_id=" + payment_method_data_id + "&transaction_id=" + transaction_id);
+            }
+            SaveChanges() {
+                let path = Transaction.GetPath();
+                Utilities.Post(path + "API/Transaction/EditPaymentMethod", this)
+                    .then(response => {
+                    if (response.length > 0) {
+                        alert("There was a problem saving this change." + '\r\n' + response);
+                    }
+                    else {
+                        Transaction.CloseChangeModal();
+                        Transaction.ShowReceiptDetail(this.transaction_id);
+                        Transaction.editing_control_data = null;
+                        Transaction.editing_payment_method_data = null;
+                    }
+                    Utilities.Toggle_Loading_Button("change_transaction_save", false);
+                });
+            }
+            static GetAndDisplayHistory(payment_method_data_id, transaction_id, is_cash) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    yield PaymentMethodData.GetHistory(payment_method_data_id, transaction_id)
+                        .then((history) => {
+                        PaymentMethodData.MarkDataToEdit(history, is_cash);
+                        PaymentMethodData.DisplayHistory(history, is_cash);
+                        PaymentMethodData.DisplayEdit();
+                    });
+                });
+            }
+            static MarkDataToEdit(payment_method_data, is_cash) {
+                Transaction.editing_control_data = null;
+                Transaction.editing_payment_method_data = null;
+                let filtered = payment_method_data.filter(x => x.is_active);
+                if (filtered.length === 1) {
+                    let p = filtered[0];
+                    let pmd = new Data.PaymentMethodData(is_cash, false, p.payment_method_data_id, () => { });
+                    pmd.payment_method_data_id = p.payment_method_data_id;
+                    pmd.transaction_id = p.transaction_id;
+                    pmd.transaction_payment_type_id = p.transaction_payment_type_id;
+                    pmd.prior_payment_method_data_id = p.prior_payment_method_data_id;
+                    pmd.is_active = true;
+                    if (is_cash) {
+                        pmd.cash_amount = p.cash_amount;
+                        pmd.cash_amount_input_element.valueAsNumber = p.cash_amount;
+                    }
+                    else {
+                        pmd.check_amount = p.check_amount;
+                        pmd.check_amount_input_element.valueAsNumber = p.check_amount;
+                        pmd.check_count = p.check_count;
+                        pmd.check_count_input_element.valueAsNumber = p.check_count;
+                        pmd.check_from = p.check_from;
+                        pmd.check_from_input_element.value = p.check_from;
+                        pmd.check_number = p.check_number;
+                        pmd.check_number_input_element.value = p.check_number;
+                        pmd.paying_for = p.paying_for;
+                        pmd.paying_for_input_element.value = p.paying_for;
+                    }
+                    Transaction.editing_payment_method_data = pmd;
+                }
+                else {
+                    alert("Invalid data stored in database for this transaction.");
+                }
+            }
+            static DisplayEdit() {
+                if (Transaction.editing_payment_method_data === null)
+                    return;
+                let container = document.getElementById(Transaction.change_edit_container);
+                Utilities.Clear_Element(container);
+                container.classList.remove("columns");
+                let e = Transaction.editing_payment_method_data;
+                Utilities.Clear_Element(e.check_buttons_container_element);
+                container.appendChild(e.control_to_render);
+                Utilities.Set_Value(Transaction.reason_for_change_input, "");
+            }
+            static CreateCashHistoryHeader() {
+                let tr = document.createElement("tr");
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "20%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "", "", "35%"));
+                return tr;
+            }
+            static CreateCheckHistoryHeader() {
+                let tr = document.createElement("tr");
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "15%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check Count", "has-text-centered", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check #", "has-text-left", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-left", "10%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Paying For", "has-text-left", "15%"));
+                return tr;
+            }
+            static DisplayHistory(payment_method_data, is_cash) {
+                let header = document.getElementById(Transaction.change_transaction_history_table_header);
+                Utilities.Clear_Element(header);
+                if (is_cash) {
+                    header.appendChild(PaymentMethodData.CreateCashHistoryHeader());
+                }
+                else {
+                    header.appendChild(PaymentMethodData.CreateCheckHistoryHeader());
+                }
+                let body = document.getElementById(Transaction.change_transaction_history_table_body);
+                Utilities.Clear_Element(body);
+                for (let pmd of payment_method_data) {
+                    if (is_cash) {
+                        body.appendChild(PaymentMethodData.CreateCashHistoryRow(pmd));
+                    }
+                    else {
+                        body.appendChild(PaymentMethodData.CreateCheckHistoryRow(pmd));
+                    }
+                }
+            }
+            static CreateCashHistoryRow(data) {
+                let tr = document.createElement("tr");
+                if (new Date(data.modified_on).getFullYear() < 1000) {
+                    let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+                    original.colSpan = 3;
+                    tr.appendChild(original);
+                }
+                else {
+                    tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.modified_on), "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", data.modified_by, "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", data.reason_for_change, "has-text-left"));
+                }
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.cash_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", "", "", "35%"));
+                return tr;
+            }
+            static CreateCheckHistoryRow(data) {
+                let tr = document.createElement("tr");
+                if (new Date(data.modified_on).getFullYear() < 1000) {
+                    let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+                    original.colSpan = 3;
+                    tr.appendChild(original);
+                }
+                else {
+                    tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.modified_on), "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", data.modified_by, "has-text-centered"));
+                    tr.appendChild(Utilities.CreateTableCell("td", data.reason_for_change, "has-text-left"));
+                }
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.check_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.check_count.toString(), "has-text-centered"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.check_number, "has-text-left"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.check_from, "has-text-left"));
+                tr.appendChild(Utilities.CreateTableCell("td", data.paying_for, "has-text-left"));
+                return tr;
+            }
         }
         Data.PaymentMethodData = PaymentMethodData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
@@ -1740,7 +1904,9 @@ var Transaction;
                         if (this.Validate()) {
                             switch (control.data_type) {
                                 case "date":
-                                    this.value = Utilities.Format_Date(input.valueAsDate);
+                                    let d = input.valueAsDate;
+                                    d.setMinutes(d.getTimezoneOffset());
+                                    this.value = Utilities.Format_Date(d);
                                     break;
                                 case "number":
                                     this.value = input.valueAsNumber.toString();
@@ -1809,6 +1975,7 @@ var Transaction;
             }
             SaveControlChanges() {
                 let path = Transaction.GetPath();
+                console.log('saving this control data', this);
                 Utilities.Post(path + "API/Transaction/EditControls", this)
                     .then(response => {
                     if (response.length > 0) {
@@ -1824,17 +1991,15 @@ var Transaction;
             }
             static GetAndDisplayControlHistory(control_data_id, transaction_id) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
                     yield ControlData.GetControlHistory(control_data_id, transaction_id)
                         .then((control_data_history) => {
-                        console.log('control data history', control_data_history);
-                        ControlData.MarkControlDataToEdit(control_data_history);
+                        ControlData.MarkDataToEdit(control_data_history);
                         ControlData.DisplayControlHistory(control_data_history);
                         ControlData.DisplayControlToEdit();
                     });
                 });
             }
-            static MarkControlDataToEdit(control_data) {
+            static MarkDataToEdit(control_data) {
                 Transaction.editing_control_data = null;
                 Transaction.editing_payment_method_data = null;
                 let filtered = control_data.filter(x => x.is_active);
@@ -1847,7 +2012,22 @@ var Transaction;
                     cd.control_data_id = c.control_data_id;
                     cd.transaction_id = c.transaction_id;
                     cd.value = c.value;
-                    cd.input_element.value = c.value;
+                    switch (c.control.data_type) {
+                        case "date":
+                            if (c.value !== "" && c.value !== null) {
+                                let tmp = c.value.split("/");
+                                if (tmp.length === 3) {
+                                    let v = tmp[2] + '-';
+                                    v += tmp[0].length === 1 ? "0" + tmp[0] : tmp[0];
+                                    v += "-";
+                                    v += tmp[1].length === 1 ? "0" + tmp[1] : tmp[1];
+                                    cd.input_element.value = v;
+                                }
+                            }
+                            break;
+                        default:
+                            cd.input_element.value = c.value;
+                    }
                     cd.control = cd.selected_control;
                     Transaction.editing_control_data = cd;
                 }
@@ -1860,6 +2040,7 @@ var Transaction;
                     return;
                 let container = document.getElementById(Transaction.change_edit_container);
                 Utilities.Clear_Element(container);
+                container.classList.add("columns");
                 let e = Transaction.editing_control_data;
                 container.appendChild(e.container_element);
                 Utilities.Set_Value(Transaction.reason_for_change_input, "");
@@ -2080,6 +2261,9 @@ var Transaction;
                 let cash_payment_method_data = null;
                 let check_payment_method_data = [];
                 let payment_method_data_copy = [...saved_payment_type_data.payment_method_data];
+                // we have to sort this because we expect the first 0 amount to be cash.
+                // so we sort this as cash amount descending.
+                payment_method_data_copy.sort((a, b) => b.cash_amount - a.cash_amount);
                 do {
                     let pmd = payment_method_data_copy.shift();
                     if (pmd.check_amount > 0 ||

@@ -412,6 +412,200 @@
 
       this.control_to_render = columns;
     }
+    
+    private static GetHistory(payment_method_data_id: string, transaction_id: string): Promise<Array<PaymentMethodData>>
+    {
+      let path = Transaction.GetPath();
+      return Utilities.Get<Array<PaymentMethodData>>(path + "API/Transaction/GetPaymentMethodHistory?payment_method_data_id=" + payment_method_data_id + "&transaction_id=" + transaction_id);
+    }
+
+    public SaveChanges(): void
+    {
+      let path = Transaction.GetPath();
+      Utilities.Post<string>(path + "API/Transaction/EditPaymentMethod", this)
+        .then(response =>
+        {
+          if (response.length > 0)
+          {
+            alert("There was a problem saving this change." + '\r\n' + response);
+          }
+          else
+          {
+            Transaction.CloseChangeModal();
+            Transaction.ShowReceiptDetail(this.transaction_id);
+            Transaction.editing_control_data = null;
+            Transaction.editing_payment_method_data = null;
+          }
+          Utilities.Toggle_Loading_Button("change_transaction_save", false);
+        })
+    }
+
+    public static async GetAndDisplayHistory(payment_method_data_id: string, transaction_id: string, is_cash: boolean)
+    {
+      await PaymentMethodData.GetHistory(payment_method_data_id, transaction_id)
+        .then((history) =>
+        {
+          PaymentMethodData.MarkDataToEdit(history, is_cash);
+          PaymentMethodData.DisplayHistory(history, is_cash);
+          PaymentMethodData.DisplayEdit();
+        });
+    }
+
+    private static MarkDataToEdit(payment_method_data: Array<PaymentMethodData>, is_cash: boolean)
+    {
+      Transaction.editing_control_data = null;
+      Transaction.editing_payment_method_data = null;
+      let filtered = payment_method_data.filter(x => x.is_active);
+      if (filtered.length === 1)
+      {
+        let p = filtered[0];
+        let pmd = new Data.PaymentMethodData(is_cash, false, p.payment_method_data_id, () => { });
+        pmd.payment_method_data_id = p.payment_method_data_id;
+        pmd.transaction_id = p.transaction_id;
+        pmd.transaction_payment_type_id = p.transaction_payment_type_id;
+        pmd.prior_payment_method_data_id = p.prior_payment_method_data_id;
+        pmd.is_active = true;
+        if (is_cash)
+        {
+          pmd.cash_amount = p.cash_amount;          
+          pmd.cash_amount_input_element.valueAsNumber = p.cash_amount;
+        }
+        else
+        {
+          pmd.check_amount = p.check_amount;
+          pmd.check_amount_input_element.valueAsNumber = p.check_amount;
+
+          pmd.check_count = p.check_count;
+          pmd.check_count_input_element.valueAsNumber = p.check_count;
+
+          pmd.check_from = p.check_from;
+          pmd.check_from_input_element.value = p.check_from;
+
+          pmd.check_number = p.check_number;
+          pmd.check_number_input_element.value = p.check_number;
+
+          pmd.paying_for = p.paying_for;
+          pmd.paying_for_input_element.value = p.paying_for;
+          
+        }
+        Transaction.editing_payment_method_data = pmd;
+      }
+      else
+      {
+        alert("Invalid data stored in database for this transaction.");
+      }
+    }
+
+    private static DisplayEdit(): void
+    {
+      if (Transaction.editing_payment_method_data === null) return;
+      let container = document.getElementById(Transaction.change_edit_container);
+      Utilities.Clear_Element(container);
+      container.classList.remove("columns");
+      let e = Transaction.editing_payment_method_data;
+      Utilities.Clear_Element(e.check_buttons_container_element);
+      container.appendChild(e.control_to_render);
+      Utilities.Set_Value(Transaction.reason_for_change_input, "");
+    }
+
+    private static CreateCashHistoryHeader(): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "20%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "", "", "35%"));
+      return tr;
+    }
+
+    private static CreateCheckHistoryHeader(): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      tr.appendChild(Utilities.CreateTableCell("th", "Modified On", "has-text-centered", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Modified By", "has-text-centered", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Reason For Change", "has-text-left", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "15%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check Count", "has-text-centered", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check #", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-left", "10%"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Paying For", "has-text-left", "15%"));
+      return tr;
+    }
+
+    private static DisplayHistory(payment_method_data: Array<PaymentMethodData>, is_cash: boolean): void
+    {
+      let header = document.getElementById(Transaction.change_transaction_history_table_header);
+      Utilities.Clear_Element(header);
+      if (is_cash)
+      {
+        header.appendChild(PaymentMethodData.CreateCashHistoryHeader());
+      }
+      else
+      {
+        header.appendChild(PaymentMethodData.CreateCheckHistoryHeader());
+      }
+      
+      let body = document.getElementById(Transaction.change_transaction_history_table_body);
+      Utilities.Clear_Element(body);
+      for (let pmd of payment_method_data)
+      {
+        if (is_cash)
+        {
+          body.appendChild(PaymentMethodData.CreateCashHistoryRow(pmd));
+        }
+        else
+        {
+          body.appendChild(PaymentMethodData.CreateCheckHistoryRow(pmd));
+        }
+      }
+    }
+
+    private static CreateCashHistoryRow(data: PaymentMethodData): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      if (new Date(data.modified_on).getFullYear() < 1000)
+      {
+        let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+        original.colSpan = 3;
+        tr.appendChild(original);
+      }
+      else
+      {
+        tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.modified_on), "has-text-centered"));
+        tr.appendChild(Utilities.CreateTableCell("td", data.modified_by, "has-text-centered"));
+        tr.appendChild(Utilities.CreateTableCell("td", data.reason_for_change, "has-text-left"));
+      }
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.cash_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", "", "", "35%"));
+
+      return tr;
+    }
+
+    private static CreateCheckHistoryRow(data: PaymentMethodData): HTMLTableRowElement
+    {
+      let tr = document.createElement("tr");
+      if (new Date(data.modified_on).getFullYear() < 1000)
+      {
+        let original = Utilities.CreateTableCell("td", "Original Value", "has-text-centered");
+        original.colSpan = 3;
+        tr.appendChild(original);
+      }
+      else
+      {
+        tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.modified_on), "has-text-centered"));
+        tr.appendChild(Utilities.CreateTableCell("td", data.modified_by, "has-text-centered"));
+        tr.appendChild(Utilities.CreateTableCell("td", data.reason_for_change, "has-text-left"));
+      }
+      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.check_amount), "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.check_count.toString(), "has-text-centered"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.check_number, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.check_from, "has-text-left"));
+      tr.appendChild(Utilities.CreateTableCell("td", data.paying_for, "has-text-left"));
+
+      return tr;
+    }
+
 
   }
 }

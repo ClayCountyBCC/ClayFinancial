@@ -176,6 +176,9 @@ var Transaction;
                 let cash_payment_method_data = null;
                 let check_payment_method_data = [];
                 let payment_method_data_copy = [...saved_payment_type_data.payment_method_data];
+                // we have to sort this because we expect the first 0 amount to be cash.
+                // so we sort this as cash amount descending.
+                payment_method_data_copy.sort((a, b) => b.cash_amount - a.cash_amount);
                 do {
                     let pmd = payment_method_data_copy.shift();
                     if (pmd.check_amount > 0 ||

@@ -280,7 +280,8 @@ var Utilities;
         if (date instanceof Date) {
             return date.toLocaleDateString('en-us');
         }
-        return new Date(date).toLocaleDateString('en-US');
+        var d = new Date(date);
+        return d.toLocaleDateString('en-US');
     }
     Utilities.Format_Date = Format_Date;
     function Format_DateTime(date) {

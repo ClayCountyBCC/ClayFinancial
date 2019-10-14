@@ -361,15 +361,15 @@ var Transaction;
         Transaction.ShowChangeModal();
         Transaction.Data.ControlData.GetAndDisplayControlHistory(control_data_id, transaction_id)
             .then(() => {
-            console.log('we good', Transaction.editing_control_data);
-            if (Transaction.editing_control_data === null)
-                return; // we have a problem
         });
     }
     Transaction.LoadControlDataChange = LoadControlDataChange;
     function LoadPaymentTypeDataChange(payment_method_data_id, is_cash, transaction_id, field_label) {
         Utilities.Set_Text("change_field_label", field_label);
         Transaction.ShowChangeModal();
+        Transaction.Data.PaymentMethodData.GetAndDisplayHistory(payment_method_data_id, transaction_id, is_cash)
+            .then(() => {
+        });
     }
     Transaction.LoadPaymentTypeDataChange = LoadPaymentTypeDataChange;
     function SaveChanges() {
@@ -378,7 +378,7 @@ var Transaction;
         if (reason.length === 0) {
             let input = document.getElementById(Transaction.reason_for_change_input);
             let container = document.getElementById(Transaction.reason_for_change_input_container);
-            Transaction.ControlGroup.UpdateInputError(input, container, "This value is required.");
+            Transaction.ControlGroup.UpdateInputError(input, container, "This is required.");
             Utilities.Toggle_Loading_Button("change_transaction_save", false);
             return;
         }
@@ -389,12 +389,16 @@ var Transaction;
             }
             Transaction.editing_control_data.reason_for_change = reason;
             Transaction.editing_control_data.SaveControlChanges();
+            Transaction.GetTransactionList(Transaction.current_page);
         }
         else {
             if (!Transaction.editing_payment_method_data.Validate()) {
                 Utilities.Toggle_Loading_Button("change_transaction_save", false);
                 return;
             }
+            Transaction.editing_payment_method_data.reason_for_change = reason;
+            Transaction.editing_payment_method_data.SaveChanges();
+            Transaction.GetTransactionList(Transaction.current_page);
         }
     }
     Transaction.SaveChanges = SaveChanges;

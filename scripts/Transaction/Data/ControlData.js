@@ -51,7 +51,9 @@ var Transaction;
                         if (this.Validate()) {
                             switch (control.data_type) {
                                 case "date":
-                                    this.value = Utilities.Format_Date(input.valueAsDate);
+                                    let d = input.valueAsDate;
+                                    d.setMinutes(d.getTimezoneOffset());
+                                    this.value = Utilities.Format_Date(d);
                                     break;
                                 case "number":
                                     this.value = input.valueAsNumber.toString();
@@ -120,6 +122,7 @@ var Transaction;
             }
             SaveControlChanges() {
                 let path = Transaction.GetPath();
+                console.log('saving this control data', this);
                 Utilities.Post(path + "API/Transaction/EditControls", this)
                     .then(response => {
                     if (response.length > 0) {
@@ -135,17 +138,15 @@ var Transaction;
             }
             static GetAndDisplayControlHistory(control_data_id, transaction_id) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    console.log('GetAndDisplayControlHistory', 'control_data_id', control_data_id, 'transaction_id', transaction_id);
                     yield ControlData.GetControlHistory(control_data_id, transaction_id)
                         .then((control_data_history) => {
-                        console.log('control data history', control_data_history);
-                        ControlData.MarkControlDataToEdit(control_data_history);
+                        ControlData.MarkDataToEdit(control_data_history);
                         ControlData.DisplayControlHistory(control_data_history);
                         ControlData.DisplayControlToEdit();
                     });
                 });
             }
-            static MarkControlDataToEdit(control_data) {
+            static MarkDataToEdit(control_data) {
                 Transaction.editing_control_data = null;
                 Transaction.editing_payment_method_data = null;
                 let filtered = control_data.filter(x => x.is_active);
@@ -158,7 +159,22 @@ var Transaction;
                     cd.control_data_id = c.control_data_id;
                     cd.transaction_id = c.transaction_id;
                     cd.value = c.value;
-                    cd.input_element.value = c.value;
+                    switch (c.control.data_type) {
+                        case "date":
+                            if (c.value !== "" && c.value !== null) {
+                                let tmp = c.value.split("/");
+                                if (tmp.length === 3) {
+                                    let v = tmp[2] + '-';
+                                    v += tmp[0].length === 1 ? "0" + tmp[0] : tmp[0];
+                                    v += "-";
+                                    v += tmp[1].length === 1 ? "0" + tmp[1] : tmp[1];
+                                    cd.input_element.value = v;
+                                }
+                            }
+                            break;
+                        default:
+                            cd.input_element.value = c.value;
+                    }
                     cd.control = cd.selected_control;
                     Transaction.editing_control_data = cd;
                 }
@@ -171,6 +187,7 @@ var Transaction;
                     return;
                 let container = document.getElementById(Transaction.change_edit_container);
                 Utilities.Clear_Element(container);
+                container.classList.add("columns");
                 let e = Transaction.editing_control_data;
                 container.appendChild(e.container_element);
                 Utilities.Set_Value(Transaction.reason_for_change_input, "");
