@@ -310,21 +310,17 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public bool ValidateTransaction(int selected_employee_id = -1)
     {
-
       switch (transaction_type)
       {
 
         case "R":
-          if (!ValidateNewReceipt()) return false;
-          break;
+          return ValidateNewReceipt();
+
         case "D":
-          if (!ValidateNewDeposit(selected_employee_id)) return false;
-          break;
+          return ValidateNewDeposit(selected_employee_id);
         default:
           return false;
       }
-
-      return true;
     }
 
     private bool ValidateNewReceipt()
@@ -423,8 +419,6 @@ namespace ClayFinancial.Models.Transaction.Data
       return true;
     }
 
-
-
     public static TransactionData GetTransactionData(long transaction_id)
     {
       var param = new DynamicParameters();
@@ -492,7 +486,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
     }
 
-
     public TransactionData SaveTransactionData()
     {
 
@@ -514,6 +507,7 @@ namespace ClayFinancial.Models.Transaction.Data
       return GetTransactionData(transaction_id);
 
     }
+
     private bool SaveNewDeposit()
     {
 
@@ -521,6 +515,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return true;
     }
+
     private bool SaveNewReceipt()
     {
       var param = new DynamicParameters();
