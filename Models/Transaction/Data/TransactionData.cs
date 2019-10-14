@@ -435,7 +435,7 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.created_by_employee_id
           ,TD.transaction_number
           ,TD.department_id
-          ,TD.transaction_type
+          ,UPPER(TD.transaction_type) transaction_type
           ,TD.child_transaction_id
           ,TV.child_created_by_employee_id
           ,TV.grandchild_created_by_employee_id
@@ -463,14 +463,21 @@ namespace ClayFinancial.Models.Transaction.Data
         return new TransactionData("There was an issue retrieving the transaction.");
       }
       var tr = td.First();
-      var controls = ControlData.GetActiveTransactionControls(tr.transaction_id);
-      var payment_methods = PaymentMethodData.GetActiveTransactionPaymentMethods(tr.transaction_id);
+      if(tr.transaction_type == "R")
+      {
+        var controls = ControlData.GetActiveTransactionControls(tr.transaction_id);
+        var payment_methods = PaymentMethodData.GetActiveTransactionPaymentMethods(tr.transaction_id);
 
-      tr.department_control_data = (from c in controls
-                                    where c.department_id.HasValue
-                                    select c).ToList();
+        tr.department_control_data = (from c in controls
+                                      where c.department_id.HasValue
+                                      select c).ToList();
 
-      tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id, controls, payment_methods);
+        tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id, controls, payment_methods);
+      }
+      else
+      {
+        // do deposit loading stuff here and junk.
+      }
       
       return tr;
     }
