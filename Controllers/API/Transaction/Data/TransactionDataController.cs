@@ -110,7 +110,7 @@ namespace ClayFinancial.Controllers.API
       }
 
       // TODO: new receipt needs to be a TransactionView
-      var td = transactionData.SaveTransactionData(); 
+      var td = transactionData.SaveTransactionData(ua.employee_id); 
       
       if(td != null)
       {
@@ -305,7 +305,8 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      var td = TransactionData.GetTransactionData(transaction_id);
+      
+      var td = TransactionData.GetTransactionData(transaction_id, ua.employee_id);
 
       if(td == null)
       {

@@ -87,9 +87,12 @@ namespace ClayFinancial.Controllers.MVC
 
       //var i = PaymentMethodData.GetPaymentMethodHistory(134);
       //var j = ControlData.GetControlDataHistory(87);
-      ViewBag.Development = Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
+
+
+
+      //ViewBag.Development = Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
  
-      var j = TransactionData.CreateDeposit(UserAccess.GetUserAccess("westje"), "Jeremy West", "localHost");
+      //var j = TransactionData.CreateDeposit(UserAccess.GetUserAccess("westje"), "Jeremy West", "localHost");
 
 
       return View();

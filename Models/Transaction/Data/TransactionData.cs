@@ -306,7 +306,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       query.AppendLine(@"
 
-        WITH all_non_deposited_receipts AS (
+
 
           SELECT 
             T.transaction_id
@@ -318,9 +318,6 @@ namespace ClayFinancial.Models.Transaction.Data
             AND department_id IN @departments_can_access
             AND created_by_employee_id = @selected_employee_id
 
-        )
-
-      
       ");
 
       if(ua.current_access == UserAccess.access_type.basic)
@@ -335,7 +332,7 @@ namespace ClayFinancial.Models.Transaction.Data
       // validate all receipts in the deposit_receipt_ids are from departments the user can access
       if(!receipt_ids.Any())
       {
-        return "The selected user does not have any receipts to deposit or you do not have access to thier receipts."; ;
+        return "The selected user does not have any receipts to deposit or you do not have access to thier receipts.";
       }
 
 
@@ -382,7 +379,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       ";
     }
-    public static TransactionData GetTransactionData(long transaction_id)
+    public static TransactionData GetTransactionData(long transaction_id, int employee_id)
     {
       var param = new DynamicParameters();
       param.Add("@transaction_id", transaction_id);
@@ -439,7 +436,7 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       else
       {
-        tr.GetDepositReceipts();
+        tr.GetDepositReceipts(employee_id);
       }
       
       return tr;
@@ -456,7 +453,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
     }
 
-    public TransactionData SaveTransactionData()
+    public TransactionData SaveTransactionData(int employee_id)
     {
 
       switch (transaction_type)
@@ -465,16 +462,16 @@ namespace ClayFinancial.Models.Transaction.Data
         case "R":
           if (!SaveNewReceipt()) return this;
           break;
-        case "D":
-          if (!SaveNewDeposit()) return this;
-          break;
+        //case "D":
+        //  if (!SaveNewDeposit()) return this;
+        //  break;
 
         default:
           error_text = "Unknown transaction type.";
           return this;
       }
 
-      return GetTransactionData(transaction_id);
+      return GetTransactionData(transaction_id, employee_id );
 
     }
 
@@ -671,8 +668,10 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@created_by_display_name", ua.display_name);
       param.Add("@received_from", "System");
       param.Add("@comment", "");
-      param.Add("@selected_empl_id", GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name));
+      param.Add("@selected_employee_id", GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name));
       param.Add("departments_can_access", ua.departments_can_access);
+      if(ValidateNewDeposit(GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name), ua).Length > 0) return null;
+
 
       StringBuilder query = new StringBuilder();
       query.AppendLine(@"
@@ -680,7 +679,7 @@ namespace ClayFinancial.Models.Transaction.Data
           USE ClayFinancial;
 
               DECLARE @department_id VARCHAR(4);
-              SET @department_id = (SELECT TOP 1 department_id FROM departments WHERE suborganization LIKE '%' + @department_id + '%');
+              SET @department_id = (SELECT TOP 1 department_id FROM departments WHERE organization LIKE '%' + @finplus_department + '%');
 
               -- SAVE TRANSACTION DATA
               -- if
@@ -689,7 +688,7 @@ namespace ClayFinancial.Models.Transaction.Data
                       @department_id, 
                       @created_by_employee_id,
                       @transaction_type,
-                      @child_transaction_id, 
+                      null, 
                       @username, 
                       @created_by_employee_ip_address,
                       @created_by_display_name,
@@ -697,12 +696,14 @@ namespace ClayFinancial.Models.Transaction.Data
                       @comment;
 
 
+              EXEC update_transaction_totals @transaction_id, 0;
+
               WITH all_selected_users_incomplete_receipts AS (
 
                 SELECT
                   transaction_id
                 FROM data_transaction DT
-                WHERE created_by_display_name = @selected_user_display_name
+                WHERE created_by_employee_id = @selected_employee_id
                   AND child_transaction_id IS NULL
                   AND UPPER(transaction_type) IN ('C','R')
                 
@@ -719,28 +720,32 @@ namespace ClayFinancial.Models.Transaction.Data
 
       if(ua.current_access == UserAccess.access_type.basic)
       {
-        query.AppendLine("  WHERE DT.department_id = @my_department_id");
+        query.AppendLine("  WHERE DT.department_id = @departments_can_access");
       }
       var i = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
 
       var transaction_id = param.Get<long>("@transaction_id");
 
-      var deposit = GetTransactionData(transaction_id);
+      var deposit = GetTransactionData(transaction_id, ua.employee_id);
 
-      deposit.GetDepositReceipts();
+      deposit.GetDepositReceipts(ua.employee_id);
 
       return deposit;
 
     }
 
-    public void GetDepositReceipts()
+    public void GetDepositReceipts(int my_employee_id)
     {
+      var param = new DynamicParameters();
+      param.Add("@transaction_id", transaction_id);
+      param.Add("@my_employee_id", my_employee_id);
       var query = new StringBuilder();
-      query.Append(GetTransactionDataQuery())
-        .Append(" AND child_transaction_id = @transaction_id");
 
-      deposit_receipts = Constants.Get_Data<TransactionData>(query.ToString(), Constants.ConnectionString.ClayFinancial);
+      query.AppendLine(GetTransactionDataQuery())
+        .AppendLine(" AND child_transaction_id = @transaction_id");
+
+      deposit_receipts = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
 
     }
