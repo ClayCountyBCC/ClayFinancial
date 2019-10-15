@@ -279,8 +279,8 @@ namespace ClayFinancial.Models.Transaction.Data
         case "R":
           return ValidateNewReceipt();
 
-        case "D":
-          return ValidateNewDeposit(selected_employee_id);
+        //case "D":
+        //  return ValidateNewDeposit(selected_employee_id);
         default:
           return false;
       }
@@ -439,7 +439,7 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       else
       {
-        tr.SetDepositReceipts();
+        tr.GetDepositReceipts();
       }
       
       return tr;
