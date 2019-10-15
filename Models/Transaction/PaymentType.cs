@@ -77,6 +77,7 @@ namespace ClayFinancial.Models.Transaction
 
     public bool ValidatePaymentType(Data.PaymentTypeData ptd)
     {
+        ADD DICTIONARY CALL TO VALIDATE PAYMENT_TYPE
       // in order to have a valid payment type, all of the required controls
       // must have a value and all of the payment methods must be valid.
       foreach (Data.ControlData cd in ptd.control_data)

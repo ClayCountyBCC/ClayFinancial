@@ -23,8 +23,8 @@ namespace ClayFinancial.Models.Transaction.Data
     //public string deposit_receipt_transaction_number { get; set; } = "";
     public int department_id { get; set; } = -1;
     public string department_name { get; set; } = "";
-    public List<ControlData> department_control_data { get; set; } = new List<ControlData>();
-    public List<PaymentTypeData> payment_type_data { get; set; } = new List<PaymentTypeData>();
+    public List<ControlData> department_control_data { get; set; } = new List<ControlData>();// no payment types and controls for deposits
+    public List<PaymentTypeData> payment_type_data { get; set; } = new List<PaymentTypeData>();// no payment types and controls for deposits
     public decimal total_cash_amount { get; set; } = -1;
     public decimal total_check_amount { get; set; } = -1;
     public int total_check_count { get; set; } = -1;
@@ -38,7 +38,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int created_by_employee_department_id { get; set; } = -1;
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
-    //public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
+    public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>(); // no payment types and controls for deposits
     //public int? number_of_deposit_receipts { get; set; } = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
@@ -676,35 +676,12 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       return $@"
 
-          -- UPDATE total_cash_amount, total_check_amount, total_check_count FIELDS
-          ;WITH PaymentMethodSums AS (
+        EXEC update_transaction_totals @transaction_id , { (add_has_been_modified ? ", has_been_modified=1" : "")}
 
 
-          SELECT
-            transaction_id
-            ,SUM(cash_amount) total_cash
-            ,SUM(check_amount) total_checks
-            ,SUM(check_count) number_of_checks
-          FROM data_payment_method
-          WHERE is_active=1
-          GROUP BY transaction_id
-
-
-          )
-
-          UPDATE DT
-          SET 
-            DT.Total_cash_amount = PMS.total_cash, 
-            DT.total_check_amount = PMS.total_checks, 
-            DT.total_check_count = PMS.number_of_checks
-            { (add_has_been_modified ? ", has_been_modified=1" : "")}
-          FROM 
-          data_transaction DT
-          INNER JOIN PaymentMethodSums PMS ON PMS.transaction_id = DT.transaction_id
-          WHERE 
-            DT.transaction_id = @transaction_id;
       ";
     }
+
 
     // this will create a list of non-deposited receipts 
 
