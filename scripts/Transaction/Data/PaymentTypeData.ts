@@ -285,7 +285,7 @@
       this.payment_method_data.push(check);
       check.add_check_button_element.onclick = (event: Event) =>
       {
-        this.AddCheckPaymentMethod(target_container, true, );
+        this.AddCheckPaymentMethod(target_container, false);
       }
     }
 

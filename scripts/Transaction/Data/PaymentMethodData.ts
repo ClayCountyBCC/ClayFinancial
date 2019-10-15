@@ -394,7 +394,7 @@
         this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
         buttons.push(this.add_check_button_element);
         buttons.push(this.cancel_check_button_element);
-        this.check_buttons_container_element = ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-half");
+        this.check_buttons_container_element = ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-quarter");
         
       }
       else

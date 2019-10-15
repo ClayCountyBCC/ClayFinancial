@@ -2294,7 +2294,7 @@ var Transaction;
                 target_container.appendChild(check.control_to_render);
                 this.payment_method_data.push(check);
                 check.add_check_button_element.onclick = (event) => {
-                    this.AddCheckPaymentMethod(target_container, true);
+                    this.AddCheckPaymentMethod(target_container, false);
                 };
             }
             AddSavedCashPaymentMethod(target_container, payment_method_data) {
