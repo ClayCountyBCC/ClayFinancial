@@ -67,6 +67,12 @@
     {
       this.transaction_type = transaction_type;
 
+      if (saved_transaction !== null)
+      {
+        this.transaction_id = saved_transaction.transaction_id;
+        this.transaction_number = saved_transaction.transaction_number;
+      }
+
       let targetContainer = document.getElementById(TransactionData.action_container);
       Utilities.Clear_Element(targetContainer);
       this.CreateReceiptTitle(targetContainer, saved_transaction);
@@ -190,12 +196,6 @@
             this.AddPaymentType(pt, controls_container);
             controls_container.classList.remove("hide");
           }
-          //controls_container.classList.toggle("hide");
-          //if (!controls_container.classList.contains("hide"))
-          //{
-
-          //}
-
           console.log('this transaction', this);
         }
       }
@@ -203,14 +203,26 @@
 
     }
 
-    private AddPaymentType(payment_type: PaymentType, container: HTMLElement, saved_payment_type_data: PaymentTypeData = null): void
+    private AddPaymentType(payment_type: PaymentType, container: HTMLElement, transaction_already_saved: boolean = false): void
     {
-      let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_index++);
+      let default_payment_type_index = this.next_payment_type_index++;
+
+      if (transaction_already_saved)
+      {
+        let max_index = 0;
+        for (let pt of this.payment_type_data)
+        {
+          if (pt.payment_type_index > max_index) max_index = pt.payment_type_index;
+        }
+        default_payment_type_index = max_index + 1;
+      }
+
+      let ptd = new PaymentTypeData(payment_type, container, default_payment_type_index);
       this.payment_type_data.push(ptd);
 
       ptd.add_another_payment_type_button.onclick = (event: Event) =>
       {
-        this.AddPaymentType(payment_type, container);
+        this.AddPaymentType(payment_type, container, transaction_already_saved);
       }
 
       ptd.cancel_payment_type_button.onclick = (event: Event) =>
@@ -221,21 +233,33 @@
         ptd = null;
         if (container.childElementCount === 0) container.classList.add("hide");
       }
-
+      if (transaction_already_saved)
+      {
+        Utilities.Set_Text(ptd.save_button, "Save New Payment Types");
+      }
       ptd.save_button.onclick = (event: Event) =>
       {
         let button = <HTMLButtonElement>event.target;
         Utilities.Toggle_Loading_Button(button, true);
-
-        if (this.ValidateTransaction())
+        
+        if (transaction_already_saved)
         {
-          Transaction.currentReceipt.ShowReceiptPreview();
+          this.SaveNewPaymentTypes();
           Utilities.Toggle_Loading_Button(button, false);
         }
         else
         {
-          Utilities.Toggle_Loading_Button(button, false);
+          if (this.ValidateTransaction())
+          {
+            Transaction.currentReceipt.ShowReceiptPreview();
+            Utilities.Toggle_Loading_Button(button, false);
+          }
+          else
+          {
+            Utilities.Toggle_Loading_Button(button, false);
+          }
         }
+        
       }
     }
 
@@ -323,6 +347,42 @@
         }
         
       }
+
+      for (let pt of this.selected_department.payment_types)
+      {
+        if (distinct_payment_type_ids.indexOf(pt.payment_type_id) === -1)
+        {
+          let li = document.createElement("li");
+          li.classList.add("light-function", "is-size-4", "has-background-link");
+          li.style.cursor = "pointer";
+          li.setAttribute("payment_type_id", pt.payment_type_id.toString());
+          let name = document.createElement("span");
+          name.classList.add("name");
+          name.appendChild(document.createTextNode(pt.name));
+          li.appendChild(name);
+
+          let totals = document.createElement("span");
+          totals.classList.add("totals");
+          li.appendChild(totals);
+
+          ol.appendChild(li);
+
+          let controls_container = document.createElement("ol");
+          controls_container.classList.add("control_container", "hide");
+
+          ol.appendChild(controls_container);
+
+          li.onclick = (event: Event) =>
+          {
+            if (controls_container.childElementCount === 0) // there is no payment type data created yet.
+            {
+              this.AddPaymentType(pt, controls_container, true);
+              controls_container.classList.remove("hide");
+            }
+            console.log('this transaction', this);
+          }
+        }
+      }
       paymentTypeContainer.appendChild(ol);
 
     }
@@ -332,12 +392,12 @@
       let ptd = new PaymentTypeData(payment_type, container, this.next_payment_type_index++, payment_type_data);
       this.payment_type_data.push(ptd);      
 
-      ptd.add_another_payment_type_button.style.display = "none";
+      //ptd.add_another_payment_type_button.style.display = "none";
 
-      //ptd.add_another_payment_type_button.onclick = (event: Event) =>
-      //{ // if they click this, I need to capture it so that I can save that particular payment type separately.
-      //  this.AddPaymentType(payment_type, container, payment_type_data);
-      //}
+      ptd.add_another_payment_type_button.onclick = (event: Event) =>
+      { // if they click this, I need to capture it so that I can save that particular payment type separately.
+        this.AddPaymentType(payment_type, container, true);
+      }
 
 
       ptd.cancel_payment_type_button.style.display = "none";
@@ -365,6 +425,16 @@
       }
       this.received_from_element_container = ControlGroup.CreateInputFieldContainer(this.received_from_element, "Received From or N/A", true, "is-one-half");
       target_container.appendChild(this.received_from_element_container);
+    }
+
+    private ValidateNewPaymentTypes(payment_types: Array<PaymentTypeData>): boolean
+    {
+      let is_valid = true;
+      for (let pt of payment_types)
+      {
+        if (!pt.Validate()) is_valid = false;
+      }
+      return is_valid;
     }
            
     private ValidateTransaction(): boolean
@@ -642,6 +712,63 @@
       button.appendChild(span);
       return button;
     }
+
+    /*
+     * Add New Payment Type to Saved Transaction 
+     * 
+     */
+    public SaveNewPaymentTypes(): void
+    {
+      console.log("save new payment types", this.payment_type_data);
+      if (this.transaction_id === -1)
+      {
+        alert("There was an error attempting to save this transaction.  The transaction id is unknown.");
+        return;
+      }
+      let PaymentTypesToSave: Array<PaymentTypeData> = [];
+      for (let pt of this.payment_type_data)
+      {
+        if (pt.transaction_payment_type_id === -1)
+        {
+          pt.transaction_id = this.transaction_id;
+          pt.added_after_save = true;
+          PaymentTypesToSave.push(pt);
+        }
+      }
+      if (!this.ValidateNewPaymentTypes(PaymentTypesToSave))
+      {
+        console.log("failed to validate new payment types");
+        return;
+      }
+      let path = Transaction.GetPath();
+      Utilities.Post_Empty(path + "API/Transaction/AddPaymentTypes", PaymentTypesToSave)
+        .then((response) =>
+        {
+          console.log("response", response);
+
+          if (response.ok)          
+          {
+            response.text().then(text =>
+            {
+              console.log('response text', text);
+              if (text.length > 0)
+              {
+                alert("An error occurred attempting to save this payment type:\r\n" + text);                
+              }
+              else
+              {
+                Transaction.ShowReceiptDetail(this.transaction_id);
+              }
+            })
+            
+          }
+          else
+          {
+            alert("An error occurred attempting to save this payment type:\r\n" + response.text);
+          }
+        });
+    }
+
 
   }
 

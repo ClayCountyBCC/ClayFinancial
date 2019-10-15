@@ -33,6 +33,7 @@ var Transaction;
                 li.style.display = "block";
                 this.payment_type_container = li;
                 if (saved_payment_type_data !== null) {
+                    this.transaction_payment_type_id = saved_payment_type_data.transaction_payment_type_id;
                     this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
                     this.RenderSavedPaymentMethods(li, saved_payment_type_data);
                 }

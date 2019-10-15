@@ -38,7 +38,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public int created_by_employee_department_id { get; set; } = -1;
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
-    //public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
+    public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
     //public int? number_of_deposit_receipts { get; set; } = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;

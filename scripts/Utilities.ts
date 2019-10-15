@@ -345,7 +345,7 @@ namespace Utilities
         //  throw new Error(response.statusText)
         //}
         //return response;
-      })
+      });
   }
 
   export function Format_Amount(amount: number): string

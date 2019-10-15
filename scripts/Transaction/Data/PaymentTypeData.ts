@@ -57,6 +57,7 @@
 
       if (saved_payment_type_data !== null)
       {
+        this.transaction_payment_type_id = saved_payment_type_data.transaction_payment_type_id;
         this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
         this.RenderSavedPaymentMethods(li, saved_payment_type_data);
       }
@@ -294,6 +295,7 @@
       target_container.appendChild(cash.control_to_render);
       this.payment_method_data.push(cash);
     }
+
 
   }
 }
