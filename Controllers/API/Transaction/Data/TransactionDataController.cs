@@ -369,28 +369,52 @@ namespace ClayFinancial.Controllers.API
       return Ok(pm);
     }
 
-    //[Httpost]
-    //[Route("NewDeposit")]
-    //public IHttpActionResult CreateDeposit(TransactionData transactionData)
-    //{
-    //  var ua = UserAccess.GetUserAccess(User.Identity.Name);
+    [HttpPost]
+    [Route("CreateDeposit")]
+    public IHttpActionResult CreateDeposit(string selected_user_display_name = "")
 
-    //  if (ua.current_access == UserAccess.access_type.no_access)
-    //  {
-    //    return Unauthorized();
-    //  }
-    //  transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-    //  transactionData.SetUserProperties(ua);
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var selected_employee_id = TransactionData.GetEmployeeIdFromDisplayName(selected_user_display_name);
 
-    //  var tr = transactionData.CreateDeposit(ua);
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
 
-    //  if (tr == null)
-    //  {
-    //    return InternalServerError();
-    //  }
+      //validate there are receipts to deposit for selected name and current users access level
+      var error = TransactionData.ValidateNewDeposit(selected_employee_id, ua);
+      if(error.Length > 0)
+      {
+        return Ok(error);
+      }
 
-    //  return Ok(tr);
-    //}
+
+
+      var deposit_transaction = TransactionData.CreateDeposit(ua, selected_user_display_name, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress );
+
+      if (deposit_transaction == null)
+      {
+        return InternalServerError();
+      }
+
+      return Ok(deposit_transaction);
+    }
+
+    [HttpGet]
+    [Route("GetNameList")]
+    public IHttpActionResult GetNameList()
+    {
+      var name_list = new List<string>();
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (ua.current_access == UserAccess.access_type.no_access) return Ok(name_list);
+
+      return Ok(myCache.GetItem("list_of_names"));
+
+
+    }
+
 
   }
 

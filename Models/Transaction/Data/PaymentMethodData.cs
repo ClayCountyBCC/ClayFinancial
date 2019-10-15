@@ -273,6 +273,7 @@ namespace ClayFinancial.Models.Transaction.Data
         LEFT OUTER JOIN data_changes_payment_method C ON D.payment_method_data_id = C.new_payment_method_data_id
         WHERE D.payment_method_data_id=@prior_payment_method_data_id;
       ");
+
       query.AppendLine(TransactionData.GetUpdateTransactionTotals(true));
 
       var i = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);

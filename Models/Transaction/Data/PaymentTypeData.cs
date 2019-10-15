@@ -105,18 +105,33 @@ namespace ClayFinancial.Models.Transaction.Data
       return dt;
     }
 
-
-    // This is used when a payment type has been added to a saved transaction
-
     public bool ValidateChangePaymentType()
     {
-      PaymentType pt = new PaymentType();
+
+      var pd = GetCached_Dict();
 
 
-      return pt.ValidatePaymentType(this);
+      return pd[this.payment_type_id].ValidatePaymentType(this);
 
     }
 
+    public static Dictionary<int, PaymentType> Get_Dict()
+    {
+      var payment_types = PaymentType.GetCached();
+
+      Dictionary<int, PaymentType> d = new Dictionary<int, PaymentType>();
+
+      foreach (PaymentType p in payment_types)
+      {
+        d[p.payment_type_id] = p;
+      }
+      return d;
+    }
+
+    public static Dictionary<int, PaymentType> GetCached_Dict()
+    {
+      return (Dictionary<int, PaymentType>)myCache.GetItem("payment_types_dict");
+    }
     public static bool SaveChangePaymentTypeData(List<PaymentTypeData> payment_type_data, UserAccess ua, string user_ip_address)
     {
       if (!payment_type_data.Any()) return false;
