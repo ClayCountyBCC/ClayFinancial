@@ -236,5 +236,16 @@ namespace ClayFinancial.Models
     {
       return (Dictionary<string, UserAccess>)myCache.GetItem("useraccess");
     }
+
+    public static int GetEmployeeIdFromDisplayName(string name)
+    {
+      var users = UserAccess.GetCachedAllUserAccess();
+      foreach(string key in users.Keys)
+      {
+        if (users[key].display_name == name) return users[key].employee_id;
+
+      }
+      return -1;
+    }
   }
 }
