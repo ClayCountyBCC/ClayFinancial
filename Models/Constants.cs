@@ -146,7 +146,21 @@ namespace ClayFinancial.Models
       }
     }
 
+    public static List<string> GetListOfNames()
+    {
+      var name_list = new List<string>();
+      var users = UserAccess.GetCachedAllUserAccess();
 
+      foreach (string key in users.Keys)
+      {
+        if (!(users[key].current_access == UserAccess.access_type.no_access))
+        {
+          name_list.Add(users[key].display_name);
+        }
+
+      }
+      return new List<string>();
+    }
 
     //public static Dictionary<T, T2> Get_Dict<T, T2>(string dictionary_name)
     //{
