@@ -397,10 +397,17 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = new DynamicParameters();
       param.Add("@transaction_id", transaction_id);
       param.Add("@my_employee_id", ua.employee_id);
+
       var query = new StringBuilder();
 
-      query.Append(GetTransactionDataQuery());
+      query.AppendLine(GetTransactionDataQuery());
 
+      if(ua.current_access == UserAccess.access_type.basic)
+      {
+        param.Add("@my_department_id", ua.my_department_id);
+
+        query.AppendLine("  AND TD.department_id = @my_department_id");
+      }
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
       var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
       if (td == null || td.Count() == 0)
@@ -424,6 +431,7 @@ namespace ClayFinancial.Models.Transaction.Data
       {
         tr.GetDepositReceipts(employee_id);
       }
+      
       
       return tr;
     }
