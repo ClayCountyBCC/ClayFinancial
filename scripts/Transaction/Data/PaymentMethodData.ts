@@ -399,8 +399,11 @@
       }
       else
       {
-        this.check_buttons_container_element = ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-half");
-        this.check_buttons_container_element.classList.add("hide");
+        this.check_buttons_container_element = ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-quarter");
+        if (payment_method_data === null)
+        {
+          this.check_buttons_container_element.classList.add("hide");
+        }
       }
       
       columns.appendChild(this.check_buttons_container_element);

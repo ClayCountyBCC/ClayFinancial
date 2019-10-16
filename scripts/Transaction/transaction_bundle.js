@@ -1480,11 +1480,13 @@ var Transaction;
                     this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
                     buttons.push(this.add_check_button_element);
                     buttons.push(this.cancel_check_button_element);
-                    this.check_buttons_container_element = Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-half");
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-quarter");
                 }
                 else {
-                    this.check_buttons_container_element = Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-half");
-                    this.check_buttons_container_element.classList.add("hide");
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-quarter");
+                    if (payment_method_data === null) {
+                        this.check_buttons_container_element.classList.add("hide");
+                    }
                 }
                 columns.appendChild(this.check_buttons_container_element);
                 this.paying_for_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half");
@@ -2119,6 +2121,7 @@ var Transaction;
                 this.payment_type_container = li;
                 if (saved_payment_type_data !== null) {
                     this.transaction_payment_type_id = saved_payment_type_data.transaction_payment_type_id;
+                    this.transaction_id = saved_payment_type_data.transaction_id;
                     this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
                     this.RenderSavedPaymentMethods(li, saved_payment_type_data);
                 }
@@ -2194,13 +2197,23 @@ var Transaction;
                 this.AddCheckPaymentMethod(fieldset);
                 target_container.appendChild(fieldset);
             }
-            AddCheckPaymentMethod(target_container, show_cancel = false) {
+            AddCheckPaymentMethod(target_container, show_cancel = false, show_save = false) {
                 let check = new Data.PaymentMethodData(false, show_cancel, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
                 target_container.appendChild(check.control_to_render);
                 this.payment_method_data.push(check);
-                check.add_check_button_element.onclick = (event) => {
-                    this.AddCheckPaymentMethod(target_container, true);
-                };
+                if (show_save) {
+                    Utilities.Set_Text(check.add_check_button_element, "Save this Check");
+                    check.add_check_button_element.classList.remove("is-info");
+                    check.add_check_button_element.classList.add("is-success");
+                    check.add_check_button_element.onclick = (event) => {
+                        this.SavePaymentMethodData(check, check.add_check_button_element);
+                    };
+                }
+                else {
+                    check.add_check_button_element.onclick = (event) => {
+                        this.AddCheckPaymentMethod(target_container, true, show_save);
+                    };
+                }
                 if (show_cancel) {
                     check.cancel_check_button_element.onclick = (event) => {
                         target_container.removeChild(check.control_to_render);
@@ -2294,13 +2307,37 @@ var Transaction;
                 target_container.appendChild(check.control_to_render);
                 this.payment_method_data.push(check);
                 check.add_check_button_element.onclick = (event) => {
-                    this.AddCheckPaymentMethod(target_container, false);
+                    this.AddCheckPaymentMethod(target_container, true, true);
                 };
             }
             AddSavedCashPaymentMethod(target_container, payment_method_data) {
                 let cash = new Data.PaymentMethodData(true, false, this.next_payment_method_id++, null, payment_method_data);
                 target_container.appendChild(cash.control_to_render);
                 this.payment_method_data.push(cash);
+            }
+            SavePaymentMethodData(check, button) {
+                Utilities.Toggle_Loading_Button(button, true);
+                if (!check.Validate()) {
+                    return;
+                }
+                check.transaction_id = this.transaction_id;
+                check.payment_method_data_id = -1;
+                check.transaction_payment_type_id = this.transaction_payment_type_id;
+                let path = Transaction.GetPath();
+                Utilities.Post_Empty(path + "API/Transaction/AddPaymentMethod", check)
+                    .then((response) => {
+                    response.text().then((text) => {
+                        console.log('response text', text, text.length);
+                        Utilities.Toggle_Loading_Button(button, false);
+                        if (text.length > 0) {
+                            alert("there was an error attempting to add this check, please refresh this web page and try again.");
+                            return;
+                        }
+                        else {
+                            Transaction.ShowReceiptDetail(this.transaction_id);
+                        }
+                    });
+                });
             }
         }
         Data.PaymentTypeData = PaymentTypeData;

@@ -332,13 +332,15 @@ namespace ClayFinancial.Models.Transaction.Data
       // validate all receipts in the deposit_receipt_ids are from departments the user can access
       if(!receipt_ids.Any())
       {
-        return "The selected user does not have any receipts to deposit or you do not have access to thier receipts.";
+        return "The selected user does not have any receipts to deposit or you do not have access to their receipts.";
       }
 
 
 
       return "";
     }
+
+
     private static string GetTransactionDataQuery()
     {
       return @"
@@ -636,7 +638,7 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       return $@"
 
-         EXEC update_transaction_totals @transaction_id, { (add_has_been_modified ? ", has_been_modified=1" : "")};
+         EXEC update_transaction_totals @transaction_id { (add_has_been_modified ? ", 1" : "")};
 
       ";
     }

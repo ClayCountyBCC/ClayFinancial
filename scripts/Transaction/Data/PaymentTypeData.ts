@@ -58,6 +58,7 @@
       if (saved_payment_type_data !== null)
       {
         this.transaction_payment_type_id = saved_payment_type_data.transaction_payment_type_id;
+        this.transaction_id = saved_payment_type_data.transaction_id;
         this.RenderSavedPaymentTypeControls(li, saved_payment_type_data);
         this.RenderSavedPaymentMethods(li, saved_payment_type_data);
       }
@@ -156,14 +157,27 @@
       target_container.appendChild(fieldset);
     }
 
-    private AddCheckPaymentMethod(target_container: HTMLElement, show_cancel: boolean = false): void
+    private AddCheckPaymentMethod(target_container: HTMLElement, show_cancel: boolean = false, show_save: boolean = false): void
     {
       let check = new PaymentMethodData(false, show_cancel, this.next_payment_method_id++, () => { this.PaymentMethodDataChanged(); });
       target_container.appendChild(check.control_to_render)
       this.payment_method_data.push(check);
-      check.add_check_button_element.onclick = (event: Event) =>
+      if (show_save)
       {
-        this.AddCheckPaymentMethod(target_container, true);
+        Utilities.Set_Text(check.add_check_button_element, "Save this Check");
+        check.add_check_button_element.classList.remove("is-info");
+        check.add_check_button_element.classList.add("is-success");
+        check.add_check_button_element.onclick = (event: Event) =>
+        {
+          this.SavePaymentMethodData(check, check.add_check_button_element);
+        }
+      }
+      else
+      {
+        check.add_check_button_element.onclick = (event: Event) =>
+        {
+          this.AddCheckPaymentMethod(target_container, true, show_save);
+        }
       }
       if (show_cancel)
       {
@@ -285,7 +299,7 @@
       this.payment_method_data.push(check);
       check.add_check_button_element.onclick = (event: Event) =>
       {
-        this.AddCheckPaymentMethod(target_container, false);
+        this.AddCheckPaymentMethod(target_container, true, true);       
       }
     }
 
@@ -296,6 +310,41 @@
       this.payment_method_data.push(cash);
     }
 
+    private SavePaymentMethodData(check: PaymentMethodData, button: HTMLButtonElement): void
+    {
+      Utilities.Toggle_Loading_Button(button, true);
+
+      if (!check.Validate())
+      {
+        return;
+      }
+
+      check.transaction_id = this.transaction_id;
+      check.payment_method_data_id = -1;
+      check.transaction_payment_type_id = this.transaction_payment_type_id;
+
+      let path = Transaction.GetPath();
+      Utilities.Post_Empty(path + "API/Transaction/AddPaymentMethod", check)
+        .then((response) =>
+        {
+          response.text().then((text) =>
+          {
+            console.log('response text', text, text.length);
+            Utilities.Toggle_Loading_Button(button, false);
+            if (text.length > 0)
+            {
+              alert("there was an error attempting to add this check, please refresh this web page and try again.");
+              return;
+            }
+            else
+            {
+              Transaction.ShowReceiptDetail(this.transaction_id);
+            }
+          });
+        });
+
+      
+    }
 
   }
 }
