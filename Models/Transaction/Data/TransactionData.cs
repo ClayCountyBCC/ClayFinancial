@@ -329,13 +329,15 @@ namespace ClayFinancial.Models.Transaction.Data
       // validate all receipts in the deposit_receipt_ids are from departments the user can access
       if(receipt_ids < 1)
       {
-        return "The selected user does not have any receipts to deposit or you do not have access to thier receipts.";
+        return "The selected user does not have any receipts to deposit or you do not have access to their receipts.";
       }
 
 
 
       return "";
     }
+
+
     private static string GetTransactionDataQuery()
     {
 

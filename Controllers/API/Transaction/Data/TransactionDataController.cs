@@ -177,7 +177,7 @@ namespace ClayFinancial.Controllers.API
 
         if(payment_method_data.error_text.Length == 0)
         {
-          payment_method_data.error_text = "There was an issue with validating the payment method.";
+          return Ok("There was an issue with validating the payment method.");
         }
 
       }
@@ -188,11 +188,11 @@ namespace ClayFinancial.Controllers.API
         {
           if (payment_method_data.error_text.Length == 0)
           {
-            payment_method_data.error_text = "There was an issue editing the payment method.";
+            return Ok("There was an issue editing the payment method.");
           }
         }
       }
-     return Ok(payment_method_data.error_text);
+     return Ok();
 
     }
     [HttpPost]
@@ -241,7 +241,7 @@ namespace ClayFinancial.Controllers.API
         }
       }
 
-      return Ok(payment_method_data.error_text);
+      return Ok();
     }
 
     [HttpPost]

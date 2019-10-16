@@ -278,11 +278,13 @@ var Transaction;
                     this.cancel_check_button_element.appendChild(document.createTextNode("Cancel Check"));
                     buttons.push(this.add_check_button_element);
                     buttons.push(this.cancel_check_button_element);
-                    this.check_buttons_container_element = Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-half");
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateButtonlistFieldContainer(buttons, "", true, "is-one-quarter");
                 }
                 else {
-                    this.check_buttons_container_element = Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-half");
-                    this.check_buttons_container_element.classList.add("hide");
+                    this.check_buttons_container_element = Transaction.ControlGroup.CreateInputFieldContainer(this.add_check_button_element, "", true, "is-one-quarter");
+                    if (payment_method_data === null) {
+                        this.check_buttons_container_element.classList.add("hide");
+                    }
                 }
                 columns.appendChild(this.check_buttons_container_element);
                 this.paying_for_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half");
