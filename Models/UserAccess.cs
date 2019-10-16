@@ -22,7 +22,7 @@ namespace ClayFinancial.Models
     public string finplus_department { get; set; } = "";
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
-    public List<int> departments_can_access = new List<int>();
+    public int my_department_id { get; set; } = -1;
     public string display_name { get; set; } = "";
     public bool maintenance_user { get; set; } = false;
 
@@ -80,6 +80,9 @@ namespace ClayFinancial.Models
         {
           employee_id = eid;
         }
+
+        finplus_department = GetFinplusDepartment();
+
         var groups = (from g in up.GetAuthorizationGroups()
                       select g.Name).ToList();
         maintenance_user = groups.Contains(maintenance_access_group);
@@ -87,18 +90,22 @@ namespace ClayFinancial.Models
         if (groups.Contains(mis_access_group))
         {
           current_access = access_type.mis_access;
+          maintenance_user = true;
+          UpdateDepartmentalAccess();
           return;
         }
 
         if (groups.Contains(finance_Level_one_group))
         {
           current_access = access_type.finance_level_one;
+          UpdateDepartmentalAccess();
           return;
         }
 
         if (groups.Contains(finance_Level_two_group))
         {
           current_access = access_type.finance_level_two;
+          UpdateDepartmentalAccess();
           return;
         }
 
@@ -117,8 +124,7 @@ namespace ClayFinancial.Models
 
     private void UpdateDepartmentalAccess()
     {
-      finplus_department = GetFinplusDepartment();
-      departments_can_access = GetDepartmentsCanAccess();
+      my_department_id = GetDepartmentsCanAccess();
     }
 
     private string GetFinplusDepartment()
@@ -132,18 +138,18 @@ namespace ClayFinancial.Models
 
     }
 
-    private List<int> GetDepartmentsCanAccess()
+    private int GetDepartmentsCanAccess()
     {
-      List<int> departments = new List<int>();
-      if (finplus_department == "") return departments;
       foreach(Transaction.Department d in Transaction.Department.GetCached())
       {
         if(d.organization.Length > 0)
         {
-          if (d.organization_access.Contains(finplus_department)) departments.Add(d.department_id);
+          if (d.organization_access.Contains(finplus_department))
+              return d.department_id;
         }
       }
-      return departments;
+
+      return my_department_id;
     }
 
     private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)
