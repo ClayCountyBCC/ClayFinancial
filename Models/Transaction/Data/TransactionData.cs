@@ -337,8 +337,30 @@ namespace ClayFinancial.Models.Transaction.Data
       return "";
     }
 
+    public static bool ValidateEdit(long transaction_id, UserAccess ua)
+    {
+      if (ua.current_access == UserAccess.access_type.basic)
+      {
+        var param = new DynamicParameters();
+        param.Add("@my_employee_id", ua.employee_id);
+        param.Add("@my_department_id", ua.my_department_id);
+        param.Add("@transaction_id", transaction_id);
+        var query = new StringBuilder();
 
-    private static string GetTransactionDataQuery()
+        query.AppendLine(TransactionData.GetTransactionDataQuery());
+
+        query.AppendLine("  AND TD.department_id = @my_department_id");
+
+        var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
+
+        if (td != null && !td.can_modify)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+    public static string GetTransactionDataQuery()
     {
 
 
@@ -403,6 +425,8 @@ namespace ClayFinancial.Models.Transaction.Data
       var query = new StringBuilder();
 
       query.AppendLine(GetTransactionDataQuery());
+
+      query.AppendLine("  AND TD.transaction_id = @transaction_id");
 
       if(ua.current_access == UserAccess.access_type.basic)
       {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Text;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
@@ -209,8 +210,9 @@ namespace ClayFinancial.Models.Transaction.Data
       ";
   }
 
-    public bool ValidateControlData()
+    public bool ValidateControlData(UserAccess ua)
     {
+
       var controls = Control.GetCachedDict();
 
       return controls[control_id].Validate(this, false);
@@ -279,10 +281,9 @@ namespace ClayFinancial.Models.Transaction.Data
       //return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
     }
 
-    public bool EditControlData()
-    {
-      return false;
-    }
+
+
+
 
     private DynamicParameters GetControlDataParameters()
     {

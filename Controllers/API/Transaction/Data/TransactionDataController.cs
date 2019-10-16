@@ -125,7 +125,7 @@ namespace ClayFinancial.Controllers.API
     [Route("AddPaymentTypes")]
     public IHttpActionResult AddPaymentType(List<PaymentTypeData> payment_types_data)
     {
-      if (!payment_types_data.Any()) return Ok(new TransactionData() {error_text = "there are no payment types in the list" }); ;
+      if (!payment_types_data.Any()) return Ok(new TransactionData() {error_text = "there are no payment types in the list" });
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -135,12 +135,14 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      // todo add validation check to see if user can add payment type to this transaction
+      // validate if user is able to edit or add payments to this transaction
+      if (!TransactionData.ValidateEdit(payment_types_data[0].transaction_id, ua)) return Unauthorized();
+
       foreach (var pt in payment_types_data)
       {
         if (!pt.ValidateChangePaymentType())
         {
-          // probable should return the entire transaction with a save error
+          // probably should return the entire transaction with a save error
           if (pt.error_text.Length > 0)
           {
             pt.error_text = "There was an issue with this payment type.";
@@ -163,8 +165,11 @@ namespace ClayFinancial.Controllers.API
     [Route("EditPaymentMethod")]
     public IHttpActionResult EditPaymentMethod(PaymentMethodData payment_method_data)
     {
-      if (payment_method_data.payment_method_data_id == -1) return Ok("Cannot edit this payment.");
+      if (payment_method_data.payment_method_data_id == -1) return BadRequest();
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (!TransactionData.ValidateEdit(payment_method_data.transaction_id, ua)) return Unauthorized();
+
       //var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       payment_method_data.SetUserName(ua.user_name);
 
@@ -212,6 +217,9 @@ namespace ClayFinancial.Controllers.API
       }
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (!TransactionData.ValidateEdit(payment_method_data.transaction_id, ua)) return Unauthorized();
+
       payment_method_data.SetUserName(ua.user_name);
 
       if (ua.current_access == UserAccess.access_type.no_access)
@@ -219,6 +227,7 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
+      if (!TransactionData.ValidateEdit(payment_method_data.transaction_id, ua)) return Unauthorized();
 
       if (!payment_method_data.ValidateNew())
       {
@@ -256,6 +265,7 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
+
       control_data.SetUsername(ua.user_name);
 
 
@@ -275,8 +285,9 @@ namespace ClayFinancial.Controllers.API
       // replacing above
       if (control_data.control_data_id == -1) return BadRequest();
       // this works because the clientside UI should never attempt this
+      if (!TransactionData.ValidateEdit(control_data.transaction_id, ua)) return Unauthorized();
 
-      if (!control_data.ValidateControlData())
+      if (!control_data.ValidateControlData(ua))
       {
         if (control_data.error_text.Length > 0)
         {
