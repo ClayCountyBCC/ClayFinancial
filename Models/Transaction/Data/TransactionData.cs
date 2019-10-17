@@ -435,31 +435,31 @@ namespace ClayFinancial.Models.Transaction.Data
         query.AppendLine("  AND TD.department_id = @my_department_id");
       }
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
-      var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
-      if (td == null || td.Count() == 0)
+      var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
+      if (td == null)
       {
         new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query.ToString()) ;
         return new TransactionData("There was an issue retrieving the transaction.");
       }
-      var tr = td.First();
-      if(tr.transaction_type == "R")
-      {
-        var controls = ControlData.GetActiveTransactionControls(tr.transaction_id);
-        var payment_methods = PaymentMethodData.GetActiveTransactionPaymentMethods(tr.transaction_id);
 
-        tr.department_control_data = (from c in controls
+      if (td.transaction_type == "R")
+      {
+        var controls = ControlData.GetActiveTransactionControls(td.transaction_id);
+        var payment_methods = PaymentMethodData.GetActiveTransactionPaymentMethods(td.transaction_id);
+
+        td.department_control_data = (from c in controls
                                       where c.department_id.HasValue
                                       select c).ToList();
 
-        tr.payment_type_data = PaymentTypeData.Get(tr.transaction_id, controls, payment_methods);
+        td.payment_type_data = PaymentTypeData.Get(td.transaction_id, controls, payment_methods);
       }
       else
       {
-        tr.GetDepositReceipts(employee_id);
+        td.GetDepositReceipts(employee_id);
       }
       
       
-      return tr;
+      return td;
     }
 
     public void SetUserProperties(UserAccess ua)
