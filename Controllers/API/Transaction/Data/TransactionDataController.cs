@@ -110,7 +110,7 @@ namespace ClayFinancial.Controllers.API
       }
 
       // TODO: new receipt needs to be a TransactionView
-      var td = transactionData.SaveTransactionData(ua.employee_id); 
+      var td = transactionData.SaveTransactionData(); 
       
       if(td)
       {
@@ -333,7 +333,6 @@ namespace ClayFinancial.Controllers.API
 
     }
 
-
     [HttpGet]
     [Route("GetControlDataHistory")]
     public IHttpActionResult GetControlHistory(long control_data_id = -1, long transaction_id = -1)
@@ -430,6 +429,18 @@ namespace ClayFinancial.Controllers.API
       return Ok(myCache.GetItem("list_of_names"));
 
 
+    }
+
+    [HttpGet]
+    [Route("GetSalesTaxAndTDC")]
+    public IHttpActionResult GetSalesTaxAndTDC(long transaction_id)
+    {
+
+
+
+
+
+      return InternalServerError();
     }
 
 

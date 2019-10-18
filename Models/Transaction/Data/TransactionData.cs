@@ -44,6 +44,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool can_modify { get; set; } = false;
     public bool has_error { get; set; } = false;
     private int my_department_id { get; set; } = -1;
+    private UserAccess.access_type my_access { get; set; } = UserAccess.access_type.basic;
+    private bool is_modifying_this_transaction { get; set; } = false;
 
     public TransactionData()
     {
@@ -470,16 +472,17 @@ namespace ClayFinancial.Models.Transaction.Data
       created_by_username = ua.user_name;
       created_by_display_name = ua.display_name;
       my_department_id = ua.my_department_id;
-
+      my_access = ua.current_access;
     }
 
-    public bool SaveTransactionData(int employee_id)
+    public bool SaveTransactionData()
     {
 
-      switch (transaction_type)
+      switch (transaction_type.ToUpper())
       {
 
         case "R":
+        case "C": 
           return SaveNewReceipt();
         default:
           return false;
@@ -502,8 +505,8 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
       param.Add("@username", created_by_username);
-      param.Add("@department_id", department_id);
-      param.Add("@transaction_type", transaction_type);
+      param.Add("@department_id", my_department_id);
+      param.Add("@transaction_type", transaction_type.ToUpper());
       //param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_ip_address);
       param.Add("@child_transaction_id", child_transaction_id);
@@ -529,15 +532,33 @@ namespace ClayFinancial.Models.Transaction.Data
                       @created_by_display_name,
                       @received_from,
                       @comment;
+
           ");
 
-    
       query.AppendLine(PaymentTypeData.GetSavePaymentTypeDataQuery());
       query.AppendLine(PaymentMethodData.GetSavePaymentMethodsQuery());
       query.AppendLine(ControlData.GetSaveControlDataQuery());
 
       // add this to update total_cash_amount, total_check_amount, total_check_count fields
-      query.AppendLine(GetUpdateTransactionTotals());
+
+      if(transaction_type != "C")
+      {
+        query.AppendLine(GetUpdateTransactionTotals(true));
+      }
+      
+
+      // IF TRANSACTION_TYPE = 'C' AND FINANCE LEVEL 2, TRANSACTION IS COMPLETE. CHILD_TRANSACTION_ID IS TRANSACTION_ID
+      if (my_access == UserAccess.access_type.finance_level_two && transaction_type.ToUpper() == "C")
+      {
+        query.AppendLine(@"
+
+          UPDATE data_transaction
+          SET child_transaction_id = @transaction_id
+          WHERE transaction_id = @transaction_id;       
+
+        ");
+      }
+
 
       // CREATE DATA TABLES
       var paymentTypeDataTable = PaymentTypeData.GetPaymentTypeDataTable();
@@ -645,13 +666,12 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-    public static string GetUpdateTransactionTotals(bool add_has_been_modified = false)
+    public static string GetUpdateTransactionTotals(bool has_been_modified)
     {
       return $@"
-
-         DECLARE @has_been_modified BIT = { (add_has_been_modified ? "1" : "0")};
-
-         EXEC update_transaction_totals @transaction_id, @has_been_modified;
+        DECLARE $@has_been_modified = {(has_been_modified ? "1" : "0")};
+          
+         EXEC update_receit_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
 
       ";
     }

@@ -97,7 +97,7 @@ namespace ClayFinancial.Models.Transaction.Data
     
     public bool ValidateChange()
     {
-
+      
       if (transaction_id == -1)
       {
         error_text = "No transaction id available. Cannot save the payment method.";
@@ -220,9 +220,11 @@ namespace ClayFinancial.Models.Transaction.Data
         -- THIS WILL ONLY HAPPEN IF THIS IS AN EDIT BECAUSE @prior ID WILL BE -1 OTHERWISE
         IF @prior_payment_method_data_id > -1 
         BEGIN 
+
           UPDATE data_payment_method
           SET is_active = 0
           WHERE payment_method_data_id = @prior_payment_method_data_id;
+
         END
 
         INSERT INTO data_payment_method

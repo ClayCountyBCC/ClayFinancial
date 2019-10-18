@@ -161,7 +161,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       // this query needs to be included in order to recalculate the totals for the transaction.
       // we may need to consider having a transaction_data_changes table to track changes
-      query.AppendLine(TransactionData.GetUpdateTransactionTotals());
+      query.AppendLine(TransactionData.GetUpdateTransactionTotals(true));
 
       // CREATE DATA TABLES
       var controlDataTable = ControlData.GetControlDataTable();
