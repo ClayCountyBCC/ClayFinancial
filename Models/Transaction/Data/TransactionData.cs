@@ -45,7 +45,6 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool has_error { get; set; } = false;
     private int my_department_id { get; set; } = -1;
     private UserAccess.access_type my_access { get; set; } = UserAccess.access_type.basic;
-    private bool is_modifying_this_transaction { get; set; } = false;
 
     public TransactionData()
     {
@@ -669,9 +668,9 @@ namespace ClayFinancial.Models.Transaction.Data
     public static string GetUpdateTransactionTotals(bool has_been_modified)
     {
       return $@"
-        DECLARE @has_been_modified = {(has_been_modified ? "1" : "0")};
+        DECLARE @has_been_modified Bit = {(has_been_modified ? "1" : "0")};
           
-         EXEC update_receit_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
+         EXEC update_receipt_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
 
       ";
     }
