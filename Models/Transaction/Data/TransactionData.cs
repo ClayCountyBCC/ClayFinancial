@@ -692,7 +692,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@transaction_type", "D");
       param.Add("@created_by_employee_ip_address", ipAddress);
       param.Add("@created_by_display_name", ua.display_name);
-      param.Add("@received_from", "System");
+      param.Add("@received_from", selected_user_display_name);
       param.Add("@comment", "");
       param.Add("@selected_employee_id", selected_employee_id);
       param.Add("@my_department_id", ua.my_department_id);
