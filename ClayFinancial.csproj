@@ -244,6 +244,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Transaction\Index.cshtml" />
     <None Include="Properties\PublishProfiles\DV10.pubxml" />
+    <None Include="Properties\PublishProfiles\Production.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
