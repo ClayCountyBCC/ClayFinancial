@@ -285,6 +285,25 @@ namespace Utilities
   //    });
   //}
 
+  export async function Get_Empty(url: string): Promise<string>
+  {
+    const response = await fetch(url,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"//,"Upgrade-Insecure-Requests": "1"
+        },
+        cache: "no-cache",
+        credentials: "include"
+      }
+    );
+    if (!response.ok)
+    {
+      throw new Error(response.statusText);
+    }
+    return await response.text();
+  }
+
   export async function Get<T>(url: string): Promise<T>
   {
     const response = await fetch(url,

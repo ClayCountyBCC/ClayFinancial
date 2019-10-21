@@ -397,7 +397,9 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      if (selected_user_display_name.Length == 0) selected_user_display_name = ua.display_name;
+      if (selected_user_display_name == null) return BadRequest();
+
+      if (selected_user_display_name == "mine") selected_user_display_name = ua.display_name;
 
       var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
       
@@ -433,7 +435,7 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetDepositCount")]
-    public IHttpActionResult GetDespositNames(string name = "")
+    public IHttpActionResult GetDespositCount(string name)
     {
       // This endpoint is going to look at the user's access
       // and return a count of the number of receipts ready to be deposited.
@@ -442,7 +444,7 @@ namespace ClayFinancial.Controllers.API
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
-      if (name == "")
+      if (name == "mine")
       {
         name = ua.display_name;
       }
