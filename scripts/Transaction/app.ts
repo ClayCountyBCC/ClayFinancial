@@ -251,12 +251,6 @@
     Utilities.Hide(Receipt.receipt_container);    
   }
 
-  export function ViewCreateDeposit(): void
-  {
-    HideAllViews();
-    Utilities.Show(Transaction.deposit_view_container);
-  }
-
   export function ViewReceiptDetail(): void
   {
     HideAllViews();
@@ -280,6 +274,7 @@
   {
     HideAllViews();
     Utilities.Show(Transaction.deposit_view_container);
+    Utilities.Hide("createDepositButton");
   }
 
   export function PreviousPage(element: HTMLAnchorElement): void

@@ -204,11 +204,6 @@ var Transaction;
         Utilities.Hide(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
     }
-    function ViewCreateDeposit() {
-        HideAllViews();
-        Utilities.Show(Transaction.deposit_view_container);
-    }
-    Transaction.ViewCreateDeposit = ViewCreateDeposit;
     function ViewReceiptDetail() {
         HideAllViews();
         Utilities.Show(Transaction.Data.TransactionData.action_container);
@@ -227,6 +222,7 @@ var Transaction;
     function ViewDeposit() {
         HideAllViews();
         Utilities.Show(Transaction.deposit_view_container);
+        Utilities.Hide("createDepositButton");
     }
     Transaction.ViewDeposit = ViewDeposit;
     function PreviousPage(element) {
