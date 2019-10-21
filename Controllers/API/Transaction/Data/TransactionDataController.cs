@@ -89,7 +89,6 @@ namespace ClayFinancial.Controllers.API
 
     }
 
-
     [HttpPost]
     [Route("Save")]
     public IHttpActionResult SaveTransaction(TransactionData transactionData)
@@ -404,19 +403,34 @@ namespace ClayFinancial.Controllers.API
 
     [HttpPost]
     [Route("CreateDeposit")]
-    public IHttpActionResult CreateDeposit(string selected_user_display_name = "")
-
+    public IHttpActionResult CreateDeposit(string selected_user_display_name)
     {
+      if (selected_user_display_name == null) return BadRequest();
+
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
       }
 
-      if (selected_user_display_name.Length == 0) selected_user_display_name = ua.display_name;
+      if (selected_user_display_name == "mine")
+      {
+        selected_user_display_name = ua.display_name;
+      }
+      else
+      {
+        var name_ua = UserAccess.GetUserAccessByDisplayName(selected_user_display_name);
+        // We check to see if the name that they gave us has a higher level access
+        // than they do.  If it is higher, then they can't do a deposit.
+        if ((int)ua.current_access < (int)name_ua.current_access) return Unauthorized();
+        if (ua.current_access == UserAccess.access_type.basic)
+        {
+          if (ua.my_department_id != name_ua.my_department_id) return Unauthorized();
+        }
+      }
+
 
       var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
-      
 
       //validate there are receipts to deposit for selected name and current users access level
       var error = TransactionData.ValidateNewDeposit(selected_employee_id, ua);
@@ -449,7 +463,7 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetDepositCount")]
-    public IHttpActionResult GetDespositNames(string name = "")
+    public IHttpActionResult GetDespositNames(string name = "mine")
     {
       // This endpoint is going to look at the user's access
       // and return a count of the number of receipts ready to be deposited.
@@ -458,7 +472,7 @@ namespace ClayFinancial.Controllers.API
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
-      if (name == "")
+      if (name == "mine")
       {
         name = ua.display_name;
       }
@@ -478,9 +492,6 @@ namespace ClayFinancial.Controllers.API
     [Route("GetSalesTaxAndTDC")]
     public IHttpActionResult GetSalesTaxAndTDC(long transaction_id)
     {
-
-
-
 
 
       return InternalServerError();

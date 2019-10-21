@@ -302,8 +302,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       query.AppendLine(@"
 
-
-
           SELECT 
             T.transaction_id
             ,T.created_by_employee_id
@@ -312,28 +310,18 @@ namespace ClayFinancial.Models.Transaction.Data
           INNER JOIN ClayFinancial.dbo.vw_transaction_view TV ON T.transaction_id = TV.transaction_id
           WHERE child_transaction_id IS NULL
             AND created_by_employee_id = @selected_employee_id
+            AND UPPER(transaction_type) IN ('C','R')
 
       ");
-
-      if(ua.current_access == UserAccess.access_type.basic)
-      {
-
-        param.Add("@my_department_id", ua.my_department_id);
-        query.AppendLine("  AND department_id  = @my_department_id");
-
-      }
-      
-
       //var user_receipt_list = new List<TransactionData>();
       var receipt_ids = Constants.Exec_Scalar<int>(query.ToString(),Constants.ConnectionString.ClayFinancial, param);
       
       // validate all receipts in the deposit_receipt_ids are from departments the user can access
-      if(receipt_ids < 1)
-      {
-        return "The selected user does not have any receipts to deposit or you do not have access to their receipts.";
-      }
-
-
+      // This is now done at the controller level
+      //if(receipt_ids < 1)
+      //{
+      //  return "The selected user does not have any receipts to deposit or you do not have access to their receipts.";
+      //}
 
       return "";
     }
@@ -491,14 +479,6 @@ namespace ClayFinancial.Models.Transaction.Data
       }
 
 
-    }
-
-    private bool SaveNewDeposit()
-    {
-
-
-
-      return true;
     }
 
     private bool SaveNewReceipt()
@@ -667,7 +647,6 @@ namespace ClayFinancial.Models.Transaction.Data
       }
     }
 
-
     public static string GetUpdateTransactionTotals(bool has_been_modified)
     {
       return $@"
@@ -677,10 +656,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       ";
     }
-
-    // this will create a list of non-deposited receipts 
-
-
 
     public static TransactionData CreateDeposit(UserAccess ua, string selected_user_display_name, string ipAddress)
     {
@@ -705,37 +680,35 @@ namespace ClayFinancial.Models.Transaction.Data
 
         USE ClayFinancial;
 
-          -- SAVE TRANSACTION DATA
-          -- if
-          EXEC ClayFinancial.dbo.insert_new_transaction_data 
-                  @transaction_id OUTPUT, 
-                  @my_department_id, 
-                  @my_employee_id,
-                  @transaction_type,
-                  null, 
-                  @username, 
-                  @created_by_employee_ip_address,
-                  @created_by_display_name,
-                  @received_from,
-                  @comment;
+        -- SAVE TRANSACTION DATA
+        -- if
+        EXEC ClayFinancial.dbo.insert_new_transaction_data 
+                @transaction_id OUTPUT, 
+                @my_department_id, 
+                @my_employee_id,
+                @transaction_type,
+                null, 
+                @username, 
+                @created_by_employee_ip_address,
+                @created_by_display_name,
+                @received_from,
+                @comment;
 
 
-          WITH all_selected_users_incomplete_receipts AS (
+        ;WITH all_selected_users_incomplete_receipts AS (
 
-            SELECT
-              transaction_id
-            FROM data_transaction DT
-            WHERE created_by_employee_id = @selected_employee_id
-              AND child_transaction_id IS NULL
-              AND UPPER(transaction_type) IN ('C','R')
-                
+          SELECT
+            transaction_id
+          FROM vw_transaction_view
+          WHERE created_by_employee_id = @selected_employee_id
+            AND child_transaction_id IS NULL
+            AND UPPER(transaction_type) IN ('C','R')
+        )
 
-          )
-
-          UPDATE DT
-            SET child_transaction_id = @transaction_id
-          FROM data_transaction DT
-          INNER JOIN all_selected_users_incomplete_receipts AR on AR.transaction_id = DT.transaction_id
+        UPDATE DT
+          SET child_transaction_id = @transaction_id
+        FROM data_transaction DT
+        INNER JOIN all_selected_users_incomplete_receipts AR on AR.transaction_id = DT.transaction_id;
 
         ;WITH total_amount_sums AS (
 
