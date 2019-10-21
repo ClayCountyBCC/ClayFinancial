@@ -737,16 +737,6 @@ namespace ClayFinancial.Models.Transaction.Data
           FROM data_transaction DT
           INNER JOIN all_selected_users_incomplete_receipts AR on AR.transaction_id = DT.transaction_id
 
-        ");
-
-
-      if(ua.current_access == UserAccess.access_type.basic)
-      {
-        query.AppendLine("  WHERE DT.department_id = @my_department_id");
-      }
-
-      query.AppendLine(@"
-
         ;WITH total_amount_sums AS (
 
           SELECT

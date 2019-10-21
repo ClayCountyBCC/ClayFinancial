@@ -281,7 +281,22 @@ namespace ClayFinancial.Models.Transaction.Data
       //return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
     }
 
+    public static List<ControlData> GetAllControlDataForTransactions(List<long> transaction_ids, UserAccess ua)
+    {
+      var param = new DynamicParameters();
+      param.Add("@transaction_ids", transaction_ids);
 
+      var query = @"
+
+        SELECT
+          *
+        FROM data_controls
+        WHERE transaction_id IN @transaction_ids
+
+      ";
+
+      return Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+    }
 
 
 

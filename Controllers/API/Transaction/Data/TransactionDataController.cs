@@ -24,13 +24,13 @@ namespace ClayFinancial.Controllers.API
     [Route("Get")]
     public IHttpActionResult GetAllTransactionData(
       int page_number = -1
-      ,string display_name_filter = ""
-      ,string completed_filter = ""
-      ,int department_id_filter = -1
-      ,string transaction_type_filter = ""
-      ,string transaction_number_filter = ""
-      ,bool has_been_modified = false
-      //,long transaction_id_filter = -1
+      , string display_name_filter = ""
+      , string completed_filter = ""
+      , int department_id_filter = -1
+      , string transaction_type_filter = ""
+      , string transaction_number_filter = ""
+      , bool has_been_modified = false
+    //,long transaction_id_filter = -1
     )
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
@@ -42,13 +42,13 @@ namespace ClayFinancial.Controllers.API
 
       var tr = TransactionData.GetTransactionList
         (ua
-        ,page_number
-        ,display_name_filter
-        ,completed_filter
-        ,transaction_type_filter
-        ,transaction_number_filter
-        ,department_id_filter
-        ,has_been_modified //   only true matters
+        , page_number
+        , display_name_filter
+        , completed_filter
+        , transaction_type_filter
+        , transaction_number_filter
+        , department_id_filter
+        , has_been_modified //   only true matters
       //  ,transaction_id_filter
       );
       if (tr == null)
@@ -82,10 +82,10 @@ namespace ClayFinancial.Controllers.API
         completed_filter,
         transaction_type_filter,
         transaction_number_filter,
-        department_id_filter, 
-        has_been_modified); 
+        department_id_filter,
+        has_been_modified);
 
-      return Ok(count); 
+      return Ok(count);
 
     }
 
@@ -96,7 +96,7 @@ namespace ClayFinancial.Controllers.API
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-      if(ua.current_access == UserAccess.access_type.no_access)
+      if (ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
       }
@@ -110,9 +110,9 @@ namespace ClayFinancial.Controllers.API
       }
 
       // TODO: new receipt needs to be a TransactionView
-      var td = transactionData.SaveTransactionData(); 
-      
-      if(td)
+      var td = transactionData.SaveTransactionData();
+
+      if (td)
       {
         return Ok(TransactionData.GetTransactionData(transactionData.transaction_id, ua.employee_id, ua));
       }
@@ -126,7 +126,7 @@ namespace ClayFinancial.Controllers.API
     [Route("AddPaymentTypes")]
     public IHttpActionResult AddPaymentType(List<PaymentTypeData> payment_types_data)
     {
-      if (!payment_types_data.Any()) return Ok(new TransactionData() {error_text = "there are no payment types in the list" });
+      if (!payment_types_data.Any()) return Ok(new TransactionData() { error_text = "there are no payment types in the list" });
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       var user_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -153,13 +153,13 @@ namespace ClayFinancial.Controllers.API
       }
 
 
-      if(!PaymentTypeData.SaveChangePaymentTypeData(payment_types_data, ua,user_ip_address))
+      if (!PaymentTypeData.SaveChangePaymentTypeData(payment_types_data, ua, user_ip_address))
       {
         return Ok("There was an issue saving the payment type data");
       }
 
       return Ok();
-     
+
     }
 
     [HttpPost]
@@ -181,7 +181,7 @@ namespace ClayFinancial.Controllers.API
       if (!payment_method_data.ValidateChange())
       {
 
-        if(payment_method_data.error_text.Length == 0)
+        if (payment_method_data.error_text.Length == 0)
         {
           return Ok("There was an issue with validating the payment method.");
         }
@@ -198,7 +198,7 @@ namespace ClayFinancial.Controllers.API
           }
         }
       }
-     return Ok();
+      return Ok();
 
     }
     [HttpPost]
@@ -295,9 +295,9 @@ namespace ClayFinancial.Controllers.API
           control_data.error_text = "There was an issue with the control data";
         }
       }
-      if(!control_data.UpdateControlData())
+      if (!control_data.UpdateControlData())
       {
-        if(control_data.error_text.Length == 0)
+        if (control_data.error_text.Length == 0)
         {
           control_data.error_text = "There was an issue updating the control";
         }
@@ -317,15 +317,15 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      
+
       var td = TransactionData.GetTransactionData(transaction_id, ua.employee_id, ua);
 
-      if(ua.current_access == UserAccess.access_type.basic && td.department_id != ua.my_department_id)
+      if (ua.current_access == UserAccess.access_type.basic && td.department_id != ua.my_department_id)
       {
         return Unauthorized();
       }
 
-      if(td == null)
+      if (td == null)
       {
         return InternalServerError();
       }
@@ -334,6 +334,22 @@ namespace ClayFinancial.Controllers.API
 
     }
 
+    [HttpGet]
+    [Route("GetControlData")]
+    
+    public IHttpActionResult GetAllControls(List<long> transaction_ids)
+    {
+
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+
+      return Ok(ControlData.GetAllControlDataForTransactions(transaction_ids, ua));
+
+    }
     [HttpGet]
     [Route("GetControlDataHistory")]
     public IHttpActionResult GetControlHistory(long control_data_id = -1, long transaction_id = -1)
