@@ -292,7 +292,7 @@ namespace ClayFinancial.Models.Transaction.Data
       return departments[department_id].ValidateTransactionData(this);
     }
 
-    public static string ValidateNewDeposit(int selected_employee_id,  UserAccess ua)
+    public static int ValidateNewDeposit(int selected_employee_id,  UserAccess ua)
     {
       var query = new StringBuilder();
 
@@ -313,17 +313,21 @@ namespace ClayFinancial.Models.Transaction.Data
             AND UPPER(transaction_type) IN ('C','R')
 
       ");
+
       //var user_receipt_list = new List<TransactionData>();
-      var receipt_ids = Constants.Exec_Scalar<int>(query.ToString(),Constants.ConnectionString.ClayFinancial, param);
-      
-      // validate all receipts in the deposit_receipt_ids are from departments the user can access
-      // This is now done at the controller level
+      var receipt_ids = Constants.Get_Data<int>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
+
+      // validate all receipts in the deposit_receipt_ids are from department the user can access
+      // This is now done at the controller level using a departmental acccess control check:
+      //    current_user_department_id is the same as the selected_user_department_id if basic
+      // if not basic, then uses a check to make sure the selected_user_access_level is <= current_user_access_level
+
       //if(receipt_ids < 1)
       //{
       //  return "The selected user does not have any receipts to deposit or you do not have access to their receipts.";
       //}
 
-      return "";
+      return receipt_ids.Count();
     }
 
     public static bool ValidateEdit(long transaction_id, UserAccess ua)
@@ -478,7 +482,6 @@ namespace ClayFinancial.Models.Transaction.Data
           return false;
       }
 
-
     }
 
     private bool SaveNewReceipt()
@@ -536,9 +539,10 @@ namespace ClayFinancial.Models.Transaction.Data
 
           UPDATE data_transaction
           SET child_transaction_id = @transaction_id
-          WHERE transaction_id = @transaction_id;       
+          WHERE transaction_id = @transaction_id; 
 
         ");
+
       }
 
 
@@ -699,7 +703,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
           SELECT
             transaction_id
-          FROM vw_transaction_view
+          FROM data_transaction DT
           WHERE created_by_employee_id = @selected_employee_id
             AND child_transaction_id IS NULL
             AND UPPER(transaction_type) IN ('C','R')
@@ -736,13 +740,16 @@ namespace ClayFinancial.Models.Transaction.Data
       ");
   
       var i = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
-
       
       var transaction_id = param.Get<long>("@transaction_id");
       
+
       var deposit = GetTransactionData(transaction_id, ua.employee_id, ua);
 
-      deposit.GetDepositReceipts(ua.employee_id);
+      if(deposit != null && transaction_id > 0)
+      {
+        deposit.GetDepositReceipts(ua.employee_id);
+      }
 
       return deposit;
 
@@ -759,7 +766,6 @@ namespace ClayFinancial.Models.Transaction.Data
            .AppendLine(" AND child_transaction_id = @transaction_id");
 
       deposit_receipts = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
-
 
     }
 
@@ -792,6 +798,45 @@ namespace ClayFinancial.Models.Transaction.Data
 
       int count = Constants.Exec_Scalar<int>(query, Constants.ConnectionString.ClayFinancial, param);      
       return count;
+    }
+
+    public static bool ValidateTransactionListAccess(List<long> transaction_ids, UserAccess ua)
+    {
+      if(ua.current_access == UserAccess.access_type.basic)
+      {
+
+        var param = new DynamicParameters();
+        param.Add("@transaction_ids", transaction_ids);
+
+
+        var query = @"
+          
+          SELECT DISTINCT
+            created_by_display_name
+          FROM data_transaction
+          WHERE transaction_id IN (@transaction_ids)
+
+        ";
+
+        var transaction_usernames = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial);
+
+
+        foreach(var name in transaction_usernames)
+        {
+
+          var name_ua = UserAccess.GetUserAccessByDisplayName(name);
+          // We check to see if the name that they gave us has a higher level access
+          // than they do.  If it is higher, then they can't do a deposit.
+          if ((int)ua.current_access < (int)name_ua.current_access || ua.my_department_id != name_ua.my_department_id)
+          {
+            return false;
+          }
+        }
+
+
+      }
+
+      return true;
     }
 
 

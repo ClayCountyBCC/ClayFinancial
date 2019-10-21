@@ -200,6 +200,7 @@ namespace ClayFinancial.Controllers.API
       return Ok();
 
     }
+
     [HttpPost]
     [Route("AddPaymentMethod")]
     public IHttpActionResult AddPaymentMethod(PaymentMethodData payment_method_data)
@@ -335,8 +336,7 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetControlData")]
-    
-    public IHttpActionResult GetAllControls(List<long> transaction_ids)
+    public IHttpActionResult GetAllActiveControlDataForTransactions(List<long> transaction_ids)
     {
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
@@ -346,9 +346,12 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      return Ok(ControlData.GetAllControlDataForTransactions(transaction_ids, ua));
+      if (!TransactionData.ValidateTransactionListAccess(transaction_ids, ua)) { return Unauthorized(); }
+
+      return Ok(ControlData.GetAllActiveControlDataForTransactions(transaction_ids, ua));
 
     }
+
     [HttpGet]
     [Route("GetControlDataHistory")]
     public IHttpActionResult GetControlHistory(long control_data_id = -1, long transaction_id = -1)
@@ -364,6 +367,8 @@ namespace ClayFinancial.Controllers.API
       {
         return BadRequest();
       }
+
+      if (!TransactionData.ValidateTransactionListAccess(new List<long>() { transaction_id }, ua)) { return Unauthorized(); }
 
       var cl = ControlData.GetControlDataHistory(control_data_id, transaction_id);
 
@@ -435,10 +440,10 @@ namespace ClayFinancial.Controllers.API
       var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
 
       //validate there are receipts to deposit for selected name and current users access level
-      var error = TransactionData.ValidateNewDeposit(selected_employee_id, ua);
-      if(error.Length > 0)
+ 
+      if(TransactionData.ValidateNewDeposit(selected_employee_id, ua) == 0)
       {
-        return Ok(error);
+        return Ok("There are no receipts to deposit");
       }
 
       var deposit_transaction = TransactionData.CreateDeposit(ua, selected_user_display_name, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress );
@@ -483,7 +488,7 @@ namespace ClayFinancial.Controllers.API
         var name_ua = UserAccess.GetUserAccessByDisplayName(name);
         // We check to see if the name that they gave us has a higher level access
         // than they do.  If it is higher, then they can't do a deposit.
-        if ((int)ua.current_access <= (int)name_ua.current_access) return Ok(0);
+        if ((int)ua.current_access < (int)name_ua.current_access) return Ok(0);
         if (ua.my_department_id != name_ua.my_department_id) return Ok(0);
       }
 

@@ -281,9 +281,10 @@ namespace ClayFinancial.Models.Transaction.Data
       //return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
     }
 
-    public static List<ControlData> GetAllControlDataForTransactions(List<long> transaction_ids, UserAccess ua)
+    public static List<ControlData> GetAllActiveControlDataForTransactions(List<long> transaction_ids, UserAccess ua)
     {
       var param = new DynamicParameters();
+
       param.Add("@transaction_ids", transaction_ids);
 
       var query = @"
@@ -292,6 +293,7 @@ namespace ClayFinancial.Models.Transaction.Data
           *
         FROM data_controls
         WHERE transaction_id IN @transaction_ids
+          AND is_active = 1
 
       ";
 
@@ -324,6 +326,7 @@ namespace ClayFinancial.Models.Transaction.Data
       var param = new DynamicParameters();
       param.Add("@control_data_id", control_data_id);
       param.Add("@transaction_id", transaction_id);
+
       var query = @"
 
         WITH QueryData AS (
@@ -337,6 +340,7 @@ namespace ClayFinancial.Models.Transaction.Data
           WHERE
             transaction_id = @transaction_id
             AND control_data_id = @control_data_id
+
         )
 
         SELECT 
@@ -358,6 +362,7 @@ namespace ClayFinancial.Models.Transaction.Data
           AND ISNULL(DC.department_id, 0) = Q.department_id
         LEFT OUTER JOIN data_changes_control DCC ON DCC.new_control_data_id = DC.control_data_id
         ORDER BY control_data_id DESC
+
 
       ";
       var control_data = Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
