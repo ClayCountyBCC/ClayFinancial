@@ -33,6 +33,7 @@ var Transaction;
     Transaction.change_edit_container = "change_edit_container";
     Transaction.change_transaction_history_table_header = "change_transaction_history_header";
     Transaction.change_transaction_history_table_body = "change_transaction_history_table";
+    Transaction.deposit_view_container = "deposit_view";
     function Start() {
         return __awaiter(this, void 0, void 0, function* () {
             yield Transaction.Department.GetDepartments()
@@ -59,13 +60,17 @@ var Transaction;
             });
             yield Transaction.GetAllNames()
                 .then(names => {
-                console.log('names returned', names);
-                let nameSelect = document.getElementById("nameFilter");
+                let filterNames = document.getElementById("nameFilter");
+                let depositNames = document.getElementById("depositNameFilter");
                 for (let name of names) {
-                    nameSelect.add(Utilities.Create_Option(name, name, false));
+                    filterNames.add(Utilities.Create_Option(name, name, false));
+                    depositNames.add(Utilities.Create_Option(name, name, false));
                 }
             });
             yield Transaction.GetTransactionList(1);
+            setInterval(() => {
+                Transaction.GetTransactionList(Transaction.current_page);
+            }, 60 * 5 * 1000);
         });
     }
     Transaction.Start = Start;
@@ -157,6 +162,9 @@ var Transaction;
         let nameSelect = document.getElementById("nameFilter");
         nameSelect.add(Utilities.Create_Option("mine", "My Transactions", true));
         nameSelect.add(Utilities.Create_Option("", "All Users", false));
+        let depositNameSelect = document.getElementById("depositNameFilter");
+        depositNameSelect.add(Utilities.Create_Option("", "Select A Name to Deposit", true));
+        depositNameSelect.add(Utilities.Create_Option("", "My Transactions", false));
         let statusSelect = document.getElementById("statusFilter");
         statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
         statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
@@ -190,28 +198,35 @@ var Transaction;
         }
     }
     Transaction.ViewReceiptInProgress = ViewReceiptInProgress;
-    function ViewReceiptDetail() {
+    function HideAllViews() {
+        Utilities.Hide(Transaction.deposit_view_container);
         Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-        Utilities.Show(Transaction.Data.TransactionData.action_container);
+        Utilities.Hide(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
+    }
+    function ViewCreateDeposit() {
+        HideAllViews();
+        Utilities.Show(Transaction.deposit_view_container);
+    }
+    Transaction.ViewCreateDeposit = ViewCreateDeposit;
+    function ViewReceiptDetail() {
+        HideAllViews();
+        Utilities.Show(Transaction.Data.TransactionData.action_container);
     }
     Transaction.ViewReceiptDetail = ViewReceiptDetail;
     function ViewPrintableReceipt() {
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-        Utilities.Hide(Transaction.Data.TransactionData.action_container);
+        HideAllViews();
         Utilities.Show(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewPrintableReceipt = ViewPrintableReceipt;
     function ViewTransactions() {
+        HideAllViews();
         Utilities.Show(Transaction.Data.TransactionData.transaction_view_container);
-        Utilities.Hide(Transaction.Data.TransactionData.action_container);
-        Utilities.Hide(Transaction.Receipt.receipt_container);
     }
     Transaction.ViewTransactions = ViewTransactions;
     function ViewDeposit() {
-        Utilities.Hide(Transaction.Data.TransactionData.transaction_view_container);
-        Utilities.Hide(Transaction.Data.TransactionData.action_container);
-        Utilities.Hide(Transaction.Receipt.receipt_container);
+        HideAllViews();
+        Utilities.Show(Transaction.deposit_view_container);
     }
     Transaction.ViewDeposit = ViewDeposit;
     function PreviousPage(element) {

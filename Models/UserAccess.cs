@@ -271,12 +271,33 @@ namespace ClayFinancial.Models
       return name_list;
     }
 
+    public static UserAccess GetUserAccessByDisplayName(string name)
+    {
+      var users = UserAccess.GetCachedAllUserAccess();
+      foreach(string key in users.Keys)
+      {
+        if (users[key].display_name == name) return users[key];
+      }
+      return null;
+    }
+
     public static List<string> GetCachedUserDisplayNames(string my_name)
     {
       var names = (List<string>)myCache.GetItem("list_of_names");
       var filtered = (from n in names where n != my_name select n).ToList();
       return filtered;
     }
+
+    //public static int GetEmployeeIdFromDisplayName(string name)
+    //{
+    //  var users = UserAccess.GetCachedAllUserAccess();
+    //  foreach (string key in users.Keys)
+    //  {
+    //    if (users[key].display_name == name) return users[key].employee_id;
+
+    //  }
+    //  return -1;
+    //}
 
 
   }

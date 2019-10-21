@@ -392,12 +392,15 @@ namespace ClayFinancial.Controllers.API
 
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      var selected_employee_id = TransactionData.GetEmployeeIdFromDisplayName(selected_user_display_name);
-
       if (ua.current_access == UserAccess.access_type.no_access)
       {
         return Unauthorized();
       }
+
+      if (selected_user_display_name.Length == 0) selected_user_display_name = ua.display_name;
+
+      var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
+      
 
       //validate there are receipts to deposit for selected name and current users access level
       var error = TransactionData.ValidateNewDeposit(selected_employee_id, ua);
@@ -431,17 +434,30 @@ namespace ClayFinancial.Controllers.API
     }
 
     [HttpGet]
-    [Route("GetDepositNames")]
-    public IHttpActionResult GetDespositNames()
+    [Route("GetDepositCount")]
+    public IHttpActionResult GetDespositNames(string name = "")
     {
       // This endpoint is going to look at the user's access
-      // and the receipts that still need to be deposited and return a list
-      // of just those names. 
-      // If the user's name is in the list, it will return a name "My Transactions" instead of a name.
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      return Ok(UserAccess.GetCachedUserDisplayNames(ua.display_name));
-    }
+      // and return a count of the number of receipts ready to be deposited.
+      // the client will use this as an identifier, if the count is 0, it will now attempt
+      // to create a deposit.
 
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
+      if (name == "")
+      {
+        name = ua.display_name;
+      }
+      else
+      {
+        var name_ua = UserAccess.GetUserAccessByDisplayName(name);
+        // We check to see if the name that they gave us has a higher level access
+        // than they do.  If it is higher, then they can't do a deposit.
+        if ((int)ua.current_access < (int)name_ua.current_access) return Ok(0);
+      }
+
+      return Ok(TransactionData.GetReadyForDepositCount(ua, name));
+    }
 
     [HttpGet]
     [Route("GetSalesTaxAndTDC")]

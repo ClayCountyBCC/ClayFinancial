@@ -680,20 +680,11 @@ namespace ClayFinancial.Models.Transaction.Data
 
     // this will create a list of non-deposited receipts 
 
-    public static int GetEmployeeIdFromDisplayName(string name)
-    {
-      var users = UserAccess.GetCachedAllUserAccess();
-      foreach (string key in users.Keys)
-      {
-        if (users[key].display_name == name) return users[key].employee_id;
 
-      }
-      return -1;
-    }
 
     public static TransactionData CreateDeposit(UserAccess ua, string selected_user_display_name, string ipAddress)
     {
-      var selected_employee_id = GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name);
+      var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
       var param = new DynamicParameters();
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@my_employee_id", ua.employee_id);
@@ -704,8 +695,9 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@received_from", "System");
       param.Add("@comment", "");
       param.Add("@selected_employee_id", selected_employee_id);
-      param.Add("my_department_id", ua.my_department_id);
-      if(ValidateNewDeposit(GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name), ua).Length > 0) return null;
+      param.Add("@my_department_id", ua.my_department_id);
+      // ValidateNewDeposit was already called in TransactionDataController
+      //if(ValidateNewDeposit(UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name), ua).Length > 0) return null;
 
 
       StringBuilder query = new StringBuilder();
@@ -818,6 +810,31 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return true;
     }
+
+    public static int GetReadyForDepositCount(UserAccess ua, string name_to_view)
+    {
+      var param = new DynamicParameters();
+      param.Add("@name", name_to_view);
+      if(ua.current_access == UserAccess.access_type.basic)
+      {
+        param.Add("@my_department", ua.my_department_id);
+      }
+      string query = $@"
+        SELECT
+          COUNT(*) Total_Open_Transactions
+        FROM data_transaction T
+        WHERE  
+          child_transaction_id IS NULL
+          AND transaction_type='R'
+          AND created_by_display_name = @name
+        { (ua.current_access == UserAccess.access_type.basic ? " AND department_id = @my_department" : "") }
+         GROUP BY created_by_display_name 
+        ";
+
+      int count = Constants.Exec_Scalar<int>(query, Constants.ConnectionString.ClayFinancial, param);      
+      return count;
+    }
+
 
   }
 }

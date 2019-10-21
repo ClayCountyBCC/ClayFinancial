@@ -27,7 +27,7 @@
            onclick="Transaction.ViewReceiptInProgress();">
           Current Receipt
         </a>
-        <a onclick="Transaction.NewDeposit();"
+        <a onclick="Transaction.ViewDeposit();"
            class="navbar-item">
           New Deposit
         </a>
@@ -305,8 +305,6 @@
 
 </div>
 
-
-
 <div id="change_transaction"
      class="modal">
 
@@ -375,6 +373,57 @@
 
 </div>
 
+<div id="deposit_view"
+     class="hide container">
+
+  <fieldset style="width: 100%;">
+    <legend class="label">Transaction Filters</legend>
+
+    <div class="level">
+
+      <div class="level-item">
+        <div class="field">
+          <div class="control">
+            <div class="select">
+              <select onchange="Transaction.GetDepositCount();"
+                      id="depositNameFilter"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-item">
+        <div class="field">
+          <label class="label">Receipts ready for Deposit</label>
+          <div class="control">
+            <input class="input" readonly id="depositCount" />
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="level-item">
+        <div class="field">
+          <div class="control">
+            <button id="createDepositButton"
+                    onclick="Transaction.FilterTransactions(); return false;"
+                    class="button is-primary is-loading"
+                    type="button">
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+  </fieldset>
+
+
+
+</div>
 
 <script src="~/scripts/Transaction/transaction_bundle.js?201910210613"></script>
 

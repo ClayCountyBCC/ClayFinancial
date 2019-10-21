@@ -25,6 +25,7 @@
   export let change_edit_container = "change_edit_container";
   export let change_transaction_history_table_header = "change_transaction_history_header";
   export let change_transaction_history_table_body = "change_transaction_history_table";
+  export let deposit_view_container = "deposit_view";
 
   export async function Start()
   {
@@ -75,15 +76,21 @@
     await Transaction.GetAllNames()
       .then(names =>
       {
-        console.log('names returned', names);
-        let nameSelect = <HTMLSelectElement>document.getElementById("nameFilter");
+        let filterNames = <HTMLSelectElement>document.getElementById("nameFilter");
+        let depositNames = <HTMLSelectElement>document.getElementById("depositNameFilter");
         for (let name of names)
         {
-          nameSelect.add(Utilities.Create_Option(name, name, false));
+          filterNames.add(Utilities.Create_Option(name, name, false));
+          depositNames.add(Utilities.Create_Option(name, name, false));
         }
       });
 
     await Transaction.GetTransactionList(1);
+
+    setInterval(() =>
+    {
+      Transaction.GetTransactionList(Transaction.current_page)
+    }, 60 * 5 * 1000);
 
   } 
 
@@ -191,6 +198,10 @@
     nameSelect.add(Utilities.Create_Option("mine", "My Transactions", true));
     nameSelect.add(Utilities.Create_Option("", "All Users", false));
 
+    let depositNameSelect = <HTMLSelectElement>document.getElementById("depositNameFilter");
+    depositNameSelect.add(Utilities.Create_Option("", "Select A Name to Deposit", true));
+    depositNameSelect.add(Utilities.Create_Option("", "My Transactions", false));
+
     let statusSelect = <HTMLSelectElement>document.getElementById("statusFilter");
     statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
     statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
@@ -232,32 +243,44 @@
     }
   }
 
+  function HideAllViews(): void
+  {
+    Utilities.Hide(Transaction.deposit_view_container);
+    Utilities.Hide(Data.TransactionData.transaction_view_container);
+    Utilities.Hide(Data.TransactionData.action_container);
+    Utilities.Hide(Receipt.receipt_container);    
+  }
+
+  export function ViewCreateDeposit(): void
+  {
+    HideAllViews();
+    Utilities.Show(Transaction.deposit_view_container);
+  }
+
   export function ViewReceiptDetail(): void
   {
-    Utilities.Hide(Data.TransactionData.transaction_view_container);
+    HideAllViews();
     Utilities.Show(Data.TransactionData.action_container);
-    Utilities.Hide(Receipt.receipt_container);
+
   }
 
   export function ViewPrintableReceipt(): void
   {
-    Utilities.Hide(Data.TransactionData.transaction_view_container);
-    Utilities.Hide(Data.TransactionData.action_container);
+    HideAllViews();
     Utilities.Show(Receipt.receipt_container);
   }
 
   export function ViewTransactions(): void
   {
+    HideAllViews();
     Utilities.Show(Data.TransactionData.transaction_view_container);
-    Utilities.Hide(Data.TransactionData.action_container);
-    Utilities.Hide(Receipt.receipt_container);
   }
+
 
   export function ViewDeposit(): void
   {
-    Utilities.Hide(Data.TransactionData.transaction_view_container);
-    Utilities.Hide(Data.TransactionData.action_container);
-    Utilities.Hide(Receipt.receipt_container);
+    HideAllViews();
+    Utilities.Show(Transaction.deposit_view_container);
   }
 
   export function PreviousPage(element: HTMLAnchorElement): void
