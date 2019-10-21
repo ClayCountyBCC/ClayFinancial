@@ -288,17 +288,5 @@ namespace ClayFinancial.Models
       return filtered;
     }
 
-    //public static int GetEmployeeIdFromDisplayName(string name)
-    //{
-    //  var users = UserAccess.GetCachedAllUserAccess();
-    //  foreach (string key in users.Keys)
-    //  {
-    //    if (users[key].display_name == name) return users[key].employee_id;
-
-    //  }
-    //  return -1;
-    //}
-
-
   }
 }

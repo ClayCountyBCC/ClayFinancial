@@ -200,7 +200,7 @@
 
     let depositNameSelect = <HTMLSelectElement>document.getElementById("depositNameFilter");
     depositNameSelect.add(Utilities.Create_Option("", "Select A Name to Deposit", true));
-    depositNameSelect.add(Utilities.Create_Option("", "My Transactions", false));
+    depositNameSelect.add(Utilities.Create_Option("mine", "My Transactions", false));
 
     let statusSelect = <HTMLSelectElement>document.getElementById("statusFilter");
     statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
@@ -533,6 +533,32 @@
     let path = Transaction.GetPath();
     return Utilities.Get(path + "API/Transaction/GetAllNames");
 
+  }
+
+  export function GetDepositCount(): void
+  {
+    let name = Utilities.Get_Value("depositNameFilter");
+    if (name.length === 0) return;
+    if (name === "mine") name = "";
+    let path = Transaction.GetPath();
+    Utilities.Get<number>(path + "API/Transaction/GetDepositCount?name=" + name)
+      .then(count =>
+      {
+        Utilities.Set_Value("", count.toString());
+        if (count > 0)
+        {
+          Utilities.Show("CreateDepositButton");
+        }
+        else
+        {
+          Utilities.Hide("CreateDepositButton");
+        }
+      });
+  }
+
+  export function CreateDeposit(): void
+  {
+    alert("This does nothing yet!");
   }
 
 }

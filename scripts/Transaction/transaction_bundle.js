@@ -621,7 +621,7 @@ var Transaction;
         nameSelect.add(Utilities.Create_Option("", "All Users", false));
         let depositNameSelect = document.getElementById("depositNameFilter");
         depositNameSelect.add(Utilities.Create_Option("", "Select A Name to Deposit", true));
-        depositNameSelect.add(Utilities.Create_Option("", "My Transactions", false));
+        depositNameSelect.add(Utilities.Create_Option("mine", "My Transactions", false));
         let statusSelect = document.getElementById("statusFilter");
         statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
         statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
@@ -888,6 +888,16 @@ var Transaction;
         return Utilities.Get(path + "API/Transaction/GetAllNames");
     }
     Transaction.GetAllNames = GetAllNames;
+    function GetDepositCount() {
+        let name = Utilities.Get_Value("depositNameFilter");
+        let path = Transaction.GetPath();
+        Utilities.Get(path + "API/Transaction/GetDepositCount");
+    }
+    Transaction.GetDepositCount = GetDepositCount;
+    function CreateDeposit() {
+        alert("This does nothing yet!");
+    }
+    Transaction.CreateDeposit = CreateDeposit;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map
 var Utilities;
