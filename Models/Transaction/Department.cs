@@ -101,8 +101,7 @@ namespace ClayFinancial.Models.Transaction
 
     public bool ValidateTransactionData(TransactionData transactionData)
     {
-      if(transactionData.department_control_data.Count() == 0 && controls_dict.Count() == 0)
-      { return true; }
+      if (transactionData.department_control_data.Count() == 0 && controls_dict.Count() == 0) { return true; }
       // We treat the Data.TransactionData class as a department class because it has all of the
       // departmental data we'll need to validate
 
@@ -155,8 +154,15 @@ namespace ClayFinancial.Models.Transaction
       var controlids = (from cid in transactionData.department_control_data
                         select cid.control_id).ToList();
 
+      // This was returning 0 when there was 1. 
+      // var distinctControlIds = controlids.Distinct();
 
-      var distinctControlIds = controlids.Distinct();
+      // The IEnumerable list did not seem to be working correctly. 
+      // Created explicit List<int> variable.
+      List<int> distinctControlIds = new List<int>();
+
+      distinctControlIds.AddRange((from id in controlids
+                                   select id).ToList().Distinct());
 
       // Todo make  sure error text is set in the object being passed to this function 
       if(controlids.Count() != distinctControlIds.Count())

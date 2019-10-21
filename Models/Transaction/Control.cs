@@ -140,7 +140,8 @@ namespace ClayFinancial.Models.Transaction
 
     private bool ValidateDecimal(Data.ControlData cd)
     {
-      if (decimal.TryParse(cd.value, out _))
+
+      if (!decimal.TryParse(cd.value, out _))
       {
         return false;
       }

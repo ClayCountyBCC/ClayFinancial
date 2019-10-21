@@ -104,7 +104,10 @@ namespace ClayFinancial.Controllers.API
 
       if (!transactionData.ValidateTransaction())
       {
-        transactionData.error_text = "There was an issue with some of the data";
+        if(transactionData.error_text.Length == 0)
+        {
+          transactionData.error_text = "There was an issue with some of the data";
+        }
         return Ok(transactionData);
       }
 
