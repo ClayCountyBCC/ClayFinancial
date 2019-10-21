@@ -114,11 +114,12 @@ namespace ClayFinancial.Controllers.API
       
       if(td)
       {
-        return Ok();
+        return Ok(TransactionData.GetTransactionData(transactionData.transaction_id, ua.employee_id, ua));
       }
-
-      return InternalServerError();
-
+      else
+      {
+        return Ok(transactionData);
+      }
     }
 
     [HttpPost]
