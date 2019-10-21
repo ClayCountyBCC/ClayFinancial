@@ -430,6 +430,8 @@ namespace ClayFinancial.Controllers.API
       }
 
 
+      if (selected_user_display_name == "mine") selected_user_display_name = ua.display_name;
+
       var selected_employee_id = UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name);
 
       //validate there are receipts to deposit for selected name and current users access level
@@ -463,7 +465,7 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetDepositCount")]
-    public IHttpActionResult GetDespositNames(string name = "mine")
+    public IHttpActionResult GetDespositCount(string name)
     {
       // This endpoint is going to look at the user's access
       // and return a count of the number of receipts ready to be deposited.

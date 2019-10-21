@@ -204,11 +204,6 @@ var Transaction;
         Utilities.Hide(Transaction.Data.TransactionData.action_container);
         Utilities.Hide(Transaction.Receipt.receipt_container);
     }
-    function ViewCreateDeposit() {
-        HideAllViews();
-        Utilities.Show(Transaction.deposit_view_container);
-    }
-    Transaction.ViewCreateDeposit = ViewCreateDeposit;
     function ViewReceiptDetail() {
         HideAllViews();
         Utilities.Show(Transaction.Data.TransactionData.action_container);
@@ -227,6 +222,7 @@ var Transaction;
     function ViewDeposit() {
         HideAllViews();
         Utilities.Show(Transaction.deposit_view_container);
+        Utilities.Hide("createDepositButton");
     }
     Transaction.ViewDeposit = ViewDeposit;
     function PreviousPage(element) {
@@ -432,13 +428,50 @@ var Transaction;
     }
     Transaction.GetAllNames = GetAllNames;
     function GetDepositCount() {
-        let name = Utilities.Get_Value("depositNameFilter");
-        let path = Transaction.GetPath();
-        Utilities.Get(path + "API/Transaction/GetDepositCount");
+        return __awaiter(this, void 0, void 0, function* () {
+            Utilities.Hide("createDepositButton");
+            Utilities.Set_Value("depositCount", "0");
+            let name = Utilities.Get_Value("depositNameFilter");
+            if (name.length === 0)
+                return;
+            let path = Transaction.GetPath();
+            yield Utilities.Get_Empty(path + "API/Transaction/GetDepositCount?name=" + name)
+                .then(response_text => {
+                let count = parseInt(response_text);
+                Utilities.Set_Value("depositCount", response_text);
+                if (count > 0) {
+                    Utilities.Show("createDepositButton");
+                }
+            });
+        });
     }
     Transaction.GetDepositCount = GetDepositCount;
     function CreateDeposit() {
-        alert("This does nothing yet!");
+        return __awaiter(this, void 0, void 0, function* () {
+            Utilities.Toggle_Loading_Button("createDepositButton", true);
+            yield GetDepositCount()
+                .then(() => {
+                let count = parseInt(Utilities.Get_Value("depositCount"));
+                if (!isNaN(count) && count > 0) {
+                    let name = Utilities.Get_Value("depositNameFilter");
+                    let path = Transaction.GetPath();
+                    Utilities.Post(path + "API/Transaction/CreateDeposit?selected_user_display_name=" + name, null)
+                        .then(transaction => {
+                        let transaction_id = transaction.transaction_id;
+                        Transaction.ShowReceiptDetail(transaction_id);
+                        Utilities.Toggle_Loading_Button("createDepositButton", false);
+                    }, error => {
+                        console.log("error!", error);
+                        Utilities.Toggle_Loading_Button("createDepositButton", false);
+                    });
+                }
+                else {
+                    Utilities.Toggle_Loading_Button("createDepositButton", false);
+                    alert("The Receipts ready for deposit was updated, a deposit can not be created at this time.");
+                    return;
+                }
+            });
+        });
     }
     Transaction.CreateDeposit = CreateDeposit;
 })(Transaction || (Transaction = {}));

@@ -218,6 +218,23 @@ var Utilities;
     //      return response.json();
     //    });
     //}
+    function Get_Empty(url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json" //,"Upgrade-Insecure-Requests": "1"
+                },
+                cache: "no-cache",
+                credentials: "include"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return yield response.text();
+        });
+    }
+    Utilities.Get_Empty = Get_Empty;
     function Get(url) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield fetch(url, {
