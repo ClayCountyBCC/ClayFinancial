@@ -811,14 +811,11 @@ namespace ClayFinancial.Models.Transaction.Data
       return true;
     }
 
-    public static int GetReadyForDepositCount(UserAccess ua, string name_to_view)
+    public static int GetReadyForDepositCount(string name_to_view)
     {
       var param = new DynamicParameters();
       param.Add("@name", name_to_view);
-      if(ua.current_access == UserAccess.access_type.basic)
-      {
-        param.Add("@my_department", ua.my_department_id);
-      }
+
       string query = $@"
         SELECT
           COUNT(*) Total_Open_Transactions
@@ -826,8 +823,7 @@ namespace ClayFinancial.Models.Transaction.Data
         WHERE  
           child_transaction_id IS NULL
           AND transaction_type='R'
-          AND created_by_display_name = @name
-        { (ua.current_access == UserAccess.access_type.basic ? " AND department_id = @my_department" : "") }
+          AND created_by_display_name = @name        
          GROUP BY created_by_display_name 
         ";
 

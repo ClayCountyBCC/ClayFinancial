@@ -409,8 +409,6 @@ namespace ClayFinancial.Controllers.API
         return Ok(error);
       }
 
-
-
       var deposit_transaction = TransactionData.CreateDeposit(ua, selected_user_display_name, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress );
 
       if (deposit_transaction == null)
@@ -453,10 +451,11 @@ namespace ClayFinancial.Controllers.API
         var name_ua = UserAccess.GetUserAccessByDisplayName(name);
         // We check to see if the name that they gave us has a higher level access
         // than they do.  If it is higher, then they can't do a deposit.
-        if ((int)ua.current_access < (int)name_ua.current_access) return Ok(0);
+        if ((int)ua.current_access <= (int)name_ua.current_access) return Ok(0);
+        if (ua.my_department_id != name_ua.my_department_id) return Ok(0);
       }
 
-      return Ok(TransactionData.GetReadyForDepositCount(ua, name));
+      return Ok(TransactionData.GetReadyForDepositCount(name));
     }
 
     [HttpGet]
