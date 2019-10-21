@@ -479,7 +479,7 @@ var Transaction;
     Transaction.page_count = 0;
     Transaction.department_id_filter = -1;
     Transaction.name_filter = "mine";
-    Transaction.completed_filter = "";
+    Transaction.completed_filter = "i";
     Transaction.transaction_type_filter = "";
     Transaction.modified_only_filter = false;
     Transaction.transaction_number_filter = "";
@@ -514,6 +514,14 @@ var Transaction;
                     Transaction.controls = Transaction.controls.concat(payment_type.controls.filter((c) => { return control_ids.indexOf(c.control_id) === -1; }));
                 }
             });
+            yield Transaction.GetAllNames()
+                .then(names => {
+                console.log('names returned', names);
+                let nameSelect = document.getElementById("nameFilter");
+                for (let name of names) {
+                    nameSelect.add(Utilities.Create_Option(name, name, false));
+                }
+            });
             yield Transaction.GetTransactionList(1);
         });
     }
@@ -546,9 +554,10 @@ var Transaction;
             yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
                 Transaction.transactions = tv;
-                Transaction.Data.TransactionData.RenderTransactionList();
+                Transaction.Data.TransactionData.RenderTransactionList(tv);
                 console.log('transactions', Transaction.transactions);
                 Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
+                Transaction.ViewTransactions();
             });
             yield Transaction.Data.TransactionData.GetTransactionPageCount()
                 .then((pagecount) => {
@@ -606,8 +615,8 @@ var Transaction;
         nameSelect.add(Utilities.Create_Option("mine", "My Transactions", true));
         nameSelect.add(Utilities.Create_Option("", "All Users", false));
         let statusSelect = document.getElementById("statusFilter");
-        statusSelect.add(Utilities.Create_Option("", "All Statuses", true));
-        statusSelect.add(Utilities.Create_Option("i", "Incomplete", false));
+        statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
+        statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
         statusSelect.add(Utilities.Create_Option("c", "Completed", false));
         let typeSelect = document.getElementById("typeFilter");
         typeSelect.add(Utilities.Create_Option("", "All Types", true));
@@ -859,6 +868,11 @@ var Transaction;
         }
     }
     Transaction.SaveChanges = SaveChanges;
+    function GetAllNames() {
+        let path = Transaction.GetPath();
+        return Utilities.Get(path + "API/Transaction/GetAllNames");
+    }
+    Transaction.GetAllNames = GetAllNames;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map
 var Utilities;
@@ -2497,6 +2511,7 @@ var Transaction;
                 this.created_by_username = "";
                 this.created_by_ip_address = "";
                 this.created_by_display_name = "PREVIEW";
+                this.deposit_receipts = [];
                 //public base_container: string = 'root';
                 this.department_element = null;
                 this.department_element_container = null;
@@ -2511,19 +2526,41 @@ var Transaction;
                 if (saved_transaction !== null) {
                     this.transaction_id = saved_transaction.transaction_id;
                     this.transaction_number = saved_transaction.transaction_number;
+                    this.transaction_type = saved_transaction.transaction_type;
                 }
                 let targetContainer = document.getElementById(TransactionData.action_container);
                 Utilities.Clear_Element(targetContainer);
                 this.CreateReceiptTitle(targetContainer, saved_transaction);
+                switch (this.transaction_type) {
+                    case "R":
+                        console.log("receipt view");
+                        this.RenderReceiptView(targetContainer, saved_transaction);
+                        break;
+                    case "D":
+                    case "C":
+                        console.log("deposit view");
+                        this.RenderDepositView(targetContainer, saved_transaction);
+                        break;
+                    default:
+                        break;
+                }
+                this.transaction_error_element = this.CreateTransactionErrorElement();
+                targetContainer.appendChild(this.transaction_error_element);
+            }
+            RenderDepositView(container, saved_transaction) {
+                let transactions_container = document.createElement("div");
+                container.appendChild(transactions_container);
+                let footer = TransactionData.CreateTransactionsTableFooter(saved_transaction);
+                TransactionData.RenderTransactionList(saved_transaction.deposit_receipts, transactions_container, footer);
+            }
+            RenderReceiptView(container, saved_transaction) {
                 let control_container = document.createElement("div");
                 control_container.id = "transaction_controls";
                 control_container.classList.add("columns");
-                targetContainer.appendChild(control_container);
+                container.appendChild(control_container);
                 this.department_element = Transaction.DepartmentControl.cloneNode(true);
                 this.RenderDepartmentSelection(control_container, saved_transaction);
                 this.RenderReceivedFromInput(control_container, saved_transaction);
-                this.transaction_error_element = this.CreateTransactionErrorElement();
-                targetContainer.appendChild(this.transaction_error_element);
             }
             CreateTransactionErrorElement() {
                 let e = document.createElement("div");
@@ -2532,7 +2569,23 @@ var Transaction;
             CreateReceiptTitle(target, saved_transaction) {
                 let title = document.createElement("h2");
                 title.classList.add("title", "has-text-centered");
-                let text = saved_transaction !== null ? "Viewing Transaction: " + saved_transaction.transaction_number : "Create a New Receipt";
+                let text = "";
+                if (saved_transaction !== null) {
+                    switch (saved_transaction.transaction_type) {
+                        case "R":
+                            text = "Viewing Receipt: " + saved_transaction.transaction_number;
+                            break;
+                        case "D":
+                            text = "Viewing Deposit: " + saved_transaction.transaction_number;
+                            break;
+                        case "C":
+                            text = "Viewing Deposit Receipt: " + saved_transaction.transaction_number;
+                            break;
+                    }
+                }
+                else {
+                    text = "Create a New Receipt";
+                }
                 title.appendChild(document.createTextNode(text));
                 target.appendChild(title);
             }
@@ -2856,6 +2909,7 @@ var Transaction;
                     Transaction.Data.TransactionData.GetTransactionList()
                         .then((tv) => {
                         Transaction.transactions = tv;
+                        TransactionData.RenderTransactionList(tv);
                         Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
                     });
                     // need to reset the current transaction
@@ -2902,25 +2956,45 @@ var Transaction;
                 let path = Transaction.GetPath();
                 return Utilities.Get(path + "API/Transaction/GetTransactionData?transaction_id=" + transaction_id.toString());
             }
-            static RenderTransactionList() {
-                Transaction.ViewTransactions();
-                let container = document.getElementById(TransactionData.transaction_list_view_container);
+            static RenderTransactionList(transactions, target_container = null, footer = null) {
+                let deposit_view = target_container !== null;
+                //Transaction.ViewTransactions();
+                let container = target_container;
+                if (!deposit_view) {
+                    container = document.getElementById(TransactionData.transaction_list_view_container);
+                }
                 Utilities.Clear_Element(container);
-                let table = TransactionData.CreateTransactionListTable();
+                let table = TransactionData.CreateTransactionListTable(deposit_view);
                 container.appendChild(table);
                 let tbody = document.createElement("tbody");
                 table.appendChild(tbody);
-                if (Transaction.transactions.length === 0) {
-                    tbody.appendChild(Transaction.CreateMessageRow(11, "No transactions were found to match your filters."));
+                let colspan = !deposit_view ? 11 : 9;
+                let errorMessage = !deposit_view ? "No transactions were found to match your filters." : "No transactions were found.";
+                if (transactions.length === 0) {
+                    tbody.appendChild(Transaction.CreateMessageRow(colspan, errorMessage));
                 }
                 else {
-                    for (let data of Transaction.transactions) {
-                        tbody.appendChild(TransactionData.CreateTransactionListRow(data));
+                    for (let data of transactions) {
+                        tbody.appendChild(TransactionData.CreateTransactionListRow(data, deposit_view));
                     }
                 }
-                Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+                if (footer !== null)
+                    table.appendChild(footer);
             }
-            static CreateTransactionListTable() {
+            static CreateTransactionsTableFooter(saved_transaction) {
+                let tfoot = document.createElement("tfoot");
+                let tr = document.createElement("tr");
+                tfoot.appendChild(tr);
+                let spacer = Utilities.CreateTableCell("td", "Deposit Totals", "has-text-right");
+                spacer.colSpan = 5;
+                tr.appendChild(spacer);
+                tr.appendChild(Utilities.CreateTableCell("td", saved_transaction.total_check_count.toString(), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(saved_transaction.total_check_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(saved_transaction.total_cash_amount), "has-text-right"));
+                tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(saved_transaction.total_check_amount + saved_transaction.total_cash_amount), "has-text-right"));
+                return tfoot;
+            }
+            static CreateTransactionListTable(short_view = false) {
                 let table = document.createElement("table");
                 table.classList.add("table", "is-fullwidth");
                 let thead = document.createElement("thead");
@@ -2931,26 +3005,28 @@ var Transaction;
                 tr.appendChild(Utilities.CreateTableCell("th", "Created On", "has-text-left", "15%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered", "5%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Number", "has-text-left", "10%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", "7.5%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Status", "has-text-left", !short_view ? "7.5%" : "12.5%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Department", "has-text-left", "15%"));
-                tr.appendChild(Utilities.CreateTableCell("th", "Checks", "has-text-right", "7.25%"));
+                tr.appendChild(Utilities.CreateTableCell("th", "Checks", "has-text-right", !short_view ? "7.5%" : "12.5%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Check Amount", "has-text-right", "10%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Cash Amount", "has-text-right", "10%"));
                 tr.appendChild(Utilities.CreateTableCell("th", "Total Amount", "has-text-right", "10%"));
-                let page = Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "has-text-centered", "10%");
-                page.colSpan = 2;
-                tr.appendChild(page);
+                if (!short_view) {
+                    let page = Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "has-text-centered", "10%");
+                    page.colSpan = 2;
+                    tr.appendChild(page);
+                }
                 //tr.appendChild(Utilities.CreateTableCell("th", "Page: " + Transaction.current_page.toString(), "", "5%"));
                 return table;
             }
-            static CreateTransactionListRow(data) {
+            static CreateTransactionListRow(data, short_view) {
                 let tr = document.createElement("tr");
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
                 //let transaction_display_value = data.transaction_type + " / " + data.transaction_number;
                 tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type, "has-text-centered"));
                 tr.appendChild(Utilities.CreateTableCell("td", data.transaction_number, "has-text-left"));
                 let status = "";
-                if (data.transaction_type === "R") {
+                if (data.transaction_type === "R" || data.transaction_type === "C") {
                     if (data.child_transaction_id === null) {
                         status = "Incomplete";
                     }
@@ -2979,24 +3055,24 @@ var Transaction;
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
-                //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
-                let listtd = document.createElement("td");
-                listtd.classList.add("has-text-right");
-                let detailButton = TransactionData.CreateTableCellIconButton("fa-list", "is-small");
-                detailButton.onclick = () => {
-                    Transaction.ShowReceiptDetail(data.transaction_id);
-                };
-                listtd.appendChild(detailButton);
-                tr.appendChild(listtd);
-                let printtd = document.createElement("td");
-                printtd.classList.add("has-text-right");
-                let printButton = TransactionData.CreateTableCellIconButton("fa-print", "is-small");
-                printButton.onclick = () => {
-                    Transaction.ShowReceipt(data.transaction_id);
-                };
-                printtd.appendChild(printButton);
-                tr.appendChild(printtd);
-                //tr.appendChild(Utilities.CreateTableCell("td", "", ""));
+                if (!short_view) {
+                    let listtd = document.createElement("td");
+                    listtd.classList.add("has-text-right");
+                    let detailButton = TransactionData.CreateTableCellIconButton("fa-list", "is-small");
+                    detailButton.onclick = () => {
+                        Transaction.ShowReceiptDetail(data.transaction_id);
+                    };
+                    listtd.appendChild(detailButton);
+                    tr.appendChild(listtd);
+                    let printtd = document.createElement("td");
+                    printtd.classList.add("has-text-right");
+                    let printButton = TransactionData.CreateTableCellIconButton("fa-print", "is-small");
+                    printButton.onclick = () => {
+                        Transaction.ShowReceipt(data.transaction_id);
+                    };
+                    printtd.appendChild(printButton);
+                    tr.appendChild(printtd);
+                }
                 return tr;
             }
             static CreateTableCellIconButton(icon, size) {

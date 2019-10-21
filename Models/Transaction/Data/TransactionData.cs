@@ -222,7 +222,7 @@ namespace ClayFinancial.Models.Transaction.Data
         }
         else
         {
-          sb.AppendLine("AND created_by_display_name = @username_filter");
+          sb.AppendLine("AND created_by_display_name = @display_name_filter");
         }
 
       }
@@ -361,6 +361,7 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       return true;
     }
+
     public static string GetTransactionDataQuery()
     {
 
@@ -370,6 +371,7 @@ namespace ClayFinancial.Models.Transaction.Data
           TD.transaction_id
           ,TD.fiscal_year
           ,TD.created_by_employee_id
+          ,TD.employee_transaction_count
           ,TD.transaction_number
           ,TD.department_id
           ,UPPER(TD.transaction_type) transaction_type
@@ -417,6 +419,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
     }
+
     public static TransactionData GetTransactionData(long transaction_id, int employee_id, UserAccess ua)
     {
       var param = new DynamicParameters();

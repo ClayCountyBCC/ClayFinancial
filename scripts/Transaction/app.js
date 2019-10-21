@@ -22,7 +22,7 @@ var Transaction;
     Transaction.page_count = 0;
     Transaction.department_id_filter = -1;
     Transaction.name_filter = "mine";
-    Transaction.completed_filter = "";
+    Transaction.completed_filter = "i";
     Transaction.transaction_type_filter = "";
     Transaction.modified_only_filter = false;
     Transaction.transaction_number_filter = "";
@@ -57,6 +57,14 @@ var Transaction;
                     Transaction.controls = Transaction.controls.concat(payment_type.controls.filter((c) => { return control_ids.indexOf(c.control_id) === -1; }));
                 }
             });
+            yield Transaction.GetAllNames()
+                .then(names => {
+                console.log('names returned', names);
+                let nameSelect = document.getElementById("nameFilter");
+                for (let name of names) {
+                    nameSelect.add(Utilities.Create_Option(name, name, false));
+                }
+            });
             yield Transaction.GetTransactionList(1);
         });
     }
@@ -89,9 +97,10 @@ var Transaction;
             yield Transaction.Data.TransactionData.GetTransactionList()
                 .then((tv) => {
                 Transaction.transactions = tv;
-                Transaction.Data.TransactionData.RenderTransactionList();
+                Transaction.Data.TransactionData.RenderTransactionList(tv);
                 console.log('transactions', Transaction.transactions);
                 Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
+                Transaction.ViewTransactions();
             });
             yield Transaction.Data.TransactionData.GetTransactionPageCount()
                 .then((pagecount) => {
@@ -149,8 +158,8 @@ var Transaction;
         nameSelect.add(Utilities.Create_Option("mine", "My Transactions", true));
         nameSelect.add(Utilities.Create_Option("", "All Users", false));
         let statusSelect = document.getElementById("statusFilter");
-        statusSelect.add(Utilities.Create_Option("", "All Statuses", true));
-        statusSelect.add(Utilities.Create_Option("i", "Incomplete", false));
+        statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
+        statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
         statusSelect.add(Utilities.Create_Option("c", "Completed", false));
         let typeSelect = document.getElementById("typeFilter");
         typeSelect.add(Utilities.Create_Option("", "All Types", true));
@@ -402,5 +411,10 @@ var Transaction;
         }
     }
     Transaction.SaveChanges = SaveChanges;
+    function GetAllNames() {
+        let path = Transaction.GetPath();
+        return Utilities.Get(path + "API/Transaction/GetAllNames");
+    }
+    Transaction.GetAllNames = GetAllNames;
 })(Transaction || (Transaction = {}));
 //# sourceMappingURL=app.js.map

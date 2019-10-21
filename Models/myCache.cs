@@ -103,7 +103,7 @@ namespace ClayFinancial.Models
           return UserAccess.GetAllUserAccess();
 
         case "list_of_names":
-          return Constants.GetListOfNames();
+          return UserAccess.GetAllUserDisplayNames();
 
         default:
           return null;

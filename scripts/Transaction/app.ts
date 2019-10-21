@@ -14,7 +14,7 @@
   export let page_count: number = 0;
   export let department_id_filter: number = -1;
   export let name_filter = "mine";
-  export let completed_filter = "";
+  export let completed_filter = "i";
   export let transaction_type_filter = "";
   export let modified_only_filter = false;
   export let transaction_number_filter = "";
@@ -72,6 +72,17 @@
 
       });
 
+    await Transaction.GetAllNames()
+      .then(names =>
+      {
+        console.log('names returned', names);
+        let nameSelect = <HTMLSelectElement>document.getElementById("nameFilter");
+        for (let name of names)
+        {
+          nameSelect.add(Utilities.Create_Option(name, name, false));
+        }
+      });
+
     await Transaction.GetTransactionList(1);
 
   } 
@@ -106,9 +117,10 @@
       .then((tv) =>
       {
         Transaction.transactions = tv;
-        Data.TransactionData.RenderTransactionList();
+        Data.TransactionData.RenderTransactionList(tv);
         console.log('transactions', Transaction.transactions);
         Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+        Transaction.ViewTransactions()
       });
 
     await Data.TransactionData.GetTransactionPageCount()
@@ -180,8 +192,8 @@
     nameSelect.add(Utilities.Create_Option("", "All Users", false));
 
     let statusSelect = <HTMLSelectElement>document.getElementById("statusFilter");
-    statusSelect.add(Utilities.Create_Option("", "All Statuses", true));
-    statusSelect.add(Utilities.Create_Option("i", "Incomplete", false));
+    statusSelect.add(Utilities.Create_Option("", "All Statuses", false));
+    statusSelect.add(Utilities.Create_Option("i", "Incomplete", true));
     statusSelect.add(Utilities.Create_Option("c", "Completed", false));
 
     let typeSelect = <HTMLSelectElement>document.getElementById("typeFilter");
@@ -491,6 +503,13 @@
       Transaction.editing_payment_method_data.SaveChanges();
       Transaction.GetTransactionList(Transaction.current_page);
     }
+  }
+
+  export function GetAllNames(): Promise<Array<string>>
+  {
+    let path = Transaction.GetPath();
+    return Utilities.Get(path + "API/Transaction/GetAllNames");
+
   }
 
 }

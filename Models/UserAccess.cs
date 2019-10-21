@@ -188,12 +188,12 @@ namespace ClayFinancial.Models
             d[""] = new UserAccess("");
             break;
 
-          case "MISSL01":
-            d["mccartneyd"] = new UserAccess("mccartneyd");
-            break;
-          case "MISHLO5":
-            d["westje"] = new UserAccess("westje");
-            break;
+          //case "MISSL01":
+          //  d["mccartneyd"] = new UserAccess("mccartneyd");
+          //  break;
+          //case "MISHLO5":
+          //  d["westje"] = new UserAccess("westje");
+          //  break;
           default:
             ParseGroup(finance_Level_one_group, ref d);
             ParseGroup(finance_Level_two_group, ref d);
@@ -255,5 +255,29 @@ namespace ClayFinancial.Models
       }
       return -1;
     }
+
+    public static List<string> GetAllUserDisplayNames()
+    {
+      var name_list = new List<string>();
+      var users = UserAccess.GetCachedAllUserAccess();
+      // Added some conditionals to this list so that we wouldn't display the people with MIS access
+      // and the user with no access.
+      foreach (string key in users.Keys)
+      {
+        var access = users[key].current_access;
+        if (access != access_type.no_access && access != access_type.mis_access) name_list.Add(users[key].display_name);
+
+      }
+      return name_list;
+    }
+
+    public static List<string> GetCachedUserDisplayNames(string my_name)
+    {
+      var names = (List<string>)myCache.GetItem("list_of_names");
+      var filtered = (from n in names where n != my_name select n).ToList();
+      return filtered;
+    }
+
+
   }
 }

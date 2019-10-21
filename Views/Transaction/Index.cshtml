@@ -13,7 +13,7 @@
 
       </div>
       <div class="navbar-end">
-        <a onclick="Transaction.Data.TransactionData.RenderTransactionList();"
+        <a onclick="Transaction.ViewTransactions();"
            class="navbar-item">
           View Transactions
         </a>
@@ -125,7 +125,7 @@
             <div class="control">
               <button id="filterRefreshButton"
                       onclick="Transaction.FilterTransactions(); return false;"
-                      class="button is-primary"
+                      class="button is-primary is-loading"
                       type="button">
                 Refresh
               </button>
@@ -376,7 +376,7 @@
 </div>
 
 
-<script src="~/scripts/Transaction/transaction_bundle.js?201910160747"></script>
+<script src="~/scripts/Transaction/transaction_bundle.js?201910210613"></script>
 
 <script type="text/javascript">
 
