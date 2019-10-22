@@ -26,6 +26,8 @@ var Transaction;
                 this.created_by_ip_address = "";
                 this.created_by_display_name = "PREVIEW";
                 this.deposit_receipts = [];
+                this.can_modify = false;
+                this.can_accept_deposit = false;
                 //public base_container: string = 'root';
                 this.department_element = null;
                 this.department_element_container = null;
