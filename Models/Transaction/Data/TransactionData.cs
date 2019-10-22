@@ -579,7 +579,7 @@ namespace ClayFinancial.Models.Transaction.Data
       
 
       // IF TRANSACTION_TYPE = 'C' AND FINANCE LEVEL 2, TRANSACTION IS COMPLETE. CHILD_TRANSACTION_ID IS TRANSACTION_ID
-      if (my_access == UserAccess.access_type.finance_level_two && transaction_type.ToUpper() == "C")
+      if ((int)my_access >= (int)UserAccess.access_type.finance_level_two && transaction_type.ToUpper() == "C")
       {
         query.AppendLine(@"
 
@@ -723,6 +723,9 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@comment", "");
       param.Add("@selected_employee_id", selected_employee_id);
       param.Add("@my_department_id", ua.my_department_id);
+      param.Add("@total_cash_amount", 0);
+      param.Add("@total_check_amount", 0);
+      param.Add("@total_check_count", 0);
       // ValidateNewDeposit was already called in TransactionDataController
       //if(ValidateNewDeposit(UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name), ua).Length > 0) return null;
 
@@ -744,7 +747,10 @@ namespace ClayFinancial.Models.Transaction.Data
                 @created_by_employee_ip_address,
                 @created_by_display_name,
                 @received_from,
-                @comment;
+                @comment,
+                @total_cash_amount,
+                @total_check_amount,
+                @total_check_count;
 
 
         ;WITH all_selected_users_incomplete_receipts AS (
