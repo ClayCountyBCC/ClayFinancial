@@ -71,7 +71,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public static List<PaymentMethodData> GetActiveTransactionPaymentMethods(List<long> transaction_ids)
     {
       var param = new DynamicParameters();
-      param.Add("transaction_id", transaction_ids);
+      param.Add("transaction_ids", transaction_ids);
 
       var query = @"
         SELECT 

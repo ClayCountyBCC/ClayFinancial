@@ -102,15 +102,16 @@ namespace ClayFinancial.Controllers.API
       transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       transactionData.SetUserProperties(ua);
 
-      if (!transactionData.ValidateTransaction())
+      if (!transactionData.ValidateTransaction()) // add check for C transactionin this validation function
       {
-        if(transactionData.error_text.Length == 0)
+        if (!transactionData.can_accept_deposit) return Unauthorized();
+
+        if (transactionData.error_text.Length == 0)
         {
           transactionData.error_text = "There was an issue with some of the data";
         }
         return Ok(transactionData);
       }
-
       // TODO: new receipt needs to be a TransactionView
       var td = transactionData.SaveTransactionData();
 

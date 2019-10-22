@@ -107,8 +107,6 @@ namespace ClayFinancial.Models.Transaction.Data
       return ((int)Math.Ceiling(page_count)); // base 1
     }
 
-
-
     public static List<TransactionData> GetTransactionList(
       UserAccess ua
       ,int page_number
@@ -266,14 +264,24 @@ namespace ClayFinancial.Models.Transaction.Data
       return sb.ToString();
     }
 
-    public bool ValidateTransaction(int selected_employee_id = -1)
+    public bool ValidateTransaction(UserAccess ua = null)
     {
       switch (transaction_type)
       {
 
         case "R":
-          return ValidateNewReceipt();
 
+          return ValidateNewReceipt(ua);
+        case "C":
+          if (ua == null)
+          {
+            return false;
+          }
+          else
+          {
+            return ValidateNewReceipt(ua);
+
+          }
         //case "D":
         //  return ValidateNewDeposit(selected_employee_id);
         default:
@@ -281,8 +289,14 @@ namespace ClayFinancial.Models.Transaction.Data
       }
     }
 
-    private bool ValidateNewReceipt()
+    private bool ValidateNewReceipt(UserAccess ua = null)
     {
+
+      if(transaction_type.ToUpper() == "C")
+      {
+        can_accept_deposit = GetTransactionData(transaction_id, ua.employee_id, ua).can_accept_deposit;
+        if (!can_accept_deposit) return false;
+      }
       var departments = Department.GetCachedDict();
       // wrong
       //Department department = Department.GetCachedDict()[department_id];

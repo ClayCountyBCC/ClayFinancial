@@ -78,13 +78,13 @@ namespace ClayFinancial.Models.Transaction.Data
       return data_payment_types;
     }
 
-    public static List<PaymentTypeData> Get(List<long> transaction_ids, List<ControlData> controls, List<PaymentMethodData> payment_methods)
+    public static List<PaymentTypeData> Get(List<long> transaction_ids)
     {
       var payment_types = PaymentType.GetCached_Dict();
 
       var param = new DynamicParameters();
 
-      param.Add("@transaction_id", transaction_ids);
+      param.Add("@transaction_ids", transaction_ids);
       var query = @"
       
         SELECT
@@ -106,22 +106,11 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var data_payment_types = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
 
-      foreach (var ptd in data_payment_types)
-      {
-        if (payment_types.ContainsKey(ptd.payment_type_id))
-        {
-          ptd.payment_type = payment_types[ptd.payment_type_id];
-        }
-        else
-        {
-          new ErrorLog("Missing Payment Type Id - " + ptd.payment_type_id.ToString(), "PaymentTypeData.Get()", "", "", "");
-        }
-
-      }
 
 
       return data_payment_types;
     }
+
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT AFTER THE DATA IS VALIDATED. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentMethodData.Save().
