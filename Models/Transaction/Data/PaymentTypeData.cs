@@ -78,7 +78,50 @@ namespace ClayFinancial.Models.Transaction.Data
       return data_payment_types;
     }
 
+    public static List<PaymentTypeData> Get(List<long> transaction_ids, List<ControlData> controls, List<PaymentMethodData> payment_methods)
+    {
+      var payment_types = PaymentType.GetCached_Dict();
 
+      var param = new DynamicParameters();
+
+      param.Add("@transaction_id", transaction_ids);
+      var query = @"
+      
+        SELECT
+          PT.transaction_payment_type_id,
+          PT.transaction_id,
+          PT.payment_type_id,
+          PT.payment_type_index,
+          PT.added_after_save,
+          CPT.added_on,
+          CPT.added_by
+        FROM  ClayFinancial.dbo.data_payment_type PT
+        INNER JOIN payment_types P ON P.payment_type_id = PT.payment_type_id
+        LEFT OUTER JOIN ClayFinancial.dbo.data_changes_payment_type CPT 
+          ON CPT.transaction_payment_type_id = PT.transaction_payment_type_id
+        WHERE 
+          transaction_id in @transaction_ids
+        ORDER BY P.name, PT.payment_type_index;
+      ";
+
+      var data_payment_types = Constants.Get_Data<PaymentTypeData>(query, param, Constants.ConnectionString.ClayFinancial);
+
+      foreach (var ptd in data_payment_types)
+      {
+        if (payment_types.ContainsKey(ptd.payment_type_id))
+        {
+          ptd.payment_type = payment_types[ptd.payment_type_id];
+        }
+        else
+        {
+          new ErrorLog("Missing Payment Type Id - " + ptd.payment_type_id.ToString(), "PaymentTypeData.Get()", "", "", "");
+        }
+
+      }
+
+
+      return data_payment_types;
+    }
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT AFTER THE DATA IS VALIDATED. NOT SAVE(); THIS IS TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentMethodData.Save().

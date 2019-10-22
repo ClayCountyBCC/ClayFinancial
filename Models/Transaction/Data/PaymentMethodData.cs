@@ -68,7 +68,40 @@ namespace ClayFinancial.Models.Transaction.Data
       // pm.RemoveAll(p => p.cash_amount == 0 && p.check_amount == 0 && p.check_number.Length == 0 && p.is_active == false);
       return pm;
     }
+    public static List<PaymentMethodData> GetActiveTransactionPaymentMethods(List<long> transaction_ids)
+    {
+      var param = new DynamicParameters();
+      param.Add("transaction_id", transaction_ids);
 
+      var query = @"
+        SELECT 
+          pm.payment_method_data_id
+          ,cpm.original_payment_method_data_id
+          ,pm.transaction_payment_type_id
+          ,pm.transaction_id
+          ,pm.cash_amount
+          ,pm.check_amount
+          ,pm.check_count
+          ,pm.check_number
+          ,pm.check_from
+          ,pm.paying_for
+          ,pm.is_active
+          ,pm.added_after_save
+          ,cpm.modified_on
+          ,cpm.modified_by
+          ,cpm.reason_for_change
+        FROM data_payment_method pm
+        LEFT OUTER JOIN data_changes_payment_method cpm on cpm.new_payment_method_data_id =  pm.payment_method_data_id
+        WHERE 
+          transaction_id IN @transaction_ids
+          AND is_active = 1
+        ORDER BY payment_method_data_id, original_payment_method_data_id
+      ";
+
+      var pm = Constants.Get_Data<PaymentMethodData>(query, param, Constants.ConnectionString.ClayFinancial);
+      // pm.RemoveAll(p => p.cash_amount == 0 && p.check_amount == 0 && p.check_number.Length == 0 && p.is_active == false);
+      return pm;
+    }
     // IF ALL OF THE SAVING IS HAPPENING INSIDE OF ONE TRANSACTION, THEN THIS WILL NEED TO BE A GetDataTable() FUNCTION
     // THAT WILL POPULATE THE DATATABLE AND RETURN THAT. NOT SAVE(); THIS IS ALSO TRUE FOR THE OTHER TWO FUNCTIONS:
     // ControlData.Save() AND PaymentTypeData.Save().

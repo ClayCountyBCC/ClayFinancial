@@ -281,7 +281,7 @@ namespace ClayFinancial.Models.Transaction.Data
       //return Constants.Exec_Scalar<ControlData>(query, Constants.ConnectionString.ClayFinancial, GetControlDataParameters()) != null;
     }
 
-    public static List<ControlData> GetAllActiveControlDataForTransactions(List<long> transaction_ids, UserAccess ua)
+    public static List<ControlData> GetAllActiveControlDataForTransactions(List<long> transaction_ids)
     {
       var param = new DynamicParameters();
 

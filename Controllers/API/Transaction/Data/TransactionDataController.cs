@@ -503,8 +503,18 @@ namespace ClayFinancial.Controllers.API
     public IHttpActionResult GetSalesTaxAndTDC(long transaction_id)
     {
 
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-      return InternalServerError();
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        return Unauthorized();
+      }
+      if (!TransactionData.ValidateTransactionListAccess(new List<long>() { transaction_id },ua))
+      {
+        return Unauthorized();
+      }
+
+      var tax_and_tdc = TransactionData.GetTaxAndTDC(transaction_id)
     }
 
 
