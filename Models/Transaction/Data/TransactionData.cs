@@ -843,7 +843,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public static List<ControlData> GetTaxAndTDC(long transaction_id)
     {
       var param = new DynamicParameters();
-      param.Add("@transaction_id");
+      param.Add("@transaction_id", transaction_id);
 
       List<long> transaction_ids = new List<long>();
 
@@ -853,6 +853,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
       ";
 
+      transaction_ids = Constants.Get_Data<long>(query, param, Constants.ConnectionString.ClayFinancial);
+
       // use the list of transaction_ids from the above query to get all controls
       var tax_and_tdc = ControlData.GetAllActiveControlDataForTransactions(transaction_ids);
 
@@ -861,9 +863,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       return tax_and_tdc;
     }
-
-
-
 
   }
 }

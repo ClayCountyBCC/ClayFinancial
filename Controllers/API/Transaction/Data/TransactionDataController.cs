@@ -351,7 +351,7 @@ namespace ClayFinancial.Controllers.API
 
       if (!TransactionData.ValidateTransactionListAccess(transaction_ids, ua)) { return Unauthorized(); }
 
-      return Ok(ControlData.GetAllActiveControlDataForTransactions(transaction_ids, ua));
+      return Ok(ControlData.GetAllActiveControlDataForTransactions(transaction_ids));
 
     }
 
@@ -509,12 +509,10 @@ namespace ClayFinancial.Controllers.API
       {
         return Unauthorized();
       }
-      if (!TransactionData.ValidateTransactionListAccess(new List<long>() { transaction_id },ua))
-      {
-        return Unauthorized();
-      }
 
-      var tax_and_tdc = TransactionData.GetTaxAndTDC(transaction_id)
+      var tax_and_tdc = TransactionData.GetTaxAndTDC(transaction_id);
+
+      return Ok(tax_and_tdc);
     }
 
 
