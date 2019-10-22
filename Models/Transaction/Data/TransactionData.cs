@@ -476,7 +476,7 @@ namespace ClayFinancial.Models.Transaction.Data
           //    or the receipt creator must be finance level 2 or higher
           if (td.created_by_display_name != ua.display_name)
           {
-            if((int)ua.current_access >= (int)UserAccess.access_type.finance_level_two) // this will handle the MIS access level
+            if((int)ua.current_access < (int)UserAccess.access_type.finance_level_two) // this will handle the MIS access level
             {
               var deposit_creator_ua = UserAccess.GetUserAccessByDisplayName(td.created_by_display_name);
               td.can_accept_deposit = ((int)deposit_creator_ua.current_access < (int)ua.current_access);
@@ -532,6 +532,15 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@created_by_display_name", created_by_display_name);
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
+      if(transaction_type.ToUpper() == "R")
+      {
+        total_cash_amount = 0;
+        total_check_count = 0;
+        total_check_amount = 0;
+      }
+      param.Add("@total_cash_amount", total_cash_amount);
+      param.Add("@total_check_amount", total_check_amount);
+      param.Add("@total_check_count", total_check_count);
 
 
       StringBuilder query = new StringBuilder();
@@ -550,7 +559,10 @@ namespace ClayFinancial.Models.Transaction.Data
                       @created_by_employee_ip_address,
                       @created_by_display_name,
                       @received_from,
-                      @comment;
+                      @comment,
+                      @total_cash_amount,
+                      @total_check_amount,
+                      @total_check_count;
 
           ");
 

@@ -313,6 +313,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@value", value);
       param.Add("@username", username);
       param.Add("@reason_for_change",reason_for_change);
+      param.Add("@transaction_type", "R");
 
 
       return param;

@@ -425,22 +425,27 @@
     public SaveChanges(): void
     {
       let path = Transaction.GetPath();
-      Utilities.Post<string>(path + "API/Transaction/EditPaymentMethod", this)
+      Utilities.Post_Empty(path + "API/Transaction/EditPaymentMethod", this)
         .then(response =>
         {
-          if (response.length > 0)
+          response.text().then(text =>
           {
-            alert("There was a problem saving this change." + '\r\n' + response);
-          }
-          else
-          {
-            Transaction.CloseChangeModal();
-            Transaction.ShowReceiptDetail(this.transaction_id);
-            Transaction.editing_control_data = null;
-            Transaction.editing_payment_method_data = null;
-          }
-          Utilities.Toggle_Loading_Button("change_transaction_save", false);
-        })
+            if (text.length === 0) // success!
+            {
+              Transaction.CloseChangeModal();
+              Transaction.ShowReceiptDetail(this.transaction_id);
+              Transaction.editing_control_data = null;
+              Transaction.editing_payment_method_data = null;
+              Transaction.GetTransactionList(Transaction.current_page, false);
+            }
+            else
+            {
+              alert("There was a problem saving this change." + '\r\n' + response);
+            }
+            Utilities.Toggle_Loading_Button("change_transaction_save", false);
+          });
+
+        });
     }
 
     public static async GetAndDisplayHistory(payment_method_data_id: string, transaction_id: string, is_cash: boolean)

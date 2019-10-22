@@ -185,10 +185,10 @@ var Transaction;
         static CreateInput(input_type, input_length, is_required, placeholder, input_value = "") {
             let input = document.createElement("input");
             input.type = input_type;
-            input.onwheel = (e) => { e.preventDefault(); };
             input.maxLength = input_length;
             input.classList.add("input", "is-normal");
             if (input.type === "number") {
+                input.onwheel = (e) => { e.preventDefault(); };
                 input.step = "0.01";
                 input.min = "0";
             }

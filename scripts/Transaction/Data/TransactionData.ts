@@ -17,6 +17,7 @@
     total_cash_amount: number;
     total_check_amount: number;
     total_check_count: number;
+    comment: string;
     created_on: any;
     created_by_username: string;
     created_by_display_name: string;
@@ -39,6 +40,7 @@
     public department_control_data: Array<ControlData> = [];
     public payment_type_data: Array<PaymentTypeData> = [];
     public county_manager_name: string = "PREVIEW";
+    public comment: string = "";
     public error_text: string = "";
     public received_from: string = "";
     public total_cash_amount: number = -1;
@@ -108,7 +110,14 @@
       let footer = TransactionData.CreateTransactionsTableFooter(saved_transaction);
       TransactionData.RenderTransactionList(saved_transaction.deposit_receipts, transactions_container, footer);
 
-
+      if (saved_transaction.can_accept_deposit)
+      {
+        // we'll show a menu that will allow the deposit viewer to indicate
+        // how many checks / how much cash/checks they've collected
+        // and provide a spot for comments.
+        // last will be a Create Receipt button.
+        container.appendChild(TransactionData.CreateAcceptDepositMenu(saved_transaction));
+      }
 
     }
 
@@ -854,6 +863,123 @@
         });
     }
 
+
+    private static CreateAcceptDepositMenu(saved_transaction: TransactionData): DocumentFragment
+    {
+      saved_transaction.transaction_type = "C";
+      saved_transaction.total_check_amount = 0;
+      saved_transaction.total_check_count = 0;
+      saved_transaction.total_cash_amount = 0;
+
+      let df = document.createDocumentFragment();
+      let container = document.createElement("div");
+      container.classList.add("columns", "is-multiline");
+      df.appendChild(container);
+
+      
+      let cash_input = ControlGroup.CreateInput("number", 15, true, "Cash Amount");
+      let cash_input_container: HTMLElement = ControlGroup.CreateInputFieldContainer(cash_input, "Cash Amount Collected", true, "is-one-quarter");
+      container.appendChild(cash_input_container);
+
+      cash_input.oninput = (event) =>
+      {
+        saved_transaction.total_cash_amount = 0;
+        if (ControlGroup.ValidateMoney(cash_input, cash_input_container))
+        {
+          saved_transaction.total_cash_amount = cash_input.valueAsNumber;
+        }
+      }
+
+      let check_input = ControlGroup.CreateInput("number", 15, true, "Check Amount");
+      let check_input_container: HTMLElement = ControlGroup.CreateInputFieldContainer(check_input, "Check Amount Collected", true, "is-one-quarter");
+      container.appendChild(check_input_container);
+
+      check_input.oninput = (event) =>
+      {
+        saved_transaction.total_check_amount = 0;
+        if (ControlGroup.ValidateMoney(check_input, check_input_container))
+        {
+          saved_transaction.total_check_amount = check_input.valueAsNumber;
+        }
+      }
+
+      let check_count_input = ControlGroup.CreateInput("number", 15, true, "# of Checks");
+      let check_count_input_container: HTMLElement = ControlGroup.CreateInputFieldContainer(check_count_input, "# of Checks", true, "is-one-quarter");
+      container.appendChild(check_count_input_container);
+
+      check_count_input.oninput = (event) =>
+      {
+        saved_transaction.total_check_count = 0;
+        if (ControlGroup.ValidateNumber(check_count_input, check_count_input_container))
+        {
+          saved_transaction.total_check_count = check_count_input.valueAsNumber;
+        }
+      }
+
+      let comment_input = document.createElement("textarea");
+      comment_input.maxLength = 500;
+      comment_input.required = false;
+      comment_input.classList.add("textarea", "is-normal");
+      comment_input.rows = 4;
+      comment_input.value = "";
+
+      comment_input.oninput = (event) =>
+      {
+        saved_transaction.comment = comment_input.value;
+      }
+
+      let comment_input_container = ControlGroup.CreateInputFieldContainer(comment_input, "Comments ** optional", true, "is-half");
+      container.appendChild(comment_input_container);
+
+      let save_button = document.createElement("button");
+      save_button.classList.add("button", "is-success");
+      save_button.appendChild(document.createTextNode("Create Receipt For This Deposit"));
+      save_button.onclick = () =>
+      {
+        
+        console.log("Create C Transaction", saved_transaction);
+        // validate
+        Utilities.Toggle_Loading_Button(save_button, true);
+
+        if (saved_transaction.total_cash_amount === 0 && saved_transaction.total_check_amount === 0 && saved_transaction.comment.length === 0)
+        {
+          alert("In order to create a receipt for this deposit, you must enter this information.");
+          return;
+        }
+
+
+        let path = Transaction.GetPath();
+        Utilities.Post<TransactionData>(path + "API/Transaction/Save", saved_transaction)
+          .then(function (response)
+          {
+            Transaction.currentReceipt.ShowReceipt(response);
+            Transaction.ResetReceipt();
+
+            Transaction.GetTransactionList(Transaction.current_page, false)
+              .then(() =>
+              {
+                Utilities.Toggle_Loading_Button(save_button, false);
+              });
+
+            // need to reset the current transaction
+            // and display the one that I just downloaded.
+          }, function (error)
+            {
+              console.log("post error occurred", error);
+            });
+      }
+
+      let save_button_container = ControlGroup.CreateInputFieldContainer(save_button, "", true, "is-one-quarter");
+      
+      container.appendChild(save_button_container);
+
+      return df;
+    }
+
+    public static SaveDepositReceipt()
+    {
+
+    }
 
   }
 

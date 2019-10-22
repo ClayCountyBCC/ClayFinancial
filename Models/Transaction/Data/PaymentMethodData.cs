@@ -242,6 +242,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@check_number", check_number);
       param.Add("@check_from", check_from);
       param.Add("@paying_for", paying_for);
+      param.Add("@transaction_type", "R");
       param.Add("@reason_for_change", reason_for_change);
       param.Add("@username", username);
       //param.Add("@added_after_save", payment_method_data_id == -1);

@@ -16,7 +16,7 @@ namespace ClayFinancial.Controllers.MVC
     public ActionResult Index()
     {
 
-
+      ViewBag.Development = Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
       return View();
     }
   }
