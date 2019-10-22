@@ -910,30 +910,5 @@ namespace ClayFinancial.Models.Transaction.Data
 
     }
 
-
-    //public static List<ControlData> GetTaxAndTDC(long transaction_id)
-    //{
-    //  var param = new DynamicParameters();
-    //  param.Add("@transaction_id", transaction_id);
-
-    //  List<long> transaction_ids = new List<long>();
-
-    //  var query = @"
-
-    //    -- query to get all receipt transaction_ids in the heirarchy starting with @transaction_id
-
-    //  ";
-
-    //  transaction_ids = Constants.Get_Data<long>(query, param, Constants.ConnectionString.ClayFinancial);
-
-    //  // use the list of transaction_ids from the above query to get all controls
-    //  var tax_and_tdc = ControlData.GetAllActiveControlDataForTransactions(transaction_ids);
-
-    //  // REMOVE ALL NON TAX AND TDC CONTROLS
-    //  tax_and_tdc.RemoveAll(c => c.control_id != 64 && c.control_id != 63);
-
-    //  return tax_and_tdc;
-    //}
-
   }
 }
