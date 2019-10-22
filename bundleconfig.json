@@ -3,6 +3,7 @@
     "outputFileName": "scripts/Transaction/transaction_bundle.js",
     "inputFiles": [
       "scripts/Utilities.js",
+      "scripts/SimpleValue.js",
       "scripts/Transaction/app.js",
       "scripts/LevelItem.js",
       "scripts/Transaction/ControlGroup.js",

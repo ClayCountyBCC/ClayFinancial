@@ -472,6 +472,18 @@ var Utilities;
     Utilities.CreateTableCell = CreateTableCell;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
+var Utilities;
+(function (Utilities) {
+    "use strict";
+    class SimpleValue {
+        constructor() {
+            this.label = "";
+            this.value = "";
+        }
+    }
+    Utilities.SimpleValue = SimpleValue;
+})(Utilities || (Utilities = {}));
+//# sourceMappingURL=SimpleValue.js.map
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }

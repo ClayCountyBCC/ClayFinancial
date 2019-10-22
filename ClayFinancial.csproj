@@ -260,6 +260,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="scripts\LevelItem.ts" />
     <TypeScriptCompile Include="scripts\MenuItem.ts" />
+    <TypeScriptCompile Include="scripts\SimpleValue.ts" />
     <TypeScriptCompile Include="scripts\Transaction\app.ts" />
     <TypeScriptCompile Include="scripts\Transaction\Control.ts" />
     <TypeScriptCompile Include="scripts\Transaction\ControlGroup.ts" />
