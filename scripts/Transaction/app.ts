@@ -89,7 +89,7 @@
 
     setInterval(() =>
     {
-      Transaction.GetTransactionList(Transaction.current_page)
+      Transaction.GetTransactionList(Transaction.current_page, false);
     }, 60 * 5 * 1000);
 
   } 
@@ -117,7 +117,7 @@
       });
   }
 
-  export async function GetTransactionList(page: number)
+  export async function GetTransactionList(page: number, change_view: boolean = true)
   {
     Transaction.current_page = page;
     await Data.TransactionData.GetTransactionList()
@@ -127,7 +127,7 @@
         Data.TransactionData.RenderTransactionList(tv);
         console.log('transactions', Transaction.transactions);
         Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-        Transaction.ViewTransactions()
+        if(change_view) Transaction.ViewTransactions()
       });
 
     await Data.TransactionData.GetTransactionPageCount()

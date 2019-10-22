@@ -555,7 +555,7 @@ var Transaction;
             });
             yield Transaction.GetTransactionList(1);
             setInterval(() => {
-                Transaction.GetTransactionList(Transaction.current_page);
+                Transaction.GetTransactionList(Transaction.current_page, false);
             }, 60 * 5 * 1000);
         });
     }
@@ -582,7 +582,7 @@ var Transaction;
         });
     }
     Transaction.ShowReceiptDetail = ShowReceiptDetail;
-    function GetTransactionList(page) {
+    function GetTransactionList(page, change_view = true) {
         return __awaiter(this, void 0, void 0, function* () {
             Transaction.current_page = page;
             yield Transaction.Data.TransactionData.GetTransactionList()
@@ -591,7 +591,8 @@ var Transaction;
                 Transaction.Data.TransactionData.RenderTransactionList(tv);
                 console.log('transactions', Transaction.transactions);
                 Utilities.Toggle_Loading_Button(Transaction.Data.TransactionData.reload_button, false);
-                Transaction.ViewTransactions();
+                if (change_view)
+                    Transaction.ViewTransactions();
             });
             yield Transaction.Data.TransactionData.GetTransactionPageCount()
                 .then((pagecount) => {
