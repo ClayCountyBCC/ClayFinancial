@@ -687,8 +687,10 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public static string GetUpdateTransactionTotals(bool has_been_modified)
     {
+      
       return $@"
         DECLARE @has_been_modified Bit = {(has_been_modified ? "1" : "0")};
+        
           
          EXEC update_receipt_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
 
