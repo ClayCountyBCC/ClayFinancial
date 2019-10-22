@@ -301,7 +301,6 @@ namespace ClayFinancial.Models.Transaction.Data
     }
 
 
-
     private DynamicParameters GetControlDataParameters()
     {
       var param = new DynamicParameters();

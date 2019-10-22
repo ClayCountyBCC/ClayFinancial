@@ -839,30 +839,101 @@ namespace ClayFinancial.Models.Transaction.Data
       return true;
     }
 
-
-    public static List<ControlData> GetTaxAndTDC(long transaction_id)
+    public static List<SimpleValue> GetTaxAndTDC(long deposit_transaction_id)
     {
       var param = new DynamicParameters();
-      param.Add("@transaction_id", transaction_id);
+      param.Add("@deposit_transaction_id", deposit_transaction_id);
 
-      List<long> transaction_ids = new List<long>();
+      string query = @"
+        -- Get Deposit Transaction Id
+        DECLARE @deposit_transaction_id BIGINT = 10167;
 
-      var query = @"
+        WITH BaseData AS (
+            SELECT 
+              D2.transaction_id a_id
+              ,D2.child_transaction_id a_child_id
+              ,D2.transaction_type a_type
+              ,D4.transaction_id b_id
+              ,D4.child_transaction_id b_child_id
+              ,D4.transaction_type b_type
+            FROM data_transaction D1 -- D transaction
+            LEFT OUTER JOIN data_transaction D2 ON D1.transaction_id = D2.child_transaction_id -- R/C transaction
+            LEFT OUTER JOIN data_transaction D3 ON D2.transaction_type = 'C' 
+              AND D3.child_transaction_id = D2.transaction_id -- D transaction
+            LEFT OUTER JOIN data_transaction D4 ON D3.transaction_id = D4.child_transaction_id -- R transaction
+            WHERE 
+              D1.transaction_type='D'
+              AND D1.transaction_id = @deposit_transaction_id
 
-        -- query to get all receipt transaction_ids in the heirarchy starting with @transaction_id
+        ), TransactionIds AS (
 
-      ";
+          SELECT
+           a_id transaction_id
+          FROM BaseData
 
-      transaction_ids = Constants.Get_Data<long>(query, param, Constants.ConnectionString.ClayFinancial);
+          UNION
 
-      // use the list of transaction_ids from the above query to get all controls
-      var tax_and_tdc = ControlData.GetAllActiveControlDataForTransactions(transaction_ids);
+          SELECT
+            b_id transaction_id
+          FROM BaseData
+          WHERE b_id IS NOT NULL
 
-      // REMOVE ALL NON TAX AND TDC CONTROLS
-      tax_and_tdc.RemoveAll(c => c.control_id != 64 && c.control_id != 63);
+        ), ControlData AS (
 
-      return tax_and_tdc;
+          SELECT
+            DC.control_data_id
+            ,DC.prior_control_data_id
+            ,DC.transaction_payment_type_id
+            ,DC.department_id
+            ,DC.transaction_id
+            ,DC.control_id
+            ,DC.value
+            ,DC.is_active
+          FROM data_control DC
+          INNER JOIN TransactionIds T ON T.transaction_id = DC.transaction_id
+          WHERE 
+            1=1
+            AND DC.is_active=1
+            AND DC.control_id IN (63, 64)
+
+        )
+
+        SELECT
+          C.label
+          ,SUM(CAST(CD.value AS money)) [value]
+        FROM ControlData CD
+        INNER JOIN controls C ON CD.control_id = C.control_id
+        GROUP BY CD.control_id, C.label
+        ORDER BY C.label";
+
+      return Constants.Get_Data<SimpleValue>(query, param, Constants.ConnectionString.ClayFinancial);
+
     }
+
+
+    //public static List<ControlData> GetTaxAndTDC(long transaction_id)
+    //{
+    //  var param = new DynamicParameters();
+    //  param.Add("@transaction_id", transaction_id);
+
+    //  List<long> transaction_ids = new List<long>();
+
+    //  var query = @"
+
+    //    -- query to get all receipt transaction_ids in the heirarchy starting with @transaction_id
+
+    //  ";
+
+    //  transaction_ids = Constants.Get_Data<long>(query, param, Constants.ConnectionString.ClayFinancial);
+
+    //  // use the list of transaction_ids from the above query to get all controls
+    //  var tax_and_tdc = ControlData.GetAllActiveControlDataForTransactions(transaction_ids);
+
+    //  // REMOVE ALL NON TAX AND TDC CONTROLS
+    //  tax_and_tdc.RemoveAll(c => c.control_id != 64 && c.control_id != 63);
+
+    //  return tax_and_tdc;
+    //}
 
   }
 }
