@@ -21,6 +21,8 @@
     created_by_username: string;
     created_by_display_name: string;
     created_by_ip_address: string;
+    can_modify: boolean;
+    can_accept_deposit: boolean;
   }
 
   export class TransactionData implements ITransactionData
@@ -47,6 +49,8 @@
     public created_by_ip_address: string = "";
     public created_by_display_name: string = "PREVIEW";
     public deposit_receipts: Array<TransactionData> = [];
+    public can_modify: boolean = false;
+    public can_accept_deposit: boolean = false;
     // client side only stuff
     public static reload_button: string = 'filterRefreshButton';
     public static action_container: string = 'action_view';

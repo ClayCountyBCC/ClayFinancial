@@ -20,7 +20,6 @@ namespace ClayFinancial.Models.Transaction.Data
     public string transaction_number { get; set; } = "";
     public string transaction_type { get; set; } = "R";
     public long? child_transaction_id { get; set; } = null;
-    //public string deposit_receipt_transaction_number { get; set; } = "";
     public int department_id { get; set; } = -1;
     public string department_name { get; set; } = "";
     public List<ControlData> department_control_data { get; set; } = new List<ControlData>();
@@ -39,9 +38,9 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_ip_address { get; set; } = "";
     public List<long> deposit_receipt_ids { get; set; } = new List<long>();
     public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
-    //public int? number_of_deposit_receipts { get; set; } = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
+    public bool can_accept_deposit { get; set; } = false;
     public bool has_error { get; set; } = false;
     private int my_department_id { get; set; } = -1;
     private UserAccess.access_type my_access { get; set; } = UserAccess.access_type.basic;
@@ -452,9 +451,30 @@ namespace ClayFinancial.Models.Transaction.Data
       else
       {
         td.GetDepositReceipts(employee_id);
+        if(td.transaction_type == "D" && !td.child_transaction_id.HasValue)
+        {
+          td.can_accept_deposit = false;
+          // here we're going to indicate to the client that it should or should not allow
+          // the viewer to accept this deposit.
+          // the criteria is as follows:
+          // the deposit creator must be different from the receipt creator
+          // the deposit creator must have a lower access level than the receipt creator
+          //    or the receipt creator must be finance level 2 or higher
+          if (td.created_by_display_name != ua.display_name)
+          {
+            if((int)ua.current_access >= (int)UserAccess.access_type.finance_level_two) // this will handle the MIS access level
+            {
+              var deposit_creator_ua = UserAccess.GetUserAccessByDisplayName(td.created_by_display_name);
+              td.can_accept_deposit = ((int)deposit_creator_ua.current_access < (int)ua.current_access);
+            }
+            else
+            {
+              td.can_accept_deposit = true;
+            }
+            
+          }
+        }
       }
-      
-      
       return td;
     }
 
