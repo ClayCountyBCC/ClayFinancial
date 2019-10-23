@@ -156,11 +156,12 @@ namespace ClayFinancial.Models
     {
       using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
       {
-        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, group))
+        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, IdentityType.Name, group))
         {
           if (gp != null)
           {
-            foreach (UserPrincipal up in gp.GetMembers())
+
+            foreach (UserPrincipal up in gp.Members)
             {
               if (up != null)
               {
