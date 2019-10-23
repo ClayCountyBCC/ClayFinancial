@@ -49,7 +49,22 @@ var Transaction;
             Utilities.Set_Text(this.created_by_element, t.created_by_display_name);
             Utilities.Set_Text(this.county_manager_element, t.county_manager_name);
             this.DisplayDepartmentControls(t);
-            this.CreatePaymentTypeDisplay(t);
+            if (t.transaction_type == "R") {
+                this.CreatePaymentTypeDisplay(t);
+            }
+            else {
+                this.CreateTransactionViewDisplay(t);
+                if (t.transaction_type === "C") {
+                }
+            }
+        }
+        CreateTransactionViewDisplay(t) {
+            Utilities.Clear_Element(this.receipt_view_contents_element);
+            Utilities.Clear_Element(this.receipt_view_totals_element);
+            for (let td of t.deposit_receipts) {
+                this.receipt_view_contents_element.appendChild(this.CreateReceiptDetailRow(td.transaction_type + " " + td.transaction_number, td.total_cash_amount, td.total_check_amount, td.total_check_count));
+            }
+            this.receipt_view_totals_element.appendChild(this.CreateReceiptDetailRow("Grand Total", t.total_cash_amount, t.total_check_amount, t.total_check_count));
         }
         CreatePaymentTypeDisplay(t) {
             Utilities.Clear_Element(this.receipt_view_contents_element);
@@ -74,8 +89,11 @@ var Transaction;
             this.receipt_view_totals_element.appendChild(this.CreatePaymentTypeRow("Grand Total", cash_total, check_total, check_count));
         }
         CreatePaymentTypeRow(payment_type, cash_amount, check_amount, check_count) {
+            return this.CreateReceiptDetailRow(payment_type, cash_amount, check_amount, check_count);
+        }
+        CreateReceiptDetailRow(label, cash_amount, check_amount, check_count) {
             let tr = document.createElement("tr");
-            tr.appendChild(Utilities.CreateTableCell("td", payment_type, "has-text-left"));
+            tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-left"));
             tr.appendChild(Utilities.CreateTableCell("td", check_count.toString(), "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(check_amount), "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(cash_amount), "has-text-right"));

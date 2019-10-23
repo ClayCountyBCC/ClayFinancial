@@ -528,7 +528,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@transaction_type", transaction_type.ToUpper());
       //param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_ip_address);
-      param.Add("@child_transaction_id", child_transaction_id);
+      
       param.Add("@created_by_display_name", created_by_display_name);
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
@@ -537,6 +537,11 @@ namespace ClayFinancial.Models.Transaction.Data
         total_cash_amount = 0;
         total_check_count = 0;
         total_check_amount = 0;
+        param.Add("@child_transaction_id", child_transaction_id);
+      }
+      else
+      {
+        param.Add("@child_transaction_id", transaction_id);
       }
       param.Add("@total_cash_amount", total_cash_amount);
       param.Add("@total_check_amount", total_check_amount);
@@ -576,7 +581,16 @@ namespace ClayFinancial.Models.Transaction.Data
       {
         query.AppendLine(GetUpdateTransactionTotals(true));
       }
-      
+      else
+      {
+        query.AppendLine(@"
+
+          UPDATE data_transaction
+            SET child_transaction_id = @transaction_id
+          WHERE transaction_id = @child_transaction_id; 
+
+        ");
+      }
 
       // IF TRANSACTION_TYPE = 'C' AND FINANCE LEVEL 2, TRANSACTION IS COMPLETE. CHILD_TRANSACTION_ID IS TRANSACTION_ID
       if ((int)my_access >= (int)UserAccess.access_type.finance_level_two && transaction_type.ToUpper() == "C")
@@ -662,17 +676,6 @@ namespace ClayFinancial.Models.Transaction.Data
         param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData"));
         param.Add("@PaymentMethodData", paymentMethodDataTable.AsTableValuedParameter("dbo.PaymentMethodData"));
         param.Add("@PaymentTypeData", paymentTypeDataTable.AsTableValuedParameter("dbo.PaymentTypeData"));
-
-        //using (IDbConnection db = new SqlConnection(Constants.Get_ConnStr(Constants.ConnectionString.ClayFinancial)))
-        //{
-        //  var i = db.ExecuteScalar(
-        //                query,
-        //                param,
-        //                commandTimeout: 60); //  THIS SAVE SHOULD NOT TAKE MORE THAN A COUPLE OF SECONDS.
-
-
-
-        //}
 
         var tran = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
@@ -817,7 +820,8 @@ namespace ClayFinancial.Models.Transaction.Data
       var query = new StringBuilder();
 
       query.AppendLine(GetTransactionDataQuery())
-           .AppendLine(" AND child_transaction_id = @transaction_id");
+           .AppendLine(" AND TD.child_transaction_id = @transaction_id")
+           .AppendLine(" AND TD.transaction_id != @transaction_id"); // added this because when we mark a C transaction as complete, it will have a child id that meets this requirement.
 
       deposit_receipts = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
