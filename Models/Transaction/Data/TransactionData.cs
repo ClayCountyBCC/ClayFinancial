@@ -524,7 +524,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
       param.Add("@created_by_employee_id", created_by_employee_id);
       param.Add("@username", created_by_username);
-      param.Add("@department_id", my_department_id);
+      param.Add("@department_id", department_id);
       param.Add("@transaction_type", transaction_type.ToUpper());
       //param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_ip_address);
