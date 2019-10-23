@@ -3186,13 +3186,11 @@ var Transaction;
                     tr.appendChild(listtd);
                     let printtd = document.createElement("td");
                     printtd.classList.add("has-text-right");
-                    if (data.transaction_type !== "D") {
-                        let printButton = TransactionData.CreateTableCellIconButton("fa-print", "is-small");
-                        printButton.onclick = () => {
-                            Transaction.ShowReceipt(data.transaction_id);
-                        };
-                        printtd.appendChild(printButton);
-                    }
+                    let printButton = TransactionData.CreateTableCellIconButton("fa-print", "is-small");
+                    printButton.onclick = () => {
+                        Transaction.ShowReceipt(data.transaction_id);
+                    };
+                    printtd.appendChild(printButton);
                     tr.appendChild(printtd);
                 }
                 return tr;
