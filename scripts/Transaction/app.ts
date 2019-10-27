@@ -275,6 +275,7 @@
     HideAllViews();
     Utilities.Show(Transaction.deposit_view_container);
     Utilities.Hide("createDepositButton");
+    Utilities.Set_Value("depositNameFilter", "");
   }
 
   export function PreviousPage(element: HTMLAnchorElement): void
@@ -565,6 +566,7 @@
             {
               let transaction_id = transaction.transaction_id;
               Transaction.ShowReceiptDetail(transaction_id);
+              Transaction.GetTransactionList(Transaction.current_page, false);
               Utilities.Toggle_Loading_Button("createDepositButton", false);
             }, error =>
               {
