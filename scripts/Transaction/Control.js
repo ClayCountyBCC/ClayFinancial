@@ -4,6 +4,7 @@ var Transaction;
         constructor() {
             this.rendered_input_element = null;
             this.valid_values = [];
+            this.is_printed = false;
         }
         Constructor() { }
         static CreateControl(control, value = null) {

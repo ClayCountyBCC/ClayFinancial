@@ -1365,6 +1365,15 @@ var Transaction;
                 return this.ValidateCheck();
             }
             ValidateCash() {
+                let is_valid = true;
+                let v = this.ValidateCashAmount();
+                if (!v && is_valid)
+                    is_valid = v;
+                //v = this.ValidatePayingFor();
+                //if (!v && is_valid) is_valid = v;
+                return is_valid;
+            }
+            ValidateCashAmount() {
                 return Transaction.ControlGroup.ValidateMoney(this.cash_amount_input_element, this.cash_amount_input_element_container);
             }
             ValidateCheck() {
@@ -1441,7 +1450,7 @@ var Transaction;
                 if (payment_method_data === null) {
                     this.cash_amount_input_element.oninput = (event) => {
                         this.cash_amount = 0;
-                        if (this.ValidateCash()) {
+                        if (this.ValidateCashAmount()) {
                             this.cash_amount = this.cash_amount_input_element.valueAsNumber;
                         }
                         this.payment_method_change();
@@ -1774,6 +1783,7 @@ var Transaction;
         constructor() {
             this.rendered_input_element = null;
             this.valid_values = [];
+            this.is_printed = false;
         }
         Constructor() { }
         static CreateControl(control, value = null) {
@@ -3126,7 +3136,7 @@ var Transaction;
                 let tr = document.createElement("tr");
                 tfoot.appendChild(tr);
                 let spacer = Utilities.CreateTableCell("td", "Deposit Totals", "has-text-right");
-                spacer.colSpan = 5;
+                spacer.colSpan = 6;
                 tr.appendChild(spacer);
                 tr.appendChild(Utilities.CreateTableCell("td", saved_transaction.total_check_count.toString(), "has-text-right"));
                 tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(saved_transaction.total_check_amount), "has-text-right"));

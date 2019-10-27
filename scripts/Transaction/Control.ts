@@ -17,6 +17,7 @@
     max_length: number;
     validation_regex: string;
     render_hints: string;
+    is_printed: boolean;
 
   }
   export class Control implements IControl
@@ -37,6 +38,7 @@
     public render_hints: string;
     public rendered_input_element: HTMLElement = null;
     public valid_values: Array<string> = [];
+    public is_printed: boolean = false;
 
     Constructor() { }
 

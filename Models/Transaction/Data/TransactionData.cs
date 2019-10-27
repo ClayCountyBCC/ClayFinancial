@@ -103,7 +103,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       if (count == 0) return 1;
 
-      decimal page_count = count / page_size;
+      decimal page_count = ((decimal)count / (decimal)page_size);
       return ((int)Math.Ceiling(page_count)); // base 1
     }
 

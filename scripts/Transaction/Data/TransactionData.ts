@@ -708,7 +708,7 @@
       let tr = document.createElement("tr");
       tfoot.appendChild(tr);
       let spacer = Utilities.CreateTableCell("td", "Deposit Totals", "has-text-right");      
-      spacer.colSpan = 5;
+      spacer.colSpan = 6;
       tr.appendChild(spacer);
 
       tr.appendChild(Utilities.CreateTableCell("td", saved_transaction.total_check_count.toString(), "has-text-right"));

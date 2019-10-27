@@ -97,6 +97,19 @@
 
     private ValidateCash(): boolean
     {
+      let is_valid = true;
+
+      let v = this.ValidateCashAmount();
+      if (!v && is_valid) is_valid = v;
+
+      //v = this.ValidatePayingFor();
+      //if (!v && is_valid) is_valid = v;
+
+      return is_valid;
+    }
+
+    private ValidateCashAmount(): boolean
+    {
       return ControlGroup.ValidateMoney(this.cash_amount_input_element, this.cash_amount_input_element_container);
     }
 
@@ -204,7 +217,7 @@
         {
           this.cash_amount = 0;
 
-          if (this.ValidateCash())
+          if (this.ValidateCashAmount())
           {
             this.cash_amount = this.cash_amount_input_element.valueAsNumber;
           }

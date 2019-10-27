@@ -61,6 +61,15 @@ var Transaction;
                 return this.ValidateCheck();
             }
             ValidateCash() {
+                let is_valid = true;
+                let v = this.ValidateCashAmount();
+                if (!v && is_valid)
+                    is_valid = v;
+                //v = this.ValidatePayingFor();
+                //if (!v && is_valid) is_valid = v;
+                return is_valid;
+            }
+            ValidateCashAmount() {
                 return Transaction.ControlGroup.ValidateMoney(this.cash_amount_input_element, this.cash_amount_input_element_container);
             }
             ValidateCheck() {
@@ -137,7 +146,7 @@ var Transaction;
                 if (payment_method_data === null) {
                     this.cash_amount_input_element.oninput = (event) => {
                         this.cash_amount = 0;
-                        if (this.ValidateCash()) {
+                        if (this.ValidateCashAmount()) {
                             this.cash_amount = this.cash_amount_input_element.valueAsNumber;
                         }
                         this.payment_method_change();
