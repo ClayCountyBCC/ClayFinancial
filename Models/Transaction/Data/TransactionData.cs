@@ -36,8 +36,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public string created_by_display_name { get; set; } = "";
     public int created_by_employee_department_id { get; set; } = -1;
     public string created_by_ip_address { get; set; } = "";
-    public List<long> deposit_receipt_ids { get; set; } = new List<long>();
     public List<TransactionData> deposit_receipts { get; set; } = new List<TransactionData>();
+    public TransactionData child_transaction = null;
     public bool my_transaction { get; set; } = false;
     public bool can_modify { get; set; } = false;
     public bool can_accept_deposit { get; set; } = false;
@@ -435,21 +435,42 @@ namespace ClayFinancial.Models.Transaction.Data
 
       query.AppendLine(GetTransactionDataQuery());
 
-      query.AppendLine("  AND TD.transaction_id = @transaction_id");
-
-      if(ua.current_access == UserAccess.access_type.basic)
+      query.AppendLine(" AND (TD.transaction_id = @transaction_id");
+      query.AppendLine(" OR TD.transaction_id IN (SELECT child_transaction_id FROM data_transaction WHERE transaction_id = @transaction_id AND child_transaction_id IS NOT NULL))");
+      if (ua.current_access == UserAccess.access_type.basic)
       {
         param.Add("@my_department_id", ua.my_department_id);
 
         query.AppendLine("  AND TD.department_id = @my_department_id");
       }
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
-      var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
+      var transactions = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
+
+      TransactionData td = null;
+      TransactionData child_td = null;
+      foreach(TransactionData t in transactions)
+      {
+        if (t.transaction_id == transaction_id)
+        {
+          td = t;
+        }
+        else
+        {
+          child_td = t;
+        }
+        //if (t.child_transaction_id.HasValue && t.child_transaction_id == transaction_id) child_td = t;
+      }
+      //if(td.child_transaction_id.HasValue && td.child_transaction_id.Value != td.transaction_id)
+      //{
+      //  td.GetChildTransaction(ua.employee_id);
+      //}
       if (td == null)
       {
         new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query.ToString()) ;
         return new TransactionData("There was an issue retrieving the transaction.");
       }
+
+      td.child_transaction = child_td;
 
       if (td.transaction_type == "R")
       {
@@ -825,6 +846,22 @@ namespace ClayFinancial.Models.Transaction.Data
 
       deposit_receipts = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
 
+    }
+
+    public void GetChildTransaction(int my_employee_id)
+    {
+      if (!child_transaction_id.HasValue) return;
+      var param = new DynamicParameters();
+      param.Add("@child_transaction_id", child_transaction_id);
+      param.Add("@my_employee_id", my_employee_id);
+      var query = new StringBuilder();
+
+      query.AppendLine(GetTransactionDataQuery())
+           .AppendLine(" AND TD.transaction_id = @child_transaction_id");
+
+      var transactions = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
+      if (transactions == null) return;
+      child_transaction = transactions.First();
     }
 
     // check for receipts a user is not allowed to accept in a deposit.
