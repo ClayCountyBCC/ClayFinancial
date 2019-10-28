@@ -119,11 +119,49 @@
         let current_check_total = 0;
         let current_cash_total = 0;
         let current_check_count = 0;
-        for (let cd of ptd.control_data)
+        let controls = ptd.control_data;
+        let address_controls = this.get_address_controls(controls, true);
+        if (address_controls.length > 0)
         {
-          this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(cd.control.label, cd.value));
+          
+          controls = this.get_address_controls(controls, false);
         }
-
+        let date_range_controls = this.get_date_range_controls(controls, true);
+        if (date_range_controls.length > 0)
+        {
+          controls = this.get_date_range_controls(controls, false);
+        }
+        for (let cd of controls)
+        {
+          let control = cd.control ? cd.control : cd.selected_control;
+          if (control.data_type === "bigtext")
+          {
+            let div = document.createElement("div");
+            let text = cd.value.split("\n");
+            for (let t of text)
+            {
+              let p = document.createElement("p");
+              p.appendChild(document.createTextNode(t));
+              div.appendChild(p)
+            }
+            this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, div));
+          }
+          else
+          {
+            this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, cd.value));
+          }
+          
+        }
+        if (address_controls.length > 0)
+        {
+          let address = this.get_address(address_controls);
+          this.receipt_view_contents_element.appendChild(this.CreateControlDataRow("Address", address));
+        }
+        if (date_range_controls.length > 0)
+        {
+          let date_range = this.get_date_range(date_range_controls);
+          this.receipt_view_contents_element.appendChild(this.CreateControlDataRow("Date Range", date_range));
+        }
 
         for (let pmd of ptd.payment_method_data)
         {
@@ -182,11 +220,22 @@
       return this.CreateReceiptDetailRow(payment_type, cash_amount, check_amount, check_count);
     }
 
-    private CreateControlDataRow(label: string, value: string) :HTMLTableRowElement
+    private CreateControlDataRow(label: string, value: HTMLElement): HTMLTableRowElement
+    private CreateControlDataRow(label: string, value: string): HTMLTableRowElement
+    private CreateControlDataRow(label: string, value: any): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
       tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-right"));
-      tr.appendChild(Utilities.CreateTableCell("td", value, "has-text-left", "", 2));
+      if (typeof value == "string")
+      {
+        tr.appendChild(Utilities.CreateTableCell("td", value, "has-text-left", "", 2));
+      }
+      else
+      {
+        let cell = Utilities.CreateTableCell("td", value, "has-text-left", "", 2);
+        cell.appendChild(value);
+        tr.appendChild(cell);
+      }
       tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 4));
       return tr;
     }
@@ -194,8 +243,8 @@
     private CreatePaymentTypeHeaderRow(): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
-      tr.appendChild(Utilities.CreateTableCell("th", "Check Number", "has-text-centered"));
-      tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-centered"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check Number", "has-text-right"));
+      tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-right"));
       tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered"));
       tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 4));
       return tr;
@@ -225,8 +274,6 @@
       tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(pmd.cash_amount), "has-text-right"));
       return tr;
     }
-
-
 
     private CreateReceiptDetailRow(
       label: string,
@@ -290,6 +337,109 @@
 
       return e;
     }
+
+    private get_address_controls(cd: Array<Data.ControlData>, match: boolean):Array<Data.ControlData>
+    {
+      let address_control_ids = [5, 6, 7, 8, 9];
+      return this.get_control_groups(address_control_ids, cd, match);
+    }
+
+    private get_address(cd: Array<Data.ControlData>): HTMLElement
+    {
+      let e = document.createElement("div");
+      let line1 = "";
+      let line2 = "";
+      let city = "";
+      let state = "";
+      let zip = "";
+      let line3 = "";
+
+      for (let c of cd)
+      {
+        switch (c.control_id)
+        {
+          case 5: // address line 1
+            line1 = c.value.trim();
+            break;
+          case 6:
+            line2 = c.value.trim();
+            break;
+          case 7: // City
+            city = c.value.trim();
+            break;
+          case 8: // State
+            state = c.value.trim();
+            break;
+          case 9: //Zip
+            zip = c.value.trim();
+        }
+      }
+      if (line1.length > 0)
+      {
+        let line1_p = document.createElement("p");
+        line1_p.appendChild(document.createTextNode(line1));
+        e.appendChild(line1_p);
+      }
+      if (line2.length > 0)
+      {
+        let line2_p = document.createElement("p");
+        line2_p.appendChild(document.createTextNode(line2));
+        e.appendChild(line2_p);
+      }
+      if (city.length > 0 || state.length > 0 || zip.length > 0)
+      {
+        if (city.length > 0) line3 = city + ", ";
+        if (state.length > 0) line3 += state + " ";
+        line3 += zip;
+        let line3_p = document.createElement("p");
+        line3_p.appendChild(document.createTextNode(line3));
+        e.appendChild(line3_p);
+      }
+      return e;
+    }
+
+    private get_date_range(cd: Array<Data.ControlData>): HTMLElement
+    {
+      let start = "";
+      let end = "";
+      let e = document.createElement("e");
+      for (let c of cd)
+      {
+        switch (c.control_id)
+        {
+          case 10:
+          case 71:
+            start = c.value;
+            break;
+          case 11:
+          case 72:
+            end = c.value;
+            break;
+        }
+      }
+      e.appendChild(document.createTextNode(start + " through " + end));
+      return e;
+    }
+
+    private get_date_range_controls(cd: Array<Data.ControlData>, match: boolean): Array<Data.ControlData>
+    {
+      let date_range_control_ids = [10, 11, 71, 72];
+      return this.get_control_groups(date_range_control_ids, cd, match);
+    }
+
+    private get_control_groups(control_ids: Array<number>, cd: Array<Data.ControlData>, match: boolean): Array<Data.ControlData>
+    {
+      if (match)
+      {
+        return cd.filter(j => control_ids.includes(j.control_id));
+      }
+      else
+      {
+        return cd.filter(j => !control_ids.includes(j.control_id));
+      } 
+    }
+
+    
 
   }
 
