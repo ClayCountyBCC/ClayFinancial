@@ -457,7 +457,7 @@ var Utilities;
         }
         return levelitem;
     }
-    function CreateTableCell(celltype, value, class_to_add, width = "") {
+    function CreateTableCell(celltype, value, class_to_add, width = "", col_span = -1) {
         if (celltype !== "td" && celltype !== "th")
             celltype = "td";
         let cell = document.createElement(celltype);
@@ -467,6 +467,8 @@ var Utilities;
             cell.appendChild(document.createTextNode(value));
         if (class_to_add.length > 0)
             cell.classList.add(class_to_add);
+        if (col_span > -1)
+            cell.colSpan = col_span;
         return cell;
     }
     Utilities.CreateTableCell = CreateTableCell;
@@ -2542,15 +2544,36 @@ var Transaction;
             let cash_total = 0;
             let check_count = 0;
             for (let ptd of t.payment_type_data) {
+                let payment_method_header_row_shown = false;
                 let current_check_total = 0;
                 let current_cash_total = 0;
                 let current_check_count = 0;
+                for (let cd of ptd.control_data) {
+                    this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(cd.control.label, cd.value));
+                }
                 for (let pmd of ptd.payment_method_data) {
+                    if (pmd.cash_amount > 0) {
+                        if (!payment_method_header_row_shown) {
+                            this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeHeaderRow());
+                            payment_method_header_row_shown = true;
+                        }
+                        this.receipt_view_contents_element.appendChild(this.CreateCashDataRow(pmd));
+                    }
+                    else {
+                        if (pmd.check_amount > 0 || pmd.check_number.length > 0 || pmd.check_from.length > 0) {
+                            if (!payment_method_header_row_shown) {
+                                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeHeaderRow());
+                                payment_method_header_row_shown = true;
+                            }
+                            this.receipt_view_contents_element.appendChild(this.CreateCheckDataRow(pmd));
+                        }
+                    }
                     current_cash_total += pmd.cash_amount;
                     current_check_total += pmd.check_amount;
                     current_check_count += pmd.check_count;
                 }
-                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeRow(ptd.selected_payment_type !== undefined ? ptd.selected_payment_type.name : ptd.payment_type.name, current_cash_total, current_check_total, current_check_count));
+                let payment_type_name = ptd.selected_payment_type !== undefined ? ptd.selected_payment_type.name : ptd.payment_type.name;
+                this.receipt_view_contents_element.appendChild(this.CreatePaymentTypeRow(payment_type_name + " Total", current_cash_total, current_check_total, current_check_count));
                 check_total += current_check_total;
                 cash_total += current_cash_total;
                 check_count += current_check_count;
@@ -2560,13 +2583,50 @@ var Transaction;
         CreatePaymentTypeRow(payment_type, cash_amount, check_amount, check_count) {
             return this.CreateReceiptDetailRow(payment_type, cash_amount, check_amount, check_count);
         }
+        CreateControlDataRow(label, value) {
+            let tr = document.createElement("tr");
+            tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", value, "has-text-left", "", 2));
+            tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 4));
+            return tr;
+        }
+        CreatePaymentTypeHeaderRow() {
+            let tr = document.createElement("tr");
+            tr.appendChild(Utilities.CreateTableCell("th", "Check Number", "has-text-centered"));
+            tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-centered"));
+            tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered"));
+            tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 4));
+            return tr;
+        }
+        CreateCheckDataRow(pmd) {
+            let tr = document.createElement("tr");
+            tr.appendChild(Utilities.CreateTableCell("td", pmd.check_number, "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", "Check", "has-text-centered"));
+            tr.appendChild(Utilities.CreateTableCell("td", pmd.check_count.toString(), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(pmd.check_amount), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", "", ""));
+            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(pmd.check_amount), "has-text-right"));
+            return tr;
+        }
+        CreateCashDataRow(pmd) {
+            let tr = document.createElement("tr");
+            tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 2));
+            //tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-left"));
+            tr.appendChild(Utilities.CreateTableCell("td", "Cash", "has-text-centered"));
+            tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 2));
+            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(pmd.cash_amount), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(pmd.cash_amount), "has-text-right"));
+            return tr;
+        }
         CreateReceiptDetailRow(label, cash_amount, check_amount, check_count) {
             let tr = document.createElement("tr");
-            tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-left"));
-            tr.appendChild(Utilities.CreateTableCell("td", check_count.toString(), "has-text-right"));
-            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(check_amount), "has-text-right"));
-            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(cash_amount), "has-text-right"));
-            tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("th", label, "has-text-left", "", 3));
+            tr.appendChild(Utilities.CreateTableCell("th", check_count.toString(), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("th", Utilities.Format_Amount(check_amount), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("th", Utilities.Format_Amount(cash_amount), "has-text-right"));
+            tr.appendChild(Utilities.CreateTableCell("th", Utilities.Format_Amount(cash_amount + check_amount), "has-text-right"));
+            tr.classList.add("payment_type_end");
             return tr;
         }
         DisplayDepartmentControls(t) {

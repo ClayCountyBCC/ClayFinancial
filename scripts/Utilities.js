@@ -457,7 +457,7 @@ var Utilities;
         }
         return levelitem;
     }
-    function CreateTableCell(celltype, value, class_to_add, width = "") {
+    function CreateTableCell(celltype, value, class_to_add, width = "", col_span = -1) {
         if (celltype !== "td" && celltype !== "th")
             celltype = "td";
         let cell = document.createElement(celltype);
@@ -467,6 +467,8 @@ var Utilities;
             cell.appendChild(document.createTextNode(value));
         if (class_to_add.length > 0)
             cell.classList.add(class_to_add);
+        if (col_span > -1)
+            cell.colSpan = col_span;
         return cell;
     }
     Utilities.CreateTableCell = CreateTableCell;

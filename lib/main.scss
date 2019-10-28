@@ -95,6 +95,11 @@ p.help.is-danger
   font-size: 1rem;
 }
 
+tr.payment_type_end td, tr.payment_type_end th
+{
+  border-bottom: 5px solid #dbdbdb;
+}
+
 /*fieldset div.check:nth-of-type(2n)
 {
   background-color: hsl(0, 0%, 86%);
