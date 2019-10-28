@@ -75,6 +75,7 @@ var Transaction;
                     // how many checks / how much cash/checks they've collected
                     // and provide a spot for comments.
                     // last will be a Create Receipt button.
+                    console.log('can accept deposit');
                     container.appendChild(TransactionData.CreateAcceptDepositMenu(saved_transaction));
                 }
             }
@@ -684,9 +685,9 @@ var Transaction;
             }
             static CreateAcceptDepositMenu(saved_transaction) {
                 saved_transaction.transaction_type = "C";
-                saved_transaction.total_check_amount = 0;
-                saved_transaction.total_check_count = 0;
-                saved_transaction.total_cash_amount = 0;
+                //saved_transaction.total_check_amount = 0;
+                //saved_transaction.total_check_count = 0;
+                //saved_transaction.total_cash_amount = 0;
                 let df = document.createDocumentFragment();
                 let container = document.createElement("div");
                 container.classList.add("columns", "is-multiline");
