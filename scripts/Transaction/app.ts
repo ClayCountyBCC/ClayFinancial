@@ -89,7 +89,14 @@
 
     setInterval(() =>
     {
-      Transaction.GetTransactionList(Transaction.current_page, false);
+      var d = new Date();
+      var now_hours = d.getHours();
+      // putting a limit on when we do the refreshing.  We stop at 7 PM and start again at 6 AM.
+      if (now_hours > 5 && now_hours < 19)
+      {
+        Transaction.GetTransactionList(Transaction.current_page, false);
+      }
+      
     }, 60 * 5 * 1000);
 
   } 
