@@ -32,8 +32,10 @@
 {
   @page
   {
-    margin: 2em;
+    margin: 2em;   
     size: ledger !important;
+    //overflow-y: visible !important;
+    //overflow-x: visible !important;
   }
 
   a
@@ -64,7 +66,7 @@
   }
 
 
-  table.pagebreak td
+  table.pagebreak td, table.pagebreak th
   {
     line-height: 1em;
     text-align: left;
@@ -82,12 +84,18 @@
     display: none;
   }
 
-  body
+  body, #receipt_view
   {
+    overflow: visible !important;
     font-size: 16px !important;
-    display: block;
-  }
+    display: block !important;
+    height: auto !important;
 
+  }
+  table tfoot
+  {
+    display: table-row-group;
+  }
   .pagebreak
   {
     page-break-inside: avoid !important;

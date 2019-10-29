@@ -225,6 +225,7 @@
     private CreateControlDataRow(label: string, value: any): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
+      tr.classList.add("pagebreak");
       tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-right"));
       if (typeof value == "string")
       {
@@ -243,6 +244,7 @@
     private CreatePaymentTypeHeaderRow(): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
+      tr.classList.add("pagebreak");
       tr.appendChild(Utilities.CreateTableCell("th", "Check Number", "has-text-right"));
       tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-right"));
       tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered"));
@@ -253,6 +255,7 @@
     private CreateCheckDataRow(pmd: Data.PaymentMethodData): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
+      tr.classList.add("pagebreak");
       tr.appendChild(Utilities.CreateTableCell("td", pmd.check_number, "has-text-right"));
       tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-right"));
       tr.appendChild(Utilities.CreateTableCell("td", "Check", "has-text-centered"));
@@ -266,6 +269,7 @@
     private CreateCashDataRow(pmd: Data.PaymentMethodData): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
+      tr.classList.add("pagebreak");
       tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 2));
       //tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-left"));
       tr.appendChild(Utilities.CreateTableCell("td", "Cash", "has-text-centered"));

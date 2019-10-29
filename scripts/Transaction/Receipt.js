@@ -144,6 +144,7 @@ var Transaction;
         }
         CreateControlDataRow(label, value) {
             let tr = document.createElement("tr");
+            tr.classList.add("pagebreak");
             tr.appendChild(Utilities.CreateTableCell("td", label, "has-text-right"));
             if (typeof value == "string") {
                 tr.appendChild(Utilities.CreateTableCell("td", value, "has-text-left", "", 2));
@@ -158,6 +159,7 @@ var Transaction;
         }
         CreatePaymentTypeHeaderRow() {
             let tr = document.createElement("tr");
+            tr.classList.add("pagebreak");
             tr.appendChild(Utilities.CreateTableCell("th", "Check Number", "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("th", "Check From", "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("th", "Type", "has-text-centered"));
@@ -166,6 +168,7 @@ var Transaction;
         }
         CreateCheckDataRow(pmd) {
             let tr = document.createElement("tr");
+            tr.classList.add("pagebreak");
             tr.appendChild(Utilities.CreateTableCell("td", pmd.check_number, "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-right"));
             tr.appendChild(Utilities.CreateTableCell("td", "Check", "has-text-centered"));
@@ -177,6 +180,7 @@ var Transaction;
         }
         CreateCashDataRow(pmd) {
             let tr = document.createElement("tr");
+            tr.classList.add("pagebreak");
             tr.appendChild(Utilities.CreateTableCell("td", "", "", "", 2));
             //tr.appendChild(Utilities.CreateTableCell("td", pmd.check_from, "has-text-left"));
             tr.appendChild(Utilities.CreateTableCell("td", "Cash", "has-text-centered"));
