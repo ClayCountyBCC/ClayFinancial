@@ -723,14 +723,23 @@ namespace ClayFinancial.Models.Transaction.Data
 
     public static string GetUpdateTransactionTotals(bool has_been_modified)
     {
-      
-      return $@"
-        DECLARE @has_been_modified Bit = {(has_been_modified ? "1" : "0")};
-        
-          
-         EXEC update_receipt_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
+      var sb = new StringBuilder();
 
-      ";
+      sb.AppendLine($@"
+        DECLARE @has_been_modified Bit = {(has_been_modified ? "1" : "0")};
+  
+        IF UPPER(@transaction_type) = 'C'
+          BEGIN
+            EXEC update_receipt_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
+          END
+        IF UPPER(@transaction_type) = 'D'
+          BEGIN
+            EXEC update_deposit_transaction_totals @transaction_id, @has_been_modified;
+          END
+
+      ");
+
+      return sb.ToString();
     }
 
     public static TransactionData CreateDeposit(UserAccess ua, string selected_user_display_name, string ipAddress)
