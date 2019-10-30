@@ -728,7 +728,7 @@ namespace ClayFinancial.Models.Transaction.Data
       sb.AppendLine($@"
         DECLARE @has_been_modified Bit = {(has_been_modified ? "1" : "0")};
   
-        IF UPPER(@transaction_type) = 'C'
+        IF UPPER(@transaction_type) = 'R'
           BEGIN
             EXEC update_receipt_transaction_totals @transaction_id, @transaction_type, @has_been_modified;
           END
