@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dapper;
 using System.Web;
 
 namespace ClayFinancial.Models.Transaction
@@ -87,10 +88,21 @@ namespace ClayFinancial.Models.Transaction
 
       // if there is anything to validate that is not specific to it's data type,
       // do it before this step.
+      
+
       if (!is_active && is_new)
       {
         cd.error_text = "This is no longer a valid control";
         return false;
+      }
+
+      if(cd.control_id == 87)
+      {
+        if (CheckForValidTransactionNumber(cd.value))
+        {
+          cd.error_text = "Not a valid deposit transaction number";
+          return false;
+        }
       }
 
       if (cd.value.Length > max_length) 
@@ -185,6 +197,22 @@ namespace ClayFinancial.Models.Transaction
     public static Dictionary<int, Control> GetCachedDict()
     {
       return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
+    }
+
+    public static bool CheckForValidTransactionNumber(string transaction_number)
+    {
+      var param = new DynamicParameters();
+      param.Add("@transaction_number", transaction_number);
+      var query = @"
+
+        SELECT
+          transaction_id
+        FROM data_transaction
+        WHERE transaction_number = @transaction_number
+
+      ";
+
+      return Constants.Get_Data<int>(query, param, Constants.ConnectionString.ClayFinancial).Count() == 1;
     }
   }
 }

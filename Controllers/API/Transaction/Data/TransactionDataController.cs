@@ -104,7 +104,7 @@ namespace ClayFinancial.Controllers.API
 
       if (!transactionData.ValidateTransaction(ua)) // add check for C transactionin this validation function
       {
-        if (!transactionData.can_accept_deposit) return Unauthorized();
+        if (!transactionData.can_accept_deposit && transactionData.transaction_type == "D") return Unauthorized();
 
         if (transactionData.error_text.Length == 0)
         {
