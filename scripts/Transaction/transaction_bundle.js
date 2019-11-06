@@ -687,7 +687,9 @@ var Transaction;
     }
     Transaction.FilterTransactions = FilterTransactions;
     function ViewReceiptInProgress() {
-        if (!Transaction.currentReceipt === null) {
+        console.log('transaction current receipt', Transaction.currentReceipt);
+        if (!(Transaction.currentReceipt === null)) {
+            console.log('viewing receipt detail');
             ViewReceiptDetail();
         }
     }
@@ -1610,6 +1612,9 @@ var Transaction;
                 }
                 columns.appendChild(this.check_buttons_container_element);
                 this.paying_for_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half");
+                if (payment_method_data === null) {
+                    this.paying_for_input_element_container.style.display = "none";
+                }
                 columns.appendChild(this.paying_for_input_element_container);
                 this.check_from_input_element_container = Transaction.ControlGroup.CreateInputFieldContainer(this.check_from_input_element, "Check From", true, "is-half");
                 columns.appendChild(this.check_from_input_element_container);
@@ -2205,6 +2210,14 @@ var Transaction;
                 tr.appendChild(Utilities.CreateTableCell("td", control_data.value, "has-text-left"));
                 return tr;
             }
+            SetErrorText(error_text) {
+                if (this.selected_control.data_type === "dropdown") {
+                    Transaction.ControlGroup.UpdateSelectError(this.container_element, error_text);
+                }
+                else {
+                    Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, error_text);
+                }
+            }
         }
         Data.ControlData = ControlData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
@@ -2464,6 +2477,9 @@ var Transaction;
                     });
                 });
             }
+            FindPaymentTypeControl(control_id) {
+                return this.control_data.find(c => c.control_id === control_id);
+            }
         }
         Data.PaymentTypeData = PaymentTypeData;
     })(Data = Transaction.Data || (Transaction.Data = {}));
@@ -2570,7 +2586,13 @@ var Transaction;
                         this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, div));
                     }
                     else {
-                        this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, cd.value));
+                        if (control.data_type === "money") {
+                            let v = Utilities.Format_Amount(parseFloat(cd.value));
+                            this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, v));
+                        }
+                        else {
+                            this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, cd.value));
+                        }
                     }
                 }
                 if (address_controls.length > 0) {
@@ -3010,6 +3032,14 @@ var Transaction;
                 paymentTypeContainer.appendChild(ol);
             }
             AddPaymentType(payment_type, container, transaction_already_saved = false) {
+                if (payment_type.payment_type_id === 62) {
+                    for (let ptd of this.payment_type_data) {
+                        if (ptd.payment_type_id === 62) {
+                            alert("You can only add 1 Security Deposit to receipt.");
+                            return;
+                        }
+                    }
+                }
                 let default_payment_type_index = this.next_payment_type_index++;
                 if (transaction_already_saved) {
                     let max_index = 0;
@@ -3245,20 +3275,65 @@ var Transaction;
                 let path = Transaction.GetPath();
                 Utilities.Post(path + "API/Transaction/Save", t)
                     .then(function (response) {
-                    console.log("post probably good", response);
-                    Transaction.currentReceipt.ShowReceipt(response);
-                    Transaction.ResetReceipt();
-                    Transaction.Data.TransactionData.GetTransactionList()
-                        .then((tv) => {
-                        Transaction.transactions = tv;
-                        TransactionData.RenderTransactionList(tv);
-                        Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-                    });
+                    if (response.error_text.length === 0) {
+                        console.log("post probably good", response);
+                        Transaction.currentReceipt.ShowReceipt(response);
+                        Transaction.ResetReceipt();
+                        Transaction.Data.TransactionData.GetTransactionList()
+                            .then((tv) => {
+                            Transaction.transactions = tv;
+                            TransactionData.RenderTransactionList(tv);
+                            Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+                        });
+                    }
+                    else {
+                        console.log('transaction error', response.error_text, response);
+                        Transaction.ViewReceiptDetail();
+                        t.ParseReturnedTransactionForErrors(response);
+                        return;
+                    }
                     // need to reset the current transaction
                     // and display the one that I just downloaded.
                 }, function (error) {
                     console.log("post error occurred", error);
                 });
+            }
+            ParseReturnedTransactionForErrors(failed_transaction) {
+                let f = failed_transaction;
+                // now we compare the current transaction to the failed transaction, match payment type ids
+                // and payment type indexes, and then match controls (including departmental)
+                // we'll apply any errors we find to the best matched control we have in this transaction.
+                for (let cd of f.department_control_data) {
+                    if (cd.error_text.length > 0) {
+                        console.log("department control error found", cd.error_text, cd);
+                        let this_cd = this.FindDepartmentControl(cd.control_id);
+                        if (this_cd !== undefined) {
+                            this_cd.SetErrorText(cd.error_text);
+                        }
+                    }
+                }
+                for (let pmd of f.payment_type_data) {
+                    let this_pmd = this.FindPaymentType(pmd.payment_type_id, pmd.payment_type_index);
+                    if (this_pmd !== undefined) {
+                        for (let cd of pmd.control_data) {
+                            if (cd.error_text.length > 0) {
+                                console.log("payment type control error found", cd.error_text, cd);
+                                let this_cd = this_pmd.FindPaymentTypeControl(cd.control_id);
+                                if (this_cd !== undefined) {
+                                    this_cd.SetErrorText(cd.error_text);
+                                }
+                            }
+                        }
+                    }
+                }
+                Utilities.Error_Show(this.transaction_error_element, failed_transaction.error_text);
+                this.transaction_error_element.parentElement.scrollIntoView();
+            }
+            FindDepartmentControl(control_id) {
+                return this.department_control_data.find(c => c.control_id === control_id);
+            }
+            FindPaymentType(payment_type_id, index) {
+                return this.payment_type_data.find(pmd => pmd.payment_type_index === index && pmd.payment_type_id === payment_type_id);
             }
             /*
              * Transaction View Code

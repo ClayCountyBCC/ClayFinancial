@@ -244,7 +244,7 @@
 
   export function ViewReceiptInProgress(): void
   {
-    if (!Transaction.currentReceipt === null)
+    if (!(Transaction.currentReceipt === null))
     {
       ViewReceiptDetail();
     }

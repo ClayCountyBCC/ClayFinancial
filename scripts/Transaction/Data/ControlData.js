@@ -225,6 +225,14 @@ var Transaction;
                 tr.appendChild(Utilities.CreateTableCell("td", control_data.value, "has-text-left"));
                 return tr;
             }
+            SetErrorText(error_text) {
+                if (this.selected_control.data_type === "dropdown") {
+                    Transaction.ControlGroup.UpdateSelectError(this.container_element, error_text);
+                }
+                else {
+                    Transaction.ControlGroup.UpdateInputError(this.input_element, this.container_element, error_text);
+                }
+            }
         }
         Data.ControlData = ControlData;
     })(Data = Transaction.Data || (Transaction.Data = {}));

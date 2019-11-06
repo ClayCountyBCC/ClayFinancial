@@ -422,6 +422,10 @@
       columns.appendChild(this.check_buttons_container_element);
 
       this.paying_for_input_element_container = ControlGroup.CreateInputFieldContainer(this.paying_for_input_element, "Paying For", true, "is-half");
+      if (payment_method_data === null)
+      {
+        this.paying_for_input_element_container.style.display = "none";
+      }
       columns.appendChild(this.paying_for_input_element_container);
       this.check_from_input_element_container = ControlGroup.CreateInputFieldContainer(this.check_from_input_element, "Check From", true, "is-half");
       columns.appendChild(this.check_from_input_element_container);

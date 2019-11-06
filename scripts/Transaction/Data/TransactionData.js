@@ -213,6 +213,14 @@ var Transaction;
                 paymentTypeContainer.appendChild(ol);
             }
             AddPaymentType(payment_type, container, transaction_already_saved = false) {
+                if (payment_type.payment_type_id === 62) {
+                    for (let ptd of this.payment_type_data) {
+                        if (ptd.payment_type_id === 62) {
+                            alert("You can only add 1 Security Deposit to receipt.");
+                            return;
+                        }
+                    }
+                }
                 let default_payment_type_index = this.next_payment_type_index++;
                 if (transaction_already_saved) {
                     let max_index = 0;
@@ -448,20 +456,65 @@ var Transaction;
                 let path = Transaction.GetPath();
                 Utilities.Post(path + "API/Transaction/Save", t)
                     .then(function (response) {
-                    console.log("post probably good", response);
-                    Transaction.currentReceipt.ShowReceipt(response);
-                    Transaction.ResetReceipt();
-                    Transaction.Data.TransactionData.GetTransactionList()
-                        .then((tv) => {
-                        Transaction.transactions = tv;
-                        TransactionData.RenderTransactionList(tv);
-                        Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-                    });
+                    if (response.error_text.length === 0) {
+                        console.log("post probably good", response);
+                        Transaction.currentReceipt.ShowReceipt(response);
+                        Transaction.ResetReceipt();
+                        Transaction.Data.TransactionData.GetTransactionList()
+                            .then((tv) => {
+                            Transaction.transactions = tv;
+                            TransactionData.RenderTransactionList(tv);
+                            Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+                        });
+                    }
+                    else {
+                        console.log('transaction error', response.error_text, response);
+                        Transaction.ViewReceiptDetail();
+                        t.ParseReturnedTransactionForErrors(response);
+                        return;
+                    }
                     // need to reset the current transaction
                     // and display the one that I just downloaded.
                 }, function (error) {
                     console.log("post error occurred", error);
                 });
+            }
+            ParseReturnedTransactionForErrors(failed_transaction) {
+                let f = failed_transaction;
+                // now we compare the current transaction to the failed transaction, match payment type ids
+                // and payment type indexes, and then match controls (including departmental)
+                // we'll apply any errors we find to the best matched control we have in this transaction.
+                for (let cd of f.department_control_data) {
+                    if (cd.error_text.length > 0) {
+                        console.log("department control error found", cd.error_text, cd);
+                        let this_cd = this.FindDepartmentControl(cd.control_id);
+                        if (this_cd !== undefined) {
+                            this_cd.SetErrorText(cd.error_text);
+                        }
+                    }
+                }
+                for (let pmd of f.payment_type_data) {
+                    let this_pmd = this.FindPaymentType(pmd.payment_type_id, pmd.payment_type_index);
+                    if (this_pmd !== undefined) {
+                        for (let cd of pmd.control_data) {
+                            if (cd.error_text.length > 0) {
+                                console.log("payment type control error found", cd.error_text, cd);
+                                let this_cd = this_pmd.FindPaymentTypeControl(cd.control_id);
+                                if (this_cd !== undefined) {
+                                    this_cd.SetErrorText(cd.error_text);
+                                }
+                            }
+                        }
+                    }
+                }
+                Utilities.Error_Show(this.transaction_error_element, failed_transaction.error_text);
+                this.transaction_error_element.parentElement.scrollIntoView();
+            }
+            FindDepartmentControl(control_id) {
+                return this.department_control_data.find(c => c.control_id === control_id);
+            }
+            FindPaymentType(payment_type_id, index) {
+                return this.payment_type_data.find(pmd => pmd.payment_type_index === index && pmd.payment_type_id === payment_type_id);
             }
             /*
              * Transaction View Code

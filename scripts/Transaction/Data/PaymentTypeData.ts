@@ -346,5 +346,10 @@
       
     }
 
+    public FindPaymentTypeControl(control_id: number): ControlData
+    {
+      return this.control_data.find(c => c.control_id === control_id);
+    }
+
   }
 }

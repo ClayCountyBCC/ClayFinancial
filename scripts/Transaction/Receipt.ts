@@ -148,7 +148,16 @@
           }
           else
           {
-            this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, cd.value));
+            if (control.data_type === "money")
+            {
+              let v = Utilities.Format_Amount(parseFloat(cd.value));
+              this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, v));
+            }
+            else
+            {
+              this.receipt_view_contents_element.appendChild(this.CreateControlDataRow(control.label, cd.value));
+            }
+            
           }
           
         }

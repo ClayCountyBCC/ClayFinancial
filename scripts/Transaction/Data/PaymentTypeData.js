@@ -252,6 +252,9 @@ var Transaction;
                     });
                 });
             }
+            FindPaymentTypeControl(control_id) {
+                return this.control_data.find(c => c.control_id === control_id);
+            }
         }
         Data.PaymentTypeData = PaymentTypeData;
     })(Data = Transaction.Data || (Transaction.Data = {}));

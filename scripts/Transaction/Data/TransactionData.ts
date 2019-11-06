@@ -297,6 +297,17 @@
 
     private AddPaymentType(payment_type: PaymentType, container: HTMLElement, transaction_already_saved: boolean = false): void
     {
+      if (payment_type.payment_type_id === 62)
+      {
+        for (let ptd of this.payment_type_data)
+        {
+          if (ptd.payment_type_id === 62)
+          {
+            alert("You can only add 1 Security Deposit to receipt.");
+            return;
+          }
+        }
+      }
       let default_payment_type_index = this.next_payment_type_index++;
 
       if (transaction_already_saved)
@@ -607,22 +618,34 @@
       // by reorder I mean make them representative
       // of the actual index that element is in the array.
       let t = this;
-      let path = Transaction.GetPath();
+      let path = Transaction.GetPath();      
       Utilities.Post<TransactionData>(path + "API/Transaction/Save", t)
         .then(function (response)
         {
-          console.log("post probably good", response);
+          if (response.error_text.length === 0)
+          {
+            console.log("post probably good", response);
 
-          Transaction.currentReceipt.ShowReceipt(response);
-          Transaction.ResetReceipt();
+            Transaction.currentReceipt.ShowReceipt(response);
+            Transaction.ResetReceipt();
 
-          Transaction.Data.TransactionData.GetTransactionList()
-            .then((tv) =>
-            {
-              Transaction.transactions = tv;
-              TransactionData.RenderTransactionList(tv);
-              Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
-            });
+            Transaction.Data.TransactionData.GetTransactionList()
+              .then((tv) =>
+              {
+                Transaction.transactions = tv;
+                TransactionData.RenderTransactionList(tv);
+                Utilities.Toggle_Loading_Button(Data.TransactionData.reload_button, false);
+              });
+          }
+          else
+          {
+            console.log('transaction error', response.error_text, response);
+            
+            Transaction.ViewReceiptDetail();
+            t.ParseReturnedTransactionForErrors(response);
+
+            return;
+          }
 
           // need to reset the current transaction
           // and display the one that I just downloaded.
@@ -630,6 +653,59 @@
           {
             console.log("post error occurred", error);
           });
+    }
+
+    private ParseReturnedTransactionForErrors(failed_transaction: TransactionData): void
+    {
+      let f = failed_transaction;
+
+      // now we compare the current transaction to the failed transaction, match payment type ids
+      // and payment type indexes, and then match controls (including departmental)
+      // we'll apply any errors we find to the best matched control we have in this transaction.
+      for (let cd of f.department_control_data)
+      {
+        if (cd.error_text.length > 0)
+        {
+          let this_cd = this.FindDepartmentControl(cd.control_id);
+          if (this_cd !== undefined)
+          {
+            this_cd.SetErrorText(cd.error_text);
+          }
+        }
+      }
+
+      for (let pmd of f.payment_type_data)
+      {
+        let this_pmd = this.FindPaymentType(pmd.payment_type_id, pmd.payment_type_index);
+        if (this_pmd !== undefined)
+        {
+          for (let cd of pmd.control_data)
+          {
+            if (cd.error_text.length > 0)
+            {
+              let this_cd = this_pmd.FindPaymentTypeControl(cd.control_id);
+              if (this_cd !== undefined)
+              {
+                this_cd.SetErrorText(cd.error_text);
+              }
+            }
+          }
+        }
+      }
+
+      Utilities.Error_Show(this.transaction_error_element, failed_transaction.error_text);
+      this.transaction_error_element.parentElement.scrollIntoView();
+
+    }
+
+    private FindDepartmentControl(control_id: number): ControlData
+    {
+      return this.department_control_data.find(c => c.control_id === control_id);
+    }
+
+    private FindPaymentType(payment_type_id: number, index: number): PaymentTypeData
+    {
+      return this.payment_type_data.find(pmd => pmd.payment_type_index === index && pmd.payment_type_id === payment_type_id);
     }
 
     /* 

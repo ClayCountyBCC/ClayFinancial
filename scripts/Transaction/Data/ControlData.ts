@@ -311,5 +311,17 @@
       return tr;
     }
 
+    public SetErrorText(error_text: string):void
+    {
+      if (this.selected_control.data_type === "dropdown")
+      {
+        ControlGroup.UpdateSelectError(this.container_element, error_text);
+      }
+      else
+      {
+        ControlGroup.UpdateInputError(this.input_element, this.container_element, error_text);
+      }
+    }
+
   }
 }

@@ -21,7 +21,7 @@
            class="navbar-item">
           New Receipt
         </a>
-        <a id="linkReceiptInProgress"           
+        <a id="linkReceiptInProgress"
            class="navbar-item has-background-grey-light has-text-grey has-text-warning"
            style="cursor: default;"
            onclick="Transaction.ViewReceiptInProgress();">
@@ -31,8 +31,30 @@
            class="navbar-item">
           New Deposit
         </a>
-        <div class="navbar-item">
-
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            Reports
+          </a>
+          <div class="navbar-dropdown">
+            @*<a href=""
+               rel="noopener noreferrer"
+               target="_blank"
+               class="navbar-item">
+              Parks & Rec Incomplete Deposits
+            </a>*@
+            <a href="http://claybccreport/reports/report/Finance/Deposit%20Log"
+               rel="noopener noreferrer"
+               target="_blank"
+               class="navbar-item">
+              Daily Deposit Log
+            </a>
+            @*<a href=""
+               rel="noopener noreferrer"
+               target="_blank"
+               class="navbar-item is-disabled">
+              Cash Monitoring Log
+            </a>*@
+          </div>
         </div>
       </div>
     </div>
@@ -258,6 +280,7 @@
       </div>
     </div>
   </div>
+
   <div id="receipt_view_footer"
        class="level">
     <div class="level-left">
@@ -431,9 +454,10 @@
 
 <script type="text/javascript">
 
-  document.addEventListener("DOMContentLoaded", function (event)
-  {
-    Transaction.Start();
-  });
+  document.addEventListener("DOMContentLoaded",
+    function (event)
+    {
+      Transaction.Start();
+    });
 
 </script>

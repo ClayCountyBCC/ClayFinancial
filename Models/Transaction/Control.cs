@@ -98,7 +98,7 @@ namespace ClayFinancial.Models.Transaction
 
       if(cd.control_id == 87)
       {
-        if (CheckForValidTransactionNumber(cd.value))
+        if (!CheckForValidTransactionNumber(cd.value))
         {
           cd.error_text = "Not a valid deposit transaction number";
           return false;
@@ -201,18 +201,20 @@ namespace ClayFinancial.Models.Transaction
 
     public static bool CheckForValidTransactionNumber(string transaction_number)
     {
+      if (transaction_number.Trim().Length != 13) return false;
+
       var param = new DynamicParameters();
       param.Add("@transaction_number", transaction_number);
       var query = @"
 
         SELECT
-          transaction_id
+          transaction_number
         FROM data_transaction
         WHERE transaction_number = @transaction_number
 
       ";
-
-      return Constants.Get_Data<int>(query, param, Constants.ConnectionString.ClayFinancial).Count() == 1;
+      var t = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial);
+      return t.Count() == 1;
     }
   }
 }
