@@ -199,9 +199,7 @@ var Transaction;
     }
     Transaction.FilterTransactions = FilterTransactions;
     function ViewReceiptInProgress() {
-        console.log('transaction current receipt', Transaction.currentReceipt);
         if (!(Transaction.currentReceipt === null)) {
-            console.log('viewing receipt detail');
             ViewReceiptDetail();
         }
     }

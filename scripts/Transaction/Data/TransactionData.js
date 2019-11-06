@@ -486,7 +486,6 @@ var Transaction;
                 // we'll apply any errors we find to the best matched control we have in this transaction.
                 for (let cd of f.department_control_data) {
                     if (cd.error_text.length > 0) {
-                        console.log("department control error found", cd.error_text, cd);
                         let this_cd = this.FindDepartmentControl(cd.control_id);
                         if (this_cd !== undefined) {
                             this_cd.SetErrorText(cd.error_text);
@@ -498,7 +497,6 @@ var Transaction;
                     if (this_pmd !== undefined) {
                         for (let cd of pmd.control_data) {
                             if (cd.error_text.length > 0) {
-                                console.log("payment type control error found", cd.error_text, cd);
                                 let this_cd = this_pmd.FindPaymentTypeControl(cd.control_id);
                                 if (this_cd !== undefined) {
                                     this_cd.SetErrorText(cd.error_text);
