@@ -216,6 +216,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
       var controls = Control.GetCachedDict();
 
+     
+
       return controls[control_id].Validate(this, false);
     }
 
@@ -381,70 +383,26 @@ namespace ClayFinancial.Models.Transaction.Data
       return control_data;
     }
 
-    //public TransactionData ValidateTransactionData(TransactionData transactionData)
-    //{
-    //  // We treat the Data.TransactionData class as a department class because it has all of the
-    //  // departmental data we'll need to validate
+    public static List<ControlData> ValidateRentalBalanceControls(string transaction_number)
+    {
 
-    //  // first we'll see if this department is active or not. If it's not, we shouldn't be allowing 
-    //  // data to be saved
+      // This is here in order to validate the payment_type_controls in the rental-balance match those in the rental-deposit
+      var param = new DynamicParameters();
+      param.Add("@transaction_number", transaction_number);
 
-    //  if (!is_active)
-    //  {
-    //    transactionData.error_text = "Department is no longer active.";
-    //    return transactionData;
-    //  }
+      var query = @"
 
-    //  // let's make sure the department controls are valid
-    //  if (!ValidateDepartmentControls(transactionData)) return transactionData;
+        SELECT
+          control_id
+          ,value
+        FROM data_control DC
+        INNER JOIN data_transaction DT ON DT.transaction_id = DC.transaction_id AND DT.transaction_number = @transaction_number
+        INNER JOIN data_payment_type PT ON PT.transaction_id = DC.transaction_id
+        WHERE DC.department_id IS NULL
+          and control_id in (71,72,88);
 
-
-
-
-    //  return transactionData;
-    //}
-
-    //private bool ValidateDepartmentControls(Data.TransactionData transactionData)
-    //{
-    //  // things to validate here:
-    //  // department controls are all required.
-    //  // every control in controls_dict for this class needs to be present
-    //  // every control in controls must have a valid value.
-    //  var controlids = (from c in transactionData.department_control_data
-    //                    select c.control_id).ToList();
-
-    //  // let's make sure every department control is present in department_controls
-    //  //foreach (int key in controls_dict.Keys)
-    //  //{
-    //  //  if (!controlids.Contains((short)key))
-    //  //  {
-
-    //  //    transactionData.error_text = "Missing department information: " + controls_dict[key].label;
-    //  //    return false;
-    //  //  }
-    //  //}
-
-    //  // now we validate each department control
-    //  //foreach (Data.ControlData cd in transactionData.department_controls)
-    //  //{
-    //  //  // if one of our department controls isn't found in our controls_dict object,
-    //  //  // it means that the client has an extra control
-    //  //  if (!controls_dict.ContainsKey(cd.control_id))
-    //  //  {
-    //  //    transactionData.error_text = "Invalid Department information found.";
-    //  //    return false;
-    //  //  }
-
-    //  //  var control = controls_dict[cd.control_id];
-
-    //  //  if (!control.ValidateControlData(cd))
-    //  //  {
-    //  //    transactionData.error_text = "There was a problem with some of the data entered.";
-    //  //    return false;
-    //  //  }
-
-    //  //}
-    //  return true;
-    //}
+      ";
+      return Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
+    }
   }
 }

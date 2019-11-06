@@ -79,6 +79,43 @@ namespace ClayFinancial.Models.Transaction
     {
       // in order to have a valid payment type, all of the required controls
       // must have a value and all of the payment methods must be valid.
+      if(ptd.payment_type_id == 63)
+      {
+        string transaction_number = (from c in ptd.control_data
+                                  where c.control_id == 87
+                                  select c.value).FirstOrDefault();
+
+        if (transaction_number.Length == 0)
+        {
+          foreach (var c in ptd.control_data)
+          {
+            if(c.control_id == 87)
+            {
+              c.error_text = "No transaction number found";
+              return false;
+            }
+          }
+        }
+      
+      var control_list = ControlData.ValidateRentalBalanceControls(transaction_number);
+        bool has_errors = false;
+        foreach( var c in ptd.control_data)
+        {
+          foreach(var d in control_list)
+          {
+            if(c.control_id == d.control_id && c.value !=d.value)
+            {
+              c.error_text = "This does not match the deposit receipt data";
+              has_errors = true;
+            }
+          }
+        }
+
+
+        if (has_errors) return false;
+      }
+
+
       foreach (Data.ControlData cd in ptd.control_data)
       {
         if (!controls_dict[cd.control_id].Validate(cd))

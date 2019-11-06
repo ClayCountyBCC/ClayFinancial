@@ -98,18 +98,11 @@ namespace ClayFinancial.Models.Transaction
 
       if(cd.control_id == 87)
       {
-        if (!CheckForValidTransactionNumber(cd.value))
-        {
-          cd.error_text = "Not a valid deposit transaction number";
-          return false;
-        }
+       cd.error_text = CheckForValidTransactionNumber(cd.value);
+        if (cd.error_text.Length > 0) return false;
+        
       }
 
-      if (cd.value.Length > max_length) 
-      {
-        cd.error_text = "Data is too long.";
-        return false;
-      }
 
       switch (this.data_type)
       {
@@ -199,9 +192,15 @@ namespace ClayFinancial.Models.Transaction
       return (Dictionary<int, Control>)myCache.GetItem("controls_dict");
     }
 
-    public static bool CheckForValidTransactionNumber(string transaction_number)
+    public static string CheckForValidTransactionNumber(string transaction_number)
     {
-      if (transaction_number.Trim().Length != 13) return false;
+
+      if (transaction_number.Trim().Length != 13 || 
+         transaction_number.Trim().IndexOf('-', 0) != 2 || 
+         transaction_number.Trim().IndexOf('-', 3) != 7)
+      {
+        return "Invalid deposit transaction number";
+      }
 
       var param = new DynamicParameters();
       param.Add("@transaction_number", transaction_number);
@@ -209,12 +208,18 @@ namespace ClayFinancial.Models.Transaction
 
         SELECT
           transaction_number
-        FROM data_transaction
-        WHERE transaction_number = @transaction_number
+        FROM data_transaction DT
+        INNER JOIN data_payment_type DPT ON DPT.transaction_id = DT.transaction_id and payment_type_id = 62
+        WHERE transaction_number = @transaction_number;
 
       ";
-      var t = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial);
-      return t.Count() == 1;
+      var td = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial);
+
+      if (td.Count() < 1) return "That transaction number was not found.";
+
+      if (td.Count() == 1) return "There is already a Rental Deposit on this receipt";
+
+      return "";
     }
   }
 }

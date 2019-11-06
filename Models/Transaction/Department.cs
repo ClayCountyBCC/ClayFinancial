@@ -216,6 +216,7 @@ namespace ClayFinancial.Models.Transaction
         transactionData.error_text = "Can not have two Rental - Security Deposit on the same receipt";
         return false;
       }
+
       foreach(PaymentTypeData ptd in transactionData.payment_type_data)
       {
         if (!payment_types_dict[ptd.payment_type_id].ValidatePaymentType(ptd))
@@ -227,9 +228,6 @@ namespace ClayFinancial.Models.Transaction
 
       return true;
     }
-
-
-    
 
   }
 }
