@@ -154,16 +154,14 @@ namespace ClayFinancial.Models.Transaction
       var query = @"
 
           SELECT
-            transaction_number
+            count(transaction_number)
           FROM data_transaction DT
           INNER JOIN data_payment_type DPT ON DPT.transaction_id = DT.transaction_id AND DPT.payment_type_id = 62
           WHERE DT.transaction_number = @transaction_number
 
       ";
 
-      var i = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
-
-      return i == transaction_number;
+      return Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial) > 0;
     }
   }
 }
