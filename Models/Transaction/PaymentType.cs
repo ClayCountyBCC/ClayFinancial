@@ -106,7 +106,7 @@ namespace ClayFinancial.Models.Transaction
 
             if(!CheckIfValidSecurityDeposit(transaction_number))
             {
-              c.error_text = "This transaction does contain a security deposit. Please check you entered the receipt number correctly.";
+              c.error_text = "This transaction does not contain a security deposit. Please check you entered the receipt number correctly.";
             }
           }
         }
