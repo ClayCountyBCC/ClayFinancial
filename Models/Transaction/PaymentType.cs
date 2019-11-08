@@ -165,12 +165,11 @@ namespace ClayFinancial.Models.Transaction
 
       if (td > 1)
       {
-        new ErrorLog("Transaction number " + transaction_number + " has multiple Rental - Security deposit Payment Types",
-                                        "Too many Rental Security deposits on a transaction",
-                                        @"PaymentType
-                                        Control.CheckForValidTransactionNumber(string transaction_number)",
-                                        "",
-                                        "");
+        new ErrorLog(transaction_number,
+                    "Transaction number " + transaction_number + " has multiple Rental - Security deposit Payment Types",
+                    "PaymentType.CheckIfValidSecurityDeposit(string transaction_number)",
+                    "",
+                    "");
         return "Multiple security deposits exist on this transaction.";
 
       }
