@@ -82,6 +82,8 @@ namespace ClayFinancial.Models.Transaction
 
     public bool Validate(Data.ControlData cd, bool is_new = true)
     {
+
+      if (cd.error_text.Length > 0) return false;
       // Here we use this class' properties to validate our controldata
       // you'll notice it doesn't matter if it's a department control
       // or a payment type control
@@ -210,16 +212,6 @@ namespace ClayFinancial.Models.Transaction
       ";
       var td = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial);
 
-      if (td.Count() < 1) return "That transaction number was not found.";
-
-      if (td.Count() == 1) return "There is already a Rental Deposit on this receipt";
-
-      if (td.Count() > 1) new ErrorLog("Transaction number " + transaction_number + " has multiple Rental - Security deposit Payment Types",
-                                        "Too many Rental Security deposits on a transaction",
-                                        @"PaymentType
-                                        Control.CheckForValidTransactionNumber(string transaction_number)",
-                                        "",
-                                        "");
 
       return "";
     }

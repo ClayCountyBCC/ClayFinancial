@@ -104,10 +104,9 @@ namespace ClayFinancial.Models.Transaction
               return false;
             }
 
-            if(!CheckIfValidSecurityDeposit(transaction_number))
-            {
-              c.error_text = "This transaction does not contain a security deposit. Please check you entered the receipt number correctly.";
-            }
+            c.error_text = CheckIfValidSecurityDeposit(transaction_number);
+            if (c.error_text.Length > 0) return false;
+
           }
         }
         
@@ -146,22 +145,37 @@ namespace ClayFinancial.Models.Transaction
 
     }
 
-    private bool CheckIfValidSecurityDeposit(string transaction_number)
+    private string CheckIfValidSecurityDeposit(string transaction_number)
     {
       var param = new DynamicParameters();
       param.Add("@transaction_number", transaction_number);
 
       var query = @"
 
-          SELECT
-            count(transaction_number)
-          FROM data_transaction DT
-          INNER JOIN data_payment_type DPT ON DPT.transaction_id = DT.transaction_id AND DPT.payment_type_id = 62
-          WHERE DT.transaction_number = @transaction_number
+        SELECT count(transaction_number)
+        FROM data_transaction DT
+        INNER JOIN data_payment_type DPT ON DPT.transaction_id = DT.transaction_id AND DPT.payment_type_id = 62
+        WHERE DT.transaction_number = @transaction_number
 
       ";
 
-      return Constants.Exec_Query(query, param, Constants.ConnectionString.ClayFinancial) > 0;
+      var td = Constants.Exec_Scalar<int>(query,  Constants.ConnectionString.ClayFinancial, param);
+
+      if (td < 1) return "This transaction does not have a security deposit.";
+
+      if (td > 1)
+      {
+        new ErrorLog("Transaction number " + transaction_number + " has multiple Rental - Security deposit Payment Types",
+                                        "Too many Rental Security deposits on a transaction",
+                                        @"PaymentType
+                                        Control.CheckForValidTransactionNumber(string transaction_number)",
+                                        "",
+                                        "");
+        return "Multiple security deposits exist on this transaction.";
+
+      }
+
+      return "";
     }
   }
 }
