@@ -96,13 +96,13 @@ namespace ClayFinancial.Models.Transaction
         return false;
       }
 
-      if(cd.control_id == 87)
+      if (cd.control_id == 87)
       {
-       cd.error_text = CheckForValidTransactionNumber(cd.value);
-        if (cd.error_text.Length > 0) return false;
-        
-      }
 
+        cd.error_text = CheckForValidTransactionNumber(cd.value);
+        if (cd.error_text.Length > 0) return false;
+
+      }
 
       switch (this.data_type)
       {
@@ -195,12 +195,7 @@ namespace ClayFinancial.Models.Transaction
     public static string CheckForValidTransactionNumber(string transaction_number)
     {
 
-      if (transaction_number.Trim().Length != 13 || 
-         transaction_number.Trim().IndexOf('-', 0) != 2 || 
-         transaction_number.Trim().IndexOf('-', 3) != 7)
-      {
-        return "Invalid deposit transaction number";
-      }
+
 
       var param = new DynamicParameters();
       param.Add("@transaction_number", transaction_number);
@@ -218,6 +213,13 @@ namespace ClayFinancial.Models.Transaction
       if (td.Count() < 1) return "That transaction number was not found.";
 
       if (td.Count() == 1) return "There is already a Rental Deposit on this receipt";
+
+      if (td.Count() > 1) new ErrorLog("Transaction number " + transaction_number + " has multiple Rental - Security deposit Payment Types",
+                                        "Too many Rental Security deposits on a transaction",
+                                        @"PaymentType
+                                        Control.CheckForValidTransactionNumber(string transaction_number)",
+                                        "",
+                                        "");
 
       return "";
     }

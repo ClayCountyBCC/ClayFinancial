@@ -383,26 +383,5 @@ namespace ClayFinancial.Models.Transaction.Data
       return control_data;
     }
 
-    public static List<ControlData> ValidateRentalBalanceControls(string transaction_number)
-    {
-
-      // This is here in order to validate the payment_type_controls in the rental-balance match those in the rental-deposit
-      var param = new DynamicParameters();
-      param.Add("@transaction_number", transaction_number);
-
-      var query = @"
-
-        SELECT
-          control_id
-          ,value
-        FROM data_control DC
-        INNER JOIN data_transaction DT ON DT.transaction_id = DC.transaction_id AND DT.transaction_number = @transaction_number
-        INNER JOIN data_payment_type PT ON PT.transaction_id = DC.transaction_id
-        WHERE DC.department_id IS NULL
-          and control_id in (71,72,88);
-
-      ";
-      return Constants.Get_Data<ControlData>(query, param, Constants.ConnectionString.ClayFinancial);
-    }
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dapper;
 using System.Web;
 using ClayFinancial.Models.Transaction.Data;
 
@@ -81,38 +82,33 @@ namespace ClayFinancial.Models.Transaction
       // must have a value and all of the payment methods must be valid.
       if(ptd.payment_type_id == 63)
       {
-        string transaction_number = (from c in ptd.control_data
-                                  where c.control_id == 87
-                                  select c.value).FirstOrDefault();
 
-        if (transaction_number.Length == 0)
+        // validate the transaction number is valid (control_id 87)
+        foreach (var c in ptd.control_data)
         {
-          foreach (var c in ptd.control_data)
+          if (c.control_id == 87)
           {
-            if(c.control_id == 87)
+            if (c.value.Trim().Length == 0)
             {
-              c.error_text = "No transaction number found";
+              c.error_text = "No transaction number entered";
               return false;
             }
-          }
-        }
-      
-      var control_list = ControlData.ValidateRentalBalanceControls(transaction_number);
-        bool has_errors = false;
-        foreach( var c in ptd.control_data)
-        {
-          foreach(var d in control_list)
-          {
-            if(c.control_id == d.control_id && c.value !=d.value)
+
+            if (c.value.Trim().Length != 13 ||
+                c.value.Trim().IndexOf('-', 0) != 2 ||
+                c.value.Trim().IndexOf('-', 3) != 7)
             {
-              c.error_text = "This does not match the deposit receipt data";
-              has_errors = true;
+              c.error_text = "Invalid deposit transaction number format. Please check you entered the receipt number correctly";
+              return false;
+            }
+
+            if(!CheckIfValidSecurityDeposit(c.value))
+            {
+              c.error_text = "This transaction does contain a security deposit. Please check you entered the receipt number correctly.";
             }
           }
         }
-
-
-        if (has_errors) return false;
+        
       }
 
 
@@ -148,5 +144,24 @@ namespace ClayFinancial.Models.Transaction
 
     }
 
+    private bool CheckIfValidSecurityDeposit(string transaction_number)
+    {
+      var param = new DynamicParameters();
+      param.Add("@transaction_number", transaction_number);
+
+      var query = @"
+
+          SELECT
+            transaction_number
+          FROM data_transaction DT
+          INNER JOIN data_payment_type DPT ON DPT.transaction_id = DT.transaction_id AND DPT.payment_type_id = 62
+          WHERE DT.transaction_number = @transaction_number
+
+      ";
+
+      var i = Constants.Get_Data<string>(query, param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
+
+      return i == transaction_number;
+    }
   }
 }
