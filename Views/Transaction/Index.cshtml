@@ -48,12 +48,12 @@
                class="navbar-item">
               Daily Deposit Log
             </a>
-            @*<a href=""
+            <a href="http://claybccreport/reports/report/Finance/FinanceAdmin/Cash%20Monitor%20Report"
                rel="noopener noreferrer"
                target="_blank"
-               class="navbar-item is-disabled">
+               class="navbar-item">
               Cash Monitoring Log
-            </a>*@
+            </a>
           </div>
         </div>
       </div>
@@ -231,7 +231,21 @@
        id="receipt_department_controls">
 
   </div>
-
+  <div class="level hide-for-print">
+    <div class="level-left"></div>
+    <div class="level-right">
+      <div class="level-item">
+        <button onclick="window.print(); return false;"
+                class="button is-success hide-for-print">
+          <span style="margin-right: 1em;"
+                class="icon is-small">
+            <i class="fas fa-print"></i>
+          </span>
+          Quick Print
+        </button>
+      </div>
+    </div>
+  </div>
   <table class="table is-fullwidth">
     <thead>
       <tr>
@@ -280,6 +294,8 @@
       </div>
     </div>
   </div>
+
+
 
   <div id="receipt_view_footer"
        class="level">
