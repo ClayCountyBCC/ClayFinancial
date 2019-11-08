@@ -88,21 +88,23 @@ namespace ClayFinancial.Models.Transaction
         {
           if (c.control_id == 87)
           {
-            if (c.value.Trim().Length == 0)
+            var transaction_number = c.value.Trim();
+
+            if (transaction_number.Length == 0)
             {
               c.error_text = "No transaction number entered";
               return false;
             }
 
-            if (c.value.Trim().Length != 13 ||
-                c.value.Trim().IndexOf('-', 0) != 2 ||
-                c.value.Trim().IndexOf('-', 3) != 7)
+            if (transaction_number.Length != 13 ||
+                transaction_number.IndexOf('-', 0) != 2 ||
+                transaction_number.IndexOf('-', 3) != 7)
             {
               c.error_text = "Invalid deposit transaction number format. Please check you entered the receipt number correctly";
               return false;
             }
 
-            if(!CheckIfValidSecurityDeposit(c.value))
+            if(!CheckIfValidSecurityDeposit(transaction_number))
             {
               c.error_text = "This transaction does contain a security deposit. Please check you entered the receipt number correctly.";
             }
