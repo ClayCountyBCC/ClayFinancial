@@ -196,7 +196,7 @@ namespace ClayFinancial.Models.Transaction.Data
                 control_id,
                 value
               )
-              SELECT
+              SELECT 
                 CASE WHEN PTD.transaction_payment_type_id = -1 THEN NULL ELSE PTD.transaction_payment_type_id END,
                 CASE WHEN CD.department_id = -1 THEN NULL ELSE CD.department_id END,
                 @transaction_id,

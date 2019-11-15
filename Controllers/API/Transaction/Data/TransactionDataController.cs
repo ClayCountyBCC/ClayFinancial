@@ -493,7 +493,7 @@ namespace ClayFinancial.Controllers.API
         // We check to see if the name that they gave us has a higher level access
         // than they do.  If it is higher, then they can't do a deposit.
         if ((int)ua.current_access < (int)name_ua.current_access) return Ok(0);
-        if (ua.my_department_id != name_ua.my_department_id) return Ok(0);
+        if (ua.current_access == UserAccess.access_type.basic && ua.my_department_id != name_ua.my_department_id) return Ok(0);
       }
 
       return Ok(TransactionData.GetReadyForDepositCount(name));

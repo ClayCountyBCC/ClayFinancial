@@ -192,9 +192,9 @@ namespace ClayFinancial.Models
           //case "MISSL01":
           //  d["mccartneyd"] = new UserAccess("mccartneyd");
           //  break;
-          //case "MISHLO5":
-          //  d["westje"] = new UserAccess("westje");
-          //  break;
+          case "MISHLO5":
+            d["westje"] = new UserAccess("westje");
+            break;
           default:
             ParseGroup(finance_Level_one_group, ref d);
             ParseGroup(finance_Level_two_group, ref d);

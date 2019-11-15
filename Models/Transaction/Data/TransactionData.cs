@@ -347,19 +347,7 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       if (ua.current_access == UserAccess.access_type.basic)
       {
-        var param = new DynamicParameters();
-        param.Add("@my_employee_id", ua.employee_id);
-        param.Add("@my_department_id", ua.my_department_id);
-        param.Add("@transaction_id", transaction_id);
-        var query = new StringBuilder();
-
-        query.AppendLine(TransactionData.GetTransactionDataQuery());
-
-        query.AppendLine("  AND TD.department_id = @my_department_id");
-
-        var td = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
-
-        if (td != null && !td.can_modify)
+        if (!GetTransactionData(transaction_id, ua.employee_id, ua).can_modify)
         {
           return false;
         }
@@ -546,10 +534,9 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@created_by_employee_id", created_by_employee_id);
       param.Add("@username", created_by_username);
       param.Add("@department_id", department_id);
-      param.Add("@transaction_type", transaction_type.ToUpper());
       //param.Add("@display_name", display_name);
       param.Add("@created_by_employee_ip_address", created_by_ip_address);
-      
+      param.Add("@transaction_type", transaction_type.ToUpper());
       param.Add("@created_by_display_name", created_by_display_name);
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
@@ -677,21 +664,20 @@ namespace ClayFinancial.Models.Transaction.Data
             );
           }
 
-          // add department control data
-          foreach (ControlData cd in department_control_data)
-          {
-            controlDataTable.Rows.Add
-            (
-              this.department_id,
-              cd.control_id,
-              cd.value,
-              null,
-              null
-            );
-          }
-
+         
         }
-
+        // add department control data
+        foreach (ControlData cd in department_control_data)
+        {
+          controlDataTable.Rows.Add
+          (
+            this.department_id,
+            cd.control_id,
+            cd.value,
+            null,
+            null
+          );
+        }
 
         // add tvp to parameter list
         param.Add("@ControlData", controlDataTable.AsTableValuedParameter("dbo.ControlData"));
