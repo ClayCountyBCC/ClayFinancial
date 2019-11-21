@@ -591,26 +591,16 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       else
       {
-        query.AppendLine(@"
+        if ((int)my_access >= (int)UserAccess.access_type.finance_level_two)
+        {
+          query.AppendLine(@"
 
-          UPDATE data_transaction
-            SET child_transaction_id = @transaction_id
-          WHERE transaction_id = @child_transaction_id; 
-
-        ");
-      }
-
-      // IF TRANSACTION_TYPE = 'C' AND FINANCE LEVEL 2, TRANSACTION IS COMPLETE. CHILD_TRANSACTION_ID IS TRANSACTION_ID
-      if ((int)my_access >= (int)UserAccess.access_type.finance_level_two && transaction_type.ToUpper() == "C")
-      {
-        query.AppendLine(@"
-
-          UPDATE data_transaction
-          SET child_transaction_id = @transaction_id
-          WHERE transaction_id = @transaction_id; 
+            UPDATE data_transaction
+              SET child_transaction_id = @transaction_id
+            WHERE transaction_id = @transaction_id; 
 
         ");
-
+        }
       }
 
 
@@ -780,6 +770,7 @@ namespace ClayFinancial.Models.Transaction.Data
           WHERE created_by_employee_id = @selected_employee_id
             AND child_transaction_id IS NULL
             AND UPPER(transaction_type) IN ('C','R')
+
         )
 
         UPDATE DT
