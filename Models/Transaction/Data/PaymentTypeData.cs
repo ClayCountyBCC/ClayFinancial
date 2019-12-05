@@ -182,6 +182,10 @@ namespace ClayFinancial.Models.Transaction.Data
       query.AppendLine(@"
           USE ClayFinancial;
           DECLARE @new_payment_type_data_id BIGINT = -1;
+          DECLARE @transaction_type VARCHAR(1);
+
+          SET @transaction_type = (SELECT transaction_type FROM data_transaction WHERE transaction_id = @transaction_id);
+
 
 
           ");

@@ -540,6 +540,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@created_by_display_name", created_by_display_name);
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
+
       if(transaction_type.ToUpper() == "R")
       {
         total_cash_amount = 0;
@@ -588,19 +589,40 @@ namespace ClayFinancial.Models.Transaction.Data
       if(transaction_type != "C")
       {
         query.AppendLine(GetUpdateTransactionTotals(true));
+
       }
       else
       {
+        param.Add("@deposit_id", transaction_id);
         if ((int)my_access >= (int)UserAccess.access_type.finance_level_two)
         {
+          
+
           query.AppendLine(@"
 
             UPDATE data_transaction
               SET child_transaction_id = @transaction_id
-            WHERE transaction_id = @transaction_id; 
+            WHERE transaction_id = @transaction_id
+               OR transaction_id = @deposit_id;
 
-        ");
+            ");
+
         }
+        //else
+        //{
+
+
+        //  query.AppendLine(@"
+
+        //    UPDATE data_transaction
+        //    SET child_transaction_id = @transaction_id
+        //    WHERE transaction_id = @deposit_id;
+
+        //  ");
+
+        //}
+
+
       }
 
 
@@ -872,7 +894,7 @@ namespace ClayFinancial.Models.Transaction.Data
         FROM data_transaction T
         WHERE  
           child_transaction_id IS NULL
-          AND transaction_type='R'
+          AND UPPER(transaction_type) IN ('C','R')
           AND created_by_display_name = @name        
          GROUP BY created_by_display_name 
         ";
@@ -927,7 +949,6 @@ namespace ClayFinancial.Models.Transaction.Data
 
       string query = @"
         -- Get Deposit Transaction Id
-        DECLARE @deposit_transaction_id BIGINT = 10167;
 
         WITH BaseData AS (
             SELECT 
