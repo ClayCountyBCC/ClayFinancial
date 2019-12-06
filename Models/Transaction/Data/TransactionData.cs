@@ -294,7 +294,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       if(transaction_type.ToUpper() == "C")
       {
-        can_accept_deposit = GetTransactionData(transaction_id, ua.employee_id, ua).can_accept_deposit;
+        can_accept_deposit = GetTransactionData("TransactionData.ValidateNewReceipt()",transaction_id, ua.employee_id, ua).can_accept_deposit;
         if (!can_accept_deposit) return false;
       }
       var departments = Department.GetCachedDict();
@@ -347,7 +347,7 @@ namespace ClayFinancial.Models.Transaction.Data
     {
       if (ua.current_access == UserAccess.access_type.basic)
       {
-        if (!GetTransactionData(transaction_id, ua.employee_id, ua).can_modify)
+        if (!GetTransactionData("TransactionData.ValidateEdit(" + transaction_id + "," + ua.display_name + ")",transaction_id, ua.employee_id, ua).can_modify)
         {
           return false;
         }
@@ -413,8 +413,12 @@ namespace ClayFinancial.Models.Transaction.Data
 
     }
 
-    public static TransactionData GetTransactionData(long transaction_id, int employee_id, UserAccess ua)
+    public static TransactionData GetTransactionData(string calling_function, long transaction_id = -1, int employee_id = -1, UserAccess ua = null)
     {
+      if(transaction_id == -1)
+      {
+        new ErrorLog("Did not get a transaction_id", "", "calling function: " + calling_function, "","");
+      }
       var param = new DynamicParameters();
       param.Add("@transaction_id", transaction_id);
       param.Add("@my_employee_id", ua.employee_id);
@@ -454,7 +458,7 @@ namespace ClayFinancial.Models.Transaction.Data
       //}
       if (td == null)
       {
-        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "", "", query.ToString()) ;
+        new ErrorLog("transaction_id: " + transaction_id, "There was an issue retrieving the transaction.", "Calling function: " + calling_function, "", query.ToString()) ;
         return new TransactionData("There was an issue retrieving the transaction.");
       }
 
@@ -753,7 +757,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@received_from", selected_user_display_name);
       param.Add("@comment", "");
       param.Add("@selected_employee_id", selected_employee_id);
-      param.Add("@my_department_id", ua.my_department_id);
+      param.Add("@my_department_id", (short)ua.my_department_id);
       param.Add("@total_cash_amount", 0);
       param.Add("@total_check_amount", 0);
       param.Add("@total_check_count", 0);
@@ -830,7 +834,7 @@ namespace ClayFinancial.Models.Transaction.Data
       var transaction_id = param.Get<long>("@transaction_id");
       
 
-      var deposit = GetTransactionData(transaction_id, ua.employee_id, ua);
+      var deposit = GetTransactionData("TransactionData.CreateDeposit",transaction_id, ua.employee_id, ua);
 
       if(deposit != null && transaction_id > 0)
       {

@@ -115,9 +115,13 @@ namespace ClayFinancial.Controllers.API
       // TODO: new receipt needs to be a TransactionView
       var td = transactionData.SaveTransactionData();
 
+      if(transactionData.transaction_id == -1)
+      {
+        new ErrorLog("Error saving the transaction", "transactionData.ErrorText: " + transactionData.error_text, "TransactionDataController.SaveTransaction() >> transactionData.SaveTransactionData()", "", "");   
+      }
       if (td)
       {
-        return Ok(TransactionData.GetTransactionData(transactionData.transaction_id, ua.employee_id, ua));
+        return Ok(TransactionData.GetTransactionData("TransactionDataController.Save()", transactionData.transaction_id, ua.employee_id, ua));
       }
       else
       {
@@ -313,8 +317,13 @@ namespace ClayFinancial.Controllers.API
 
     [HttpGet]
     [Route("GetTransactionData")]
-    public IHttpActionResult GetTransactionData(long transaction_id)
+    public IHttpActionResult GetTransactionData(long transaction_id = -1)
     {
+      if(transaction_id == -1)
+      {
+        return BadRequest();
+      }
+
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
       if (ua.current_access == UserAccess.access_type.no_access)
@@ -322,7 +331,7 @@ namespace ClayFinancial.Controllers.API
         return Unauthorized();
       }
 
-      var td = TransactionData.GetTransactionData(transaction_id, ua.employee_id, ua);
+      var td = TransactionData.GetTransactionData("TransactionDataController.GetTransactionData(" + transaction_id + ")",transaction_id, ua.employee_id, ua);
 
       if (ua.current_access == UserAccess.access_type.basic && td.department_id != ua.my_department_id)
       {
