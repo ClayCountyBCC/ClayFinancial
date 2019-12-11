@@ -42,6 +42,8 @@ namespace ClayFinancial.Models.Transaction.Data
     public bool can_modify { get; set; } = false;
     public bool can_accept_deposit { get; set; } = false;
     public bool has_error { get; set; } = false;
+
+    public long deposit_transaction_id = -1;
     private int my_department_id { get; set; } = -1;
     private UserAccess.access_type my_access { get; set; } = UserAccess.access_type.basic;
 
@@ -294,6 +296,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
       if(transaction_type.ToUpper() == "C")
       {
+        deposit_transaction_id = transaction_id;
         can_accept_deposit = GetTransactionData("TransactionData.ValidateNewReceipt()",transaction_id, ua.employee_id, ua).can_accept_deposit;
         if (!can_accept_deposit) return false;
       }
@@ -545,7 +548,7 @@ namespace ClayFinancial.Models.Transaction.Data
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
 
-      if(transaction_type.ToUpper() == "R")
+      if (transaction_type.ToUpper() == "R")
       {
         total_cash_amount = 0;
         total_check_count = 0;
@@ -554,7 +557,7 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       else
       {
-        param.Add("@child_transaction_id", transaction_id);
+        param.Add("@child_transaction_id", null);
       }
       param.Add("@total_cash_amount", total_cash_amount);
       param.Add("@total_check_amount", total_check_amount);
@@ -597,35 +600,26 @@ namespace ClayFinancial.Models.Transaction.Data
       }
       else
       {
-        param.Add("@deposit_id", transaction_id);
+        param.Add("@deposit_transaction_id", deposit_transaction_id);
+
+
+        query.AppendLine(@"
+
+          UPDATE data_transaction
+            SET child_transaction_id = @transaction_id
+          WHERE transaction_id = @deposit_transaction_id
+
+          ");
+
         if ((int)my_access >= (int)UserAccess.access_type.finance_level_two)
         {
-          
 
           query.AppendLine(@"
+            OR transaction_id = @transaction_id
 
-            UPDATE data_transaction
-              SET child_transaction_id = @transaction_id
-            WHERE transaction_id = @transaction_id
-               OR transaction_id = @deposit_id;
-
-            ");
+          ");
 
         }
-        //else
-        //{
-
-
-        //  query.AppendLine(@"
-
-        //    UPDATE data_transaction
-        //    SET child_transaction_id = @transaction_id
-        //    WHERE transaction_id = @deposit_id;
-
-        //  ");
-
-        //}
-
 
       }
 
