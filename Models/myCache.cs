@@ -71,7 +71,11 @@ namespace ClayFinancial.Models
     {
       CacheItemPolicy CIP = new CacheItemPolicy()
       {
-        AbsoluteExpiration = DateTime.Now.AddHours(10)
+
+        AbsoluteExpiration = 
+          DateTime.Now.CompareTo(DateTime.Parse(DateTime.Now.ToShortDateString() + " 6:00:00 AM")) < 0 ?
+              DateTime.Parse(DateTime.Now.ToShortDateString() + " 6:00:00 AM")
+            : DateTime.Parse(DateTime.Now.AddDays(1).ToShortDateString() + " 6:00:00 AM")  // if created after 6 AM then exp 6 am tomorrow
       };
       return CIP;
     }

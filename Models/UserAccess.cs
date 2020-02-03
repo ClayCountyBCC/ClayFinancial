@@ -81,7 +81,8 @@ namespace ClayFinancial.Models
           employee_id = eid;
         }
 
-        finplus_department = GetFinplusDepartment();
+        finplus_department = GetFinplusDepartment().Trim();
+        UpdateDepartmentalAccess();
 
         var groups = (from g in up.GetAuthorizationGroups()
                       select g.Name).ToList();
@@ -91,34 +92,50 @@ namespace ClayFinancial.Models
         {
           current_access = access_type.mis_access;
           maintenance_user = true;
-          UpdateDepartmentalAccess();
+          
           return;
         }
 
         if (groups.Contains(finance_Level_one_group))
         {
           current_access = access_type.finance_level_one;
-          UpdateDepartmentalAccess();
           return;
         }
 
         if (groups.Contains(finance_Level_two_group))
         {
           current_access = access_type.finance_level_two;
-          UpdateDepartmentalAccess();
           return;
         }
 
         if (groups.Contains(basic_access_group))
         {
           current_access = access_type.basic;
-          UpdateDepartmentalAccess();
         }
         
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex);
+        var data = $@"
+
+
+             /**
+            
+             Function: UserAccess.ParseUser()
+             user_name: {user_name};
+             display_name: {display_name};
+             current_access: {current_access};
+             finplus_department: {finplus_department};
+
+             **/
+
+
+          ";
+        new ErrorLog("ClayFinancial User Department Missing", 
+                     data + @"
+
+                      " +  ex.Message,
+                     "","","");
       }
     }
 
@@ -133,21 +150,48 @@ namespace ClayFinancial.Models
       var dp = new DynamicParameters();
       dp.Add("employee_id", employee_id.ToString());
       string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
-      string department = Constants.Exec_Scalar<string>(query, Constants.ConnectionString.Finplus, dp);
-      return department.Trim();
+      var department = Constants.Get_Data<string>(query, dp, Constants.ConnectionString.Finplus);
+      if (!department.Any() || department.First().Length == 0)
+      {
 
+        var data = $@"
+
+
+             /**
+
+             Function: UserAccess.GetFinPlusDepartment()
+             user_name: {user_name};
+             display_name: {display_name};
+             current_access: {current_access};
+             finplus_department: {finplus_department};
+
+             **/
+
+
+          ";
+
+        new ErrorLog("User Department Missing", data, "", "", "");
+        return "";
+      }
+      else
+      {
+        return department.First().Trim();
+      }
     }
 
     private int GetDepartmentsCanAccess()
     {
+      if (finplus_department.Trim().Length == 0) return -1;
+
       foreach(Transaction.Department d in Transaction.Department.GetCached())
       {
         if(d.organization.Length > 0)
         {
-          if (d.organization_access.Contains(finplus_department))
+          if (d.organization_access.Contains(finplus_department.Trim()))
               return d.department_id;
         }
       }
+
 
       return my_department_id;
     }
