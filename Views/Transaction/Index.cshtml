@@ -37,11 +37,11 @@
           </a>
           <div class="navbar-dropdown">
             @*<a href=""
-               rel="noopener noreferrer"
-               target="_blank"
-               class="navbar-item">
-              Parks & Rec Incomplete Deposits
-            </a>*@
+                 rel="noopener noreferrer"
+                 target="_blank"
+                 class="navbar-item">
+                Parks & Rec Incomplete Deposits
+              </a>*@
             <a href="http://claybccreport/reports/report/Finance/Deposit%20Log"
                rel="noopener noreferrer"
                target="_blank"
@@ -168,8 +168,8 @@
 
   </div>
 
-  <nav class="pagination" 
-       role="navigation" 
+  <nav class="pagination"
+       role="navigation"
        aria-label="pagination">
     <a id="resultsPreviousPage"
        onclick="Transaction.PreviousPage(this);"
@@ -219,7 +219,7 @@
             </p>
             <p style="font-size: 1.25rem;"
                id="receipt_view_date"
-               class="title">              
+               class="title">
             </p>
           </div>
         </div>
@@ -258,11 +258,11 @@
         </th>
         <th class="has-text-right"
             style="width: 10%;">
-          Check 
+          Check
         </th>
         <th class="has-text-right"
             style="width: 10%;">
-          Cash 
+          Cash
         </th>
         <th class="has-text-right"
             style="width: 10%;">
@@ -390,10 +390,9 @@
       </div>
       <table class="table is-fullwidth">
         <thead id="change_transaction_history_header">
-          
+
         </thead>
         <tbody id="change_transaction_history_table">
-
         </tbody>
       </table>
     </section>
@@ -406,7 +405,9 @@
       </button>
       <button onclick="Transaction.SaveChanges();"
               id="change_transaction_save"
-              class="button is-success">Save changes</button>
+              class="button is-success">
+        Save changes
+      </button>
 
     </footer>
 
@@ -466,7 +467,23 @@
 
 </div>
 
-<script src="~/scripts/Transaction/transaction_bundle.js?201910281641"></script>
+@*<script src="~/scripts/Transaction/transaction_bundle.js?202003051112"></script>*@
+
+<script src="~/scripts/Utilities.js"></script>
+<script src="~/scripts/SimpleValue.js"></script>
+<script src="~/scripts/Transaction/app.js"></script>
+<script src="~/scripts/LevelItem.js"></script>
+<script src="~/scripts/Transaction/ControlGroup.js"></script>
+<script src="~/scripts/Transaction/Data/PaymentMethodData.js"></script>
+<script src="~/scripts/Transaction/PaymentType.js"></script>
+<script src="~/scripts/Transaction/Control.js"></script>
+<script src="~/scripts/Transaction/Department.js"></script>
+<script src="~/scripts/Transaction/Data/ControlData.js"></script>
+<script src="~/scripts/Transaction/Data/PaymentTypeData.js"></script>
+<script src="~/scripts/Transaction/Receipt.js"></script>
+<script src="~/scripts/Transaction/Data/TransactionData.js"></script>
+
+
 
 <script type="text/javascript">
 

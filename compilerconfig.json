@@ -14,5 +14,17 @@
   {
     "outputFile": "lib/Utilities.css",
     "inputFile": "lib/Utilities.scss"
+  },
+  {
+    "outputFile": "scripts/Transaction/transaction_bundle.es5.js",
+    "inputFile": "scripts/Transaction/transaction_bundle.js"
+  },
+  {
+    "outputFile": "scripts/Transaction/transaction_bundle.min.es5.js",
+    "inputFile": "scripts/Transaction/transaction_bundle.min.js"
+  },
+  {
+    "outputFile": "scripts/Transaction/transaction_bundle.es5.min.es5.js",
+    "inputFile": "scripts/Transaction/transaction_bundle.es5.min.js"
   }
 ]

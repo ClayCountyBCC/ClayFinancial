@@ -43,18 +43,28 @@ namespace ClayFinancial.Models
       SaveLog();
     }
 
-    private void SaveLog()
+    private void SaveLog(ErrorLog el = null, string c_name = "ProdLog")
     {
       string sql = @"
           INSERT INTO ErrorData 
-          (applicationName, errorText, errorMessage, 
+          (applicationName, AppId, errorText, errorMessage, 
           errorStacktrace, errorSource, query)  
           VALUES (@applicationName, @errorText, @errorMessage,
             @errorStacktrace, @errorSource, @query);";
-      var cs = ConfigurationManager.ConnectionStrings["LOG"].ConnectionString;
-      using (IDbConnection db = new SqlConnection(cs))
+
+      var cs = ConfigurationManager.ConnectionStrings[c_name].ConnectionString;
+
+      try
       {
-        db.Execute(sql, this);
+        using (IDbConnection db = new SqlConnection(cs))
+        {
+          db.Execute(sql, this);
+        }
+      }
+      catch (Exception ex)
+      {
+        SaveLog(this, "LOG");
+        SaveLog(new ErrorLog(ex, sql), "LOG");
       }
     }
 

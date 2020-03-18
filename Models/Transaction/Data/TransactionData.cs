@@ -140,7 +140,7 @@ namespace ClayFinancial.Models.Transaction.Data
       if(ua.current_access == UserAccess.access_type.basic)
       {
         param.Add("@my_department_id", ua.my_department_id);
-        sb.AppendLine(" AND department_id = @my_department_id");
+        sb.AppendLine("  AND (department_id = @my_department_id OR (created_by_employee_id = @my_employee_id AND can_modify = 1))");
       }
 
       sb.AppendLine(TransactionData.CreateFilterWhereClause(
@@ -363,6 +363,8 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       return @"
+WITH transaction_data AS (
+
         SELECT
           TD.transaction_id
           ,TD.fiscal_year
@@ -372,7 +374,7 @@ namespace ClayFinancial.Models.Transaction.Data
           ,TD.department_id
           ,UPPER(TD.transaction_type) transaction_type
           ,TD.child_transaction_id
-          ,TD.created_on
+
           ,TV.department_name
           ,TV.county_manager_name
           ,TD.total_cash_amount
@@ -387,7 +389,7 @@ namespace ClayFinancial.Models.Transaction.Data
           ,CASE WHEN TD.child_transaction_id IS NULL AND TD.created_by_employee_id = @my_employee_id
             THEN 1
             ELSE
-              CASE WHEN TV.child_transaction_type = 'C' OR ISNULL(TV.grandchild_transaction_type, '')= 'C'
+              CASE WHEN TV.child_transaction_type = 'C' OR ISNULL(TV.grandchild_transaction_type, '') = 'C'
                 THEN 0
                 ELSE
                   CASE WHEN TV.grandchild_created_by_employee_id IS NULL
@@ -407,11 +409,37 @@ namespace ClayFinancial.Models.Transaction.Data
             END my_transaction
         FROM ClayFinancial.dbo.data_transaction TD
         INNER JOIN vw_transaction_view TV ON TD.transaction_id = TV.transaction_id
-        WHERE
-          1 = 1
+
+)
+
+        SELECT 
+          transaction_id
+          ,fiscal_year
+          ,created_by_employee_id
+          ,employee_transaction_count
+          ,transaction_number
+          ,department_id
+          ,transaction_type
+          ,child_transaction_id
+
+          ,department_name
+          ,county_manager_name
+          ,total_cash_amount
+          ,total_check_amount
+          ,total_check_count
+          ,created_on
+          ,received_from
+          ,created_by_username
+          ,created_by_display_name
+          ,created_by_ip_address
+          ,has_been_modified 
+          ,can_modify
+          ,my_transaction
+        FROM transaction_data TD
+        WHERE 1=1   
+
 
       ";
-
 
 
     }
@@ -430,13 +458,13 @@ namespace ClayFinancial.Models.Transaction.Data
 
       query.AppendLine(GetTransactionDataQuery());
 
-      query.AppendLine(" AND (TD.transaction_id = @transaction_id");
-      query.AppendLine(" OR TD.transaction_id IN (SELECT child_transaction_id FROM data_transaction WHERE transaction_id = @transaction_id AND child_transaction_id IS NOT NULL))");
+      query.AppendLine(" AND (transaction_id = @transaction_id");
+      query.AppendLine(" OR transaction_id IN (SELECT child_transaction_id FROM data_transaction WHERE transaction_id = @transaction_id AND child_transaction_id IS NOT NULL))");
       if (ua.current_access == UserAccess.access_type.basic)
       {
         param.Add("@my_department_id", ua.my_department_id);
 
-        query.AppendLine("  AND TD.department_id = @my_department_id");
+        query.AppendLine("  AND (department_id = @my_department_id OR (created_by_employee_id = @my_employee_id AND can_modify = 1))");
       }
       // TODO: FILL THE REST OF THE TRANSACTION DATA.
       var transactions = Constants.Get_Data<TransactionData>(query.ToString(), param, Constants.ConnectionString.ClayFinancial);

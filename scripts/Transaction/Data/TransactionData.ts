@@ -827,19 +827,30 @@
     private static CreateTransactionListRow(data: TransactionData, short_view: boolean): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
-      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
+      let data_row = document.createElement("tr");
+      tr.append(data_row);
+      
+      
+      data_row.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(data.created_on), "has-text-left"));
+
+      if (data.transaction_type === "C" && data.comment.length > 0)
+      {
+        let comment_container = document.createElement("tr");
+        comment_container.appendChild(Utilities.CreateTableCell("td", data.comment, "has-text-left"));
+        tr.appendChild(comment_container);
+      }
 
       //let transaction_display_value = data.transaction_type + " / " + data.transaction_number;
-      tr.appendChild(Utilities.CreateTableCell("td", data.transaction_type, "has-text-centered"));
+      data_row.appendChild(Utilities.CreateTableCell("td", data.transaction_type, "has-text-centered"));
       let link = document.createElement("a");
       link.appendChild(document.createTextNode(data.transaction_number));
-      link.onclick = () =>
+      link.onclick = () =>                                     
       {
         Transaction.ShowReceiptDetail(data.transaction_id);
       }
       let linkCell = Utilities.CreateTableCell("td", "", "has-text-left");
       linkCell.appendChild(link);
-      tr.appendChild(linkCell);
+      data_row.appendChild(linkCell);
 
       let status = "";
       if (data.transaction_type === "R" || data.transaction_type === "C")
@@ -874,13 +885,14 @@
           }
         }
       }
-      tr.appendChild(Utilities.CreateTableCell("td", status, "has-text-left"));
-      tr.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
-      tr.appendChild(Utilities.CreateTableCell("td", data.received_from, "has-text-left"));
-      tr.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
-      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
-      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
-      tr.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+      data_row.appendChild(Utilities.CreateTableCell("td", status, "has-text-left"));
+      data_row.appendChild(Utilities.CreateTableCell("td", data.department_name, "has-text-left"));
+      data_row.appendChild(Utilities.CreateTableCell("td", data.received_from, "has-text-left"));
+      data_row.appendChild(Utilities.CreateTableCell("td", data.total_check_count.toString(), "has-text-right"));
+      data_row.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount), "has-text-right"));
+      data_row.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_cash_amount), "has-text-right"));
+      data_row.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(data.total_check_amount + data.total_cash_amount), "has-text-right"));
+
       if (!short_view)
       {
         //let listtd = document.createElement("td");
@@ -900,10 +912,11 @@
           Transaction.ShowReceipt(data.transaction_id);
         }
         printtd.appendChild(printButton);
-        tr.appendChild(printtd);
+        data_row.appendChild(printtd);
       }
 
-      return tr;
+
+      return data_row;
     }
 
     private static CreateTableCellIconButton(icon: string, size: string): HTMLAnchorElement

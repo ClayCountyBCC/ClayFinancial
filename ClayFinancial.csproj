@@ -182,6 +182,18 @@
     <Content Include="lib\Utilities.min.css">
       <DependentUpon>Utilities.css</DependentUpon>
     </Content>
+    <Content Include="scripts\Transaction\transaction_bundle.es5.js">
+      <DependentUpon>transaction_bundle.js</DependentUpon>
+    </Content>
+    <Content Include="scripts\Transaction\transaction_bundle.es5.min.es5.js">
+      <DependentUpon>transaction_bundle.es5.min.js</DependentUpon>
+    </Content>
+    <Content Include="scripts\Transaction\transaction_bundle.es5.min.es5.min.js">
+      <DependentUpon>transaction_bundle.es5.min.es5.js</DependentUpon>
+    </Content>
+    <Content Include="scripts\Transaction\transaction_bundle.es5.min.js">
+      <DependentUpon>transaction_bundle.es5.js</DependentUpon>
+    </Content>
     <Content Include="scripts\Transaction\transaction_bundle.js" />
     <Content Include="scripts\Transaction\transaction_bundle.min.js">
       <DependentUpon>transaction_bundle.js</DependentUpon>
