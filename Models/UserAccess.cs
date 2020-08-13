@@ -146,15 +146,17 @@ namespace ClayFinancial.Models
 
     private string GetFinplusDepartment()
     {
-      if (employee_id == 0) return "";
-      var dp = new DynamicParameters();
-      dp.Add("employee_id", employee_id.ToString());
-      string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
-      var department = Constants.Get_Data<string>(query, dp, Constants.ConnectionString.Finplus);
-      if (!department.Any() || department.First().Length == 0)
+      try
       {
+        if (employee_id == 0) return "";
+        var dp = new DynamicParameters();
+        dp.Add("employee_id", employee_id.ToString());
+        string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
+        var department = Constants.Get_Data<string>(query, dp, Constants.ConnectionString.Finplus);
+        if (!department.Any() || department.First().Length == 0)
+        {
 
-        var data = $@"
+          var data = $@"
 
 
              /**
@@ -170,12 +172,18 @@ namespace ClayFinancial.Models
 
           ";
 
-        new ErrorLog("User Department Missing", data, "", "", "");
-        return "";
+          new ErrorLog("User Department Missing", data, "", "", "");
+          return "";
+        }
+        else
+        {
+          return department.First().Trim();
+        }
       }
-      else
+      catch(Exception ex)
       {
-        return department.First().Trim();
+        new ErrorLog(ex);
+        return "";
       }
     }
 
@@ -198,25 +206,32 @@ namespace ClayFinancial.Models
 
     private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)
     {
-      using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
+      try
       {
-        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, IdentityType.Name, group))
+        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
         {
-          if (gp != null)
+          using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, IdentityType.Name, group))
           {
-
-            foreach (UserPrincipal up in gp.Members)
+            if (gp != null)
             {
-              if (up != null)
+
+              foreach (UserPrincipal up in gp.Members)
               {
-                if (!d.ContainsKey(up.SamAccountName.ToLower()))
+                if (up != null)
                 {
-                  d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+                  if (!d.ContainsKey(up.SamAccountName.ToLower()))
+                  {
+                    d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+                  }
                 }
               }
             }
           }
         }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex);
       }
     }
 

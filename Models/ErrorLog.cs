@@ -49,7 +49,7 @@ namespace ClayFinancial.Models
           INSERT INTO ErrorData 
           (applicationName, AppId, errorText, errorMessage, 
           errorStacktrace, errorSource, query)  
-          VALUES (@applicationName, @errorText, @errorMessage,
+          VALUES (@applicationName, @AppId, @errorText, @errorMessage,
             @errorStacktrace, @errorSource, @query);";
 
       var cs = ConfigurationManager.ConnectionStrings[c_name].ConnectionString;

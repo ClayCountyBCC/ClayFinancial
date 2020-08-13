@@ -7,6 +7,7 @@ using System.Web.Routing;
 using System.Web.Security;
 using System.Web.SessionState;
 using System.Web.Http;
+using ClayFinancial.Models;
 
 namespace ClayFinancial
 {
@@ -18,7 +19,14 @@ namespace ClayFinancial
       AreaRegistration.RegisterAllAreas();
       GlobalConfiguration.Configure(WebApiConfig.Register);
       RouteConfig.RegisterRoutes(RouteTable.Routes);
-      Models.UserAccess.GetCachedAllUserAccess();
+      try
+      {
+        Models.UserAccess.GetCachedAllUserAccess();
+      }
+      catch(Exception ex)
+      {
+        new ErrorLog(ex);
+      }
     }
   }
 }

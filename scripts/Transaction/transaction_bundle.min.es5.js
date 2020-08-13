@@ -7,7 +7,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
-  return new (i || (i = Promise))(function (u, f) {
+  function u(n) {
+    return n instanceof i ? n : new i(function (t) {
+      t(n);
+    });
+  }return new (i || (i = Promise))(function (i, f) {
     function o(n) {
       try {
         e(r.next(n));
@@ -21,9 +25,7 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
         f(t);
       }
     }function e(n) {
-      n.done ? u(n.value) : new i(function (t) {
-        t(n.value);
-      }).then(o, s);
+      n.done ? i(n.value) : u(n.value).then(o, s);
     }e((r = r.apply(n, t || [])).next());
   });
 },
@@ -324,7 +326,11 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
 
   n.SimpleValue = t;
 })(Utilities || (Utilities = {}));__awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
-  return new (i || (i = Promise))(function (u, f) {
+  function u(n) {
+    return n instanceof i ? n : new i(function (t) {
+      t(n);
+    });
+  }return new (i || (i = Promise))(function (i, f) {
     function o(n) {
       try {
         e(r.next(n));
@@ -338,9 +344,7 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
         f(t);
       }
     }function e(n) {
-      n.done ? u(n.value) : new i(function (t) {
-        t(n.value);
-      }).then(o, s);
+      n.done ? i(n.value) : u(n.value).then(o, s);
     }e((r = r.apply(n, t || [])).next());
   });
 }, (function (n) {
@@ -998,7 +1002,11 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
 
   n.ControlGroup = t;
 })(Transaction || (Transaction = {}));__awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
-  return new (i || (i = Promise))(function (u, f) {
+  function u(n) {
+    return n instanceof i ? n : new i(function (t) {
+      t(n);
+    });
+  }return new (i || (i = Promise))(function (i, f) {
     function o(n) {
       try {
         e(r.next(n));
@@ -1012,9 +1020,7 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
         f(t);
       }
     }function e(n) {
-      n.done ? u(n.value) : new i(function (t) {
-        t(n.value);
-      }).then(o, s);
+      n.done ? i(n.value) : u(n.value).then(o, s);
     }e((r = r.apply(n, t || [])).next());
   });
 }, (function (n) {
@@ -1390,7 +1396,11 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
 
   n.Department = t;
 })(Transaction || (Transaction = {}));__awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
-  return new (i || (i = Promise))(function (u, f) {
+  function u(n) {
+    return n instanceof i ? n : new i(function (t) {
+      t(n);
+    });
+  }return new (i || (i = Promise))(function (i, f) {
     function o(n) {
       try {
         e(r.next(n));
@@ -1404,9 +1414,7 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
         f(t);
       }
     }function e(n) {
-      n.done ? u(n.value) : new i(function (t) {
-        t(n.value);
-      }).then(o, s);
+      n.done ? i(n.value) : u(n.value).then(o, s);
     }e((r = r.apply(n, t || [])).next());
   });
 }, (function (n) {
@@ -2962,9 +2970,12 @@ var __awaiter = undefined && undefined.__awaiter || function (n, t, i, r) {
       }, {
         key: "CreateTransactionListRow",
         value: function CreateTransactionListRow(t, r) {
-          var u = document.createElement("tr");u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(t.created_on), "has-text-left"));u.appendChild(Utilities.CreateTableCell("td", t.transaction_type, "has-text-centered"));var f = document.createElement("a");f.appendChild(document.createTextNode(t.transaction_number));f.onclick = function () {
+          var o = document.createElement("tr"),
+              u = document.createElement("tr");if ((o.append(u), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_DateTime(t.created_on), "has-text-left")), t.transaction_type === "C" && t.comment.length > 0)) {
+            var _n60 = document.createElement("tr");_n60.appendChild(Utilities.CreateTableCell("td", t.comment, "has-text-left"));o.appendChild(_n60);
+          }u.appendChild(Utilities.CreateTableCell("td", t.transaction_type, "has-text-centered"));var f = document.createElement("a");f.appendChild(document.createTextNode(t.transaction_number));f.onclick = function () {
             n.ShowReceiptDetail(t.transaction_id);
-          };var o = Utilities.CreateTableCell("td", "", "has-text-left");o.appendChild(f);u.appendChild(o);var e = "";if ((t.transaction_type === "R" || t.transaction_type === "C" ? e = t.child_transaction_id === null ? "Incomplete" : t.child_transaction_id === t.transaction_id ? "Completed" : "Deposited" : t.transaction_type === "D" && (e = t.child_transaction_id === null ? "Incomplete" : "Accepted"), u.appendChild(Utilities.CreateTableCell("td", e, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.department_name, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.received_from, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.total_check_count.toString(), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_check_amount), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_cash_amount), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_check_amount + t.total_cash_amount), "has-text-right")), !r)) {
+          };var s = Utilities.CreateTableCell("td", "", "has-text-left");s.appendChild(f);u.appendChild(s);var e = "";if ((t.transaction_type === "R" || t.transaction_type === "C" ? e = t.child_transaction_id === null ? "Incomplete" : t.child_transaction_id === t.transaction_id ? "Completed" : "Deposited" : t.transaction_type === "D" && (e = t.child_transaction_id === null ? "Incomplete" : "Accepted"), u.appendChild(Utilities.CreateTableCell("td", e, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.department_name, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.received_from, "has-text-left")), u.appendChild(Utilities.CreateTableCell("td", t.total_check_count.toString(), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_check_amount), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_cash_amount), "has-text-right")), u.appendChild(Utilities.CreateTableCell("td", Utilities.Format_Amount(t.total_check_amount + t.total_cash_amount), "has-text-right")), !r)) {
             var _r6 = document.createElement("td");_r6.classList.add("has-text-right");var _f3 = i.CreateTableCellIconButton("fa-print", "is-small");_f3.onclick = function () {
               n.ShowReceipt(t.transaction_id);
             };_r6.appendChild(_f3);u.appendChild(_r6);
