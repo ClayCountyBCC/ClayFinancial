@@ -39,6 +39,10 @@ namespace ClayFinancial.Models
     public UserAccess(string name)
     {
       user_name = name;
+#if DEBUG
+      user_name = "bramlitta-clerk";
+#endif
+      
       if (user_name.Length == 0)
       {
         user_name = "clayIns";
@@ -81,7 +85,7 @@ namespace ClayFinancial.Models
           employee_id = eid;
         }
 
-        finplus_department = GetFinplusDepartment().Trim();
+        finplus_department = GetFinplusDepartment(up).Trim();
         UpdateDepartmentalAccess();
 
         var groups = (from g in up.GetAuthorizationGroups()
@@ -96,7 +100,7 @@ namespace ClayFinancial.Models
           return;
         }
 
-        if (groups.Contains(finance_Level_one_group))
+        if (groups.Contains(finance_Level_one_group) || finplus_department == "0701")
         {
           current_access = access_type.finance_level_one;
           return;
@@ -108,7 +112,7 @@ namespace ClayFinancial.Models
           return;
         }
 
-        if (groups.Contains(basic_access_group))
+        if (groups.Contains(basic_access_group) )
         {
           current_access = access_type.basic;
         }
@@ -144,10 +148,11 @@ namespace ClayFinancial.Models
       my_department_id = GetDepartmentsCanAccess();
     }
 
-    private string GetFinplusDepartment()
+    private string GetFinplusDepartment(UserPrincipal up)
     {
       try
       {
+        if (up.DistinguishedName.Contains("CLKCRT")) return "0701";
         if (employee_id == 0) return "";
         var dp = new DynamicParameters();
         dp.Add("employee_id", employee_id.ToString());
@@ -248,9 +253,10 @@ namespace ClayFinancial.Models
             d[""] = new UserAccess("");
             break;
 
-          //case "MISSL01":
-          //  d["mccartneyd"] = new UserAccess("mccartneyd");
-          //  break;
+          case "MISSL01":
+            //d["mccartneyd"] = new UserAccess("mccartneyd");
+            d["bramlitta-clerk"] = new UserAccess("bramlitta-clerk");
+            break;
           case "MISHLO5":
             d["westje"] = new UserAccess("westje");
             break;
@@ -278,6 +284,9 @@ namespace ClayFinancial.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+#if DEBUG
+        un = "bramlitta-clerk";
+#endif
         switch (Environment.MachineName.ToUpper())
         {
           default:
