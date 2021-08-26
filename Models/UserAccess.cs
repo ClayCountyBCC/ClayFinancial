@@ -15,6 +15,7 @@ namespace ClayFinancial.Models
     private const string finance_Level_one_group = "gReceiptAppFinanceLevelOneAccess";
     private const string finance_Level_two_group = "gReceiptAppFinanceLevelTwoAccess";
     private const string maintenance_access_group = "gReceiptAppMaintenanceAccess";
+    private const string cc_clerk_access_group = "gClayCountyClerkAccess";
     private const string mis_access_group = "gMISDeveloper_Group";
 
 
@@ -40,7 +41,7 @@ namespace ClayFinancial.Models
     {
       user_name = name;
 #if DEBUG
-      user_name = "bramlitta-clerk";
+     user_name = "burdenc-Clerk";
 #endif
       
       if (user_name.Length == 0)
@@ -85,12 +86,24 @@ namespace ClayFinancial.Models
           employee_id = eid;
         }
 
-        finplus_department = GetFinplusDepartment(up).Trim();
-        UpdateDepartmentalAccess();
-
         var groups = (from g in up.GetAuthorizationGroups()
                       select g.Name).ToList();
         maintenance_user = groups.Contains(maintenance_access_group);
+
+        if (!user_name.TrimEnd().ToLower().EndsWith("-clerk"/*!groups.Contains(cc_clerk_access_group*/))
+        {
+          finplus_department = GetFinplusDepartment(up).Trim();
+        }
+        else
+        {
+          finplus_department = "0701";
+        }
+
+        
+        
+        UpdateDepartmentalAccess();
+
+
 
         if (groups.Contains(mis_access_group))
         {
@@ -150,6 +163,7 @@ namespace ClayFinancial.Models
 
     private string GetFinplusDepartment(UserPrincipal up)
     {
+      
       try
       {
         if (up.DistinguishedName.Contains("CLKCRT")) return "0701";
@@ -157,6 +171,7 @@ namespace ClayFinancial.Models
         var dp = new DynamicParameters();
         dp.Add("employee_id", employee_id.ToString());
         string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
+
         var department = Constants.Get_Data<string>(query, dp, Constants.ConnectionString.Finplus);
         if (!department.Any() || department.First().Length == 0)
         {
@@ -254,10 +269,9 @@ namespace ClayFinancial.Models
             break;
 
           case "MISSL01":
-            //d["mccartneyd"] = new UserAccess("mccartneyd");
-            d["bramlitta-clerk"] = new UserAccess("bramlitta-clerk");
+            d["mccartneyd"] = new UserAccess("mccartneyd");
             break;
-          case "MISHLO5":
+          case "MISHL17":
             d["westje"] = new UserAccess("westje");
             break;
           default:
@@ -284,9 +298,7 @@ namespace ClayFinancial.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
-#if DEBUG
-        un = "bramlitta-clerk";
-#endif
+
         switch (Environment.MachineName.ToUpper())
         {
           default:

@@ -851,7 +851,7 @@ WITH transaction_data AS (
 
       ");
   
-      var i = Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
+      Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
       
       var transaction_id = param.Get<long>("@transaction_id");
       
