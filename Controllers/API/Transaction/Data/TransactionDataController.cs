@@ -472,8 +472,10 @@ namespace ClayFinancial.Controllers.API
     [HttpGet]
     [Route("GetAllNames")]
     public IHttpActionResult GetNameList()
-    {      
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+    {
+      var username = User.Identity.Name;
+
+      var ua = UserAccess.GetUserAccess(username);
 
       if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
 
@@ -495,6 +497,7 @@ namespace ClayFinancial.Controllers.API
       if (name == "mine")
       {
         name = ua.display_name;
+
       }
       else
       {
@@ -512,8 +515,10 @@ namespace ClayFinancial.Controllers.API
     [Route("GetSalesTaxAndTDC")]
     public IHttpActionResult GetSalesTaxAndTDC(long transaction_id)
     {
+      string un = User.Identity.Name;
 
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      var ua = UserAccess.GetUserAccess(un);
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {

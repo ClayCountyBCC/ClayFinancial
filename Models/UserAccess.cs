@@ -26,6 +26,13 @@ namespace ClayFinancial.Models
     public int my_department_id { get; set; } = -1;
     public string display_name { get; set; } = "";
     public bool maintenance_user { get; set; } = false;
+    public class temp_user
+    {
+
+      public string username;
+      public int empl_id;
+    
+    }
 
     public enum access_type : int
     {
@@ -40,10 +47,7 @@ namespace ClayFinancial.Models
     public UserAccess(string name)
     {
       user_name = name;
-#if DEBUG
-     user_name = "burdenc-Clerk";
-#endif
-      
+
       if (user_name.Length == 0)
       {
         user_name = "clayIns";
@@ -83,6 +87,7 @@ namespace ClayFinancial.Models
         display_name = up.DisplayName;
         if (int.TryParse(up.EmployeeId, out int eid))
         {
+
           employee_id = eid;
         }
 
@@ -90,17 +95,16 @@ namespace ClayFinancial.Models
                       select g.Name).ToList();
         maintenance_user = groups.Contains(maintenance_access_group);
 
-        if (!user_name.TrimEnd().ToLower().EndsWith("-clerk"/*!groups.Contains(cc_clerk_access_group*/))
+        if (!user_name.TrimEnd().ToLower().Replace(" ", "").EndsWith("-clerk"/*!groups.Contains(cc_clerk_access_group*/))
         {
           finplus_department = GetFinplusDepartment(up).Trim();
         }
         else
         {
-          finplus_department = "0701";
+          finplus_department = "0701";         
+         
         }
 
-        
-        
         UpdateDepartmentalAccess();
 
 
@@ -167,7 +171,12 @@ namespace ClayFinancial.Models
       try
       {
         if (up.DistinguishedName.Contains("CLKCRT")) return "0701";
-        if (employee_id == 0) return "";
+        if (employee_id == 0)
+        {
+          // TODO: Add MERGE statement for username and employee_id to employees table
+
+          return "";
+        }
         var dp = new DynamicParameters();
         dp.Add("employee_id", employee_id.ToString());
         string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
@@ -183,6 +192,7 @@ namespace ClayFinancial.Models
 
              Function: UserAccess.GetFinPlusDepartment()
              user_name: {user_name};
+             employee_id: {employee_id};
              display_name: {display_name};
              current_access: {current_access};
              finplus_department: {finplus_department};
@@ -271,9 +281,9 @@ namespace ClayFinancial.Models
           case "MISSL01":
             d["mccartneyd"] = new UserAccess("mccartneyd");
             break;
-          case "MISHL17":
-            d["westje"] = new UserAccess("westje");
-            break;
+          //case "MISHL17":
+          //  d["westje"] = new UserAccess("westje");
+          //  break;
           default:
             ParseGroup(finance_Level_one_group, ref d);
             ParseGroup(finance_Level_two_group, ref d);
@@ -298,6 +308,7 @@ namespace ClayFinancial.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+        //un = "";                                             
 
         switch (Environment.MachineName.ToUpper())
         {
@@ -306,6 +317,36 @@ namespace ClayFinancial.Models
 
             if (d.ContainsKey(un))
             {
+
+              var i = new temp_user();
+
+              var param = new DynamicParameters();
+              param.Add("@username", d[un].user_name);
+              param.Add("@empl_id", d[un].employee_id);
+
+              var sql = "EXEC check_and_set_employee_id @username, @empl_id";
+              try
+              {
+                i = Constants.Get_Data<temp_user>(sql, param, Constants.ConnectionString.ClayFinancial).First();
+
+                var name = i.username;
+                if(d[un].employee_id == 0)
+                {
+                  new ErrorLog("User with no employee_id", $@"Username: {d[un].user_name}", "UserAccess.GetUserAccess(string Username): Line 306", "No Error", "");
+                }
+
+                if (d[un].employee_id != i.empl_id)
+                {
+                  d[un].employee_id = i.empl_id;
+                }
+
+
+              }
+              catch (Exception ex)
+              {
+                var broken = "broken";
+              }
+
               return d[un]; // we're dun
             }
             else
@@ -332,8 +373,8 @@ namespace ClayFinancial.Models
       foreach(string key in users.Keys)
       {
         if (users[key].display_name == name) return users[key].employee_id;
-
       }
+
       return -1;
     }
 
@@ -346,7 +387,22 @@ namespace ClayFinancial.Models
       foreach (string key in users.Keys)
       {
         var access = users[key].current_access;
-        if (access != access_type.no_access && access != access_type.mis_access) name_list.Add(users[key].display_name);
+       
+        if (access != access_type.no_access && access != access_type.mis_access)
+        {
+          string name;
+          //THIS IF STATEMENT HELPS WITH THE NON-STANDARD NAME AD USERNAME COMPLETION
+          if (users[key].display_name.Replace(" ", "").EndsWith("-Clerk"))
+          {
+            name = users[key].display_name;
+            //name = users[key].display_name.Replace("-", "").Replace("Clerk", "").Trim() + "-Clerk";
+          }
+          else
+          {
+            name = users[key].display_name;
+          }
+          name_list.Add(name);
+        }
 
       }
       return name_list;
