@@ -33,10 +33,30 @@ namespace ClayFinancial.Controllers.API
     //,long transaction_id_filter = -1
     )
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+
+#if DEBUG
+     var ua = UserAccess.GetUserAccess(User.Identity.Name);
+#else
+     var ua = UserAccess.GetUserAccess(User.Identity.Name);
+#endif
+
+
+
+
+
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -74,6 +94,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
       var count = TransactionData.GetTransactionPageCount(
@@ -97,6 +126,16 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
       transactionData.created_by_ip_address = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -140,6 +179,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -183,6 +231,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
       if (!payment_method_data.ValidateChange())
@@ -233,6 +290,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -271,6 +337,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if(ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -328,6 +403,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -335,6 +419,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.basic && td.department_id != ua.my_department_id)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -356,6 +449,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -373,6 +475,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -402,6 +513,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -428,6 +548,15 @@ namespace ClayFinancial.Controllers.API
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 
@@ -477,9 +606,25 @@ namespace ClayFinancial.Controllers.API
 
       var ua = UserAccess.GetUserAccess(username);
 
-      if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
 
-      return Ok(UserAccess.GetCachedUserDisplayNames(ua.display_name));
+        return Unauthorized();
+      }
+      var user_list = UserAccess.GetCachedUserDisplayNames(ua.display_name);
+
+
+
+
+      return Ok(user_list);
 
     }
 
@@ -493,8 +638,20 @@ namespace ClayFinancial.Controllers.API
       // to create a deposit.
 
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if (ua.current_access == UserAccess.access_type.no_access) return Unauthorized();
-      if (name == "mine")
+      if (ua.current_access == UserAccess.access_type.no_access)
+      {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
+        return Unauthorized();
+      }
+        if (name == "mine")
       {
         name = ua.display_name;
 
@@ -522,6 +679,15 @@ namespace ClayFinancial.Controllers.API
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
+        if (ua.organizational_unit == "")
+        {
+          return InternalServerError();
+        }
+        if (ua.employee_id == 0)
+        {
+          return InternalServerError();
+        }
+
         return Unauthorized();
       }
 

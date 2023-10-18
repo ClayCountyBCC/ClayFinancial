@@ -45,11 +45,12 @@ namespace ClayFinancial.Models.Transaction
 
       string sql = @"
         SELECT
-          department_id
-          ,name
-          ,ISNULL(organization, '') organization
+          d.department_id
+          ,[name]
           ,is_active
-        FROM departments        
+        FROM departments d
+        inner join lookup_org_unit_department_id lud on lud.department_id = d.department_id
+        GROUP BY d.department_id,[name],is_active
         ORDER BY name ASC";
       var departments = Constants.Get_Data<Department>(sql, Constants.ConnectionString.ClayFinancial);
 
