@@ -224,7 +224,7 @@ namespace ClayFinancial.Models
           return;
         }
 
-        if (groups.Contains(finance_Level_one_group) || organizational_unit == "CLKCRT") ;
+        if (groups.Contains(finance_Level_one_group) || organizational_unit == "CLKCRT")
         {
           current_access = access_type.finance_level_one;
           return;
@@ -244,7 +244,7 @@ namespace ClayFinancial.Models
       }
       catch (Exception ex)
       {
-#if DEBUG 
+
 
         var data = $@"
 
@@ -255,13 +255,14 @@ namespace ClayFinancial.Models
              display_name: {display_name};
              current_access: {current_access};
              finplus_department: {finplus_department};
+             exception: {ex};
 
          
 
 
           ";
   
-
+#if DEBUG 
         //new ErrorLog("ClayFinancial User Department Missing",
         //             data + @"
 
@@ -310,7 +311,7 @@ namespace ClayFinancial.Models
         //string query = "SELECT home_orgn FROM finplus51.dbo.employee WHERE empl_no=@employee_id";
         //var department = Constants.Get_Data<string>(query, dp, Constants.ConnectionString.Finplus);
 
-      var department = organizational_unit;
+        var department = organizational_unit;
 
 
         SetUserOrganizationalUnit(up);
@@ -338,7 +339,7 @@ namespace ClayFinancial.Models
         var i = Constants.Exec_Scalar<int>(query, Constants.ConnectionString.ClayFinancial, dp);
         if(i == -1)
         {
- #if DEBUG         
+    
           var data = $@"
 
 
@@ -354,17 +355,19 @@ namespace ClayFinancial.Models
             
 
           ";
-
+ #if DEBUG     
           new ErrorLog("org_unit not inserted", data, "", "", "");
+#endif 
+
           return "";
-#endif        
+       
 
         }
 
 
         if (!department.Any() || department.Trim().Length == 0)
         {
-#if DEBUG
+
           var data = $@"
 
 
@@ -380,11 +383,12 @@ namespace ClayFinancial.Models
 
 
           ";
-
+#if DEBUG
           new ErrorLog("User Department Missing", data, "", "", "");
+#endif
           return "";
 
-#endif
+
         }
         else
         {
