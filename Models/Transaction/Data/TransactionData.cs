@@ -794,6 +794,14 @@ WITH transaction_data AS (
 
         -- SAVE TRANSACTION DATA
         -- if
+
+        SELECT
+          @department_id = CASE WHEN @department_id <= 0 THEN D.department_id ELSE @department_id END
+        FROM lookup_org_unit_department_id L
+        INNER JOIN departments D ON D.department_id = L.department_id
+        WHERE L.org_unit = @org_unit
+
+
         EXEC ClayFinancial.dbo.insert_new_transaction_data 
                 @transaction_id OUTPUT, 
                 @my_department_id, 
@@ -850,9 +858,27 @@ WITH transaction_data AS (
           DT.transaction_id = @transaction_id;
 
       ");
-  
-      Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
-      
+
+      try
+      {
+        Constants.Exec_Query(query.ToString(), param, Constants.ConnectionString.ClayFinancial);
+
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(
+          $@"
+            Username: {ua.user_name}
+            Org unit: {ua.organizational_unit}
+            
+            
+            
+            "
+          
+          , "", "", ex.Source, query.ToString());
+      }
+
+
       var transaction_id = param.Get<long>("@transaction_id");
       
 

@@ -588,7 +588,8 @@ namespace ClayFinancial.Controllers.API
         return Ok("There are no receipts to deposit");
       }
 
-      var deposit_transaction = TransactionData.CreateDeposit(ua, selected_user_display_name, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress );
+        var deposit_transaction = TransactionData.CreateDeposit(ua, selected_user_display_name, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress );
+
 
       if (deposit_transaction == null)
       {
