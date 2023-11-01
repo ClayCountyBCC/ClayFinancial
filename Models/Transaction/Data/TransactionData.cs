@@ -796,7 +796,7 @@ WITH transaction_data AS (
         -- if
 
         SELECT
-          @department_id = CASE WHEN @department_id <= 0 THEN D.department_id ELSE @department_id END
+          @my_department_id = CASE WHEN @my_department_id <= 0 THEN D.department_id ELSE @my_department_id END
         FROM lookup_org_unit_department_id L
         INNER JOIN departments D ON D.department_id = L.department_id
         WHERE L.org_unit = @org_unit
