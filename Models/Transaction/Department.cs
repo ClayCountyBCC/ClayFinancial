@@ -47,10 +47,11 @@ namespace ClayFinancial.Models.Transaction
         SELECT
           d.department_id
           ,[name]
+          ,lud.org_unit [organization]
           ,is_active
         FROM departments d
         inner join lookup_org_unit_department_id lud on lud.department_id = d.department_id
-        GROUP BY d.department_id,[name],is_active
+        GROUP BY d.department_id,[name],lud.org_unit,is_active
         ORDER BY name ASC";
       var departments = Constants.Get_Data<Department>(sql, Constants.ConnectionString.ClayFinancial);
 

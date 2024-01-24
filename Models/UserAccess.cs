@@ -6,6 +6,7 @@ using System.DirectoryServices.AccountManagement;
 using Dapper;
 using System.Data;
 using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 
 namespace ClayFinancial.Models
 {
@@ -49,6 +50,8 @@ namespace ClayFinancial.Models
     {
       user_name = name;
 
+
+
       if (user_name.Length == 0)
       {
         user_name = "clayIns";
@@ -56,13 +59,16 @@ namespace ClayFinancial.Models
       }
       else
       {
+
         display_name = name;
+
         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
         {
           try
           {
             var up = UserPrincipal.FindByIdentity(pc, user_name);
             ParseUser(up);
+
           }
           catch (Exception ex)
           {
@@ -136,24 +142,39 @@ namespace ClayFinancial.Models
         //  finplus_department = "0701";
         //  SetUserOrganizationalUnit(up);         
         //}
-
+        #region get/set EmployeeId
         SetUserOrganizationalUnit(up);
 
         DynamicParameters param = new DynamicParameters();
         param.Add("@user_name", user_name);
         param.Add("@employee_id", up.EmployeeId);
         param.Add("@org_unit", organizational_unit);
+        param.Add("@surname", up.Surname);
         
 
         var sql = $@"
                     
-                    
+                  DECLARE @user_type char(1);
 
-                  DECLARE @new_id INT = 
-                    CASE WHEN @org_unit = 'CLKCRT' 
-                      THEN (select max(employee_id) + 1 from employees E where org_unit = 'CLKCRT') 
+                  /* 
+                  user_type
+                  TEST USER (T)
+                  CLERK OF COURT USER (C)
+                  COUNTY USER (U)
+
+                  */
+
+                  SET @user_type =
+                    CASE 
+                      WHEN UPPER(@surname) = 'TEST' THEN 'T'
+                      WHEN UPPER(@org_unit) = 'CLKCRT' THEN 'C'
+                      ELSE 'U'
                     END;
 
+                  DECLARE @new_id INT = 
+                    CASE WHEN @user_type IN ('C','T')
+                      THEN (select max(employee_id) + 1 from employees E where ISNULL(employee_id, 1) < 1000) 
+                    END;
 
                   WITH this_user as (
                     SELECT
@@ -175,24 +196,36 @@ namespace ClayFinancial.Models
 
                     SELECT [employee_id] FROM employees WHERE [username] = @user_name";
 
-        var i = Constants.Get_Data<int>(sql, param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
-        if (i <= 0)
+        try
         {
-#if DEBUG
-          //new ErrorLog(
-          //    $"Issue with employee_id",
-          //    $"User: {up.DisplayName} is showing \'{finplus_department}\' for employee id in FinPlus",
-          //    $@"UserAccess.ParseUser(UserPrincipal up)
-          //                  Authenticated User: {authenticated}
-          //                  user_name: {user_name}
-          //                  organizational_unit: {organizational_unit}",
-          //    "",
-          //    "");
-#endif         
-          
-        }
+          int i;
 
-        if(organizational_unit == "DisabledUsers")
+            i = Constants.Get_Data<int>(sql, param, Constants.ConnectionString.ClayFinancial).FirstOrDefault();
+
+            if (i <= 0)
+            {
+  #if DEBUG
+              //new ErrorLog(
+              //    $"Issue with employee_id",
+              //    $"User: {up.DisplayName} is showing \'{finplus_department}\' for employee id in FinPlus",
+              //    $@"UserAccess.ParseUser(UserPrincipal up)
+              //                  Authenticated User: {authenticated}
+              //                  user_name: {user_name}
+              //                  organizational_unit: {organizational_unit}",
+              //    "",
+              //    "");
+  #endif
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+          new ErrorLog("Error\n\nModel: UserAccess\nFunction: ParcseUser;\nRegion: get/set EmployeeId;", ex.Message, ex.StackTrace,ex.Source, sql);
+        }
+        #endregion
+
+        if (organizational_unit == "DisabledUsers")
         {
           current_access = access_type.no_access;
           return;
@@ -224,7 +257,8 @@ namespace ClayFinancial.Models
           return;
         }
 
-        if (groups.Contains(finance_Level_one_group) || organizational_unit == "CLKCRT")
+
+        if (groups.Contains(finance_Level_one_group))
         {
           current_access = access_type.finance_level_one;
           return;
@@ -235,6 +269,7 @@ namespace ClayFinancial.Models
           current_access = access_type.finance_level_two;
           return;
         }
+        
 
         if (groups.Contains(basic_access_group) )
         {
@@ -498,6 +533,9 @@ namespace ClayFinancial.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+#if DEBUG
+        Username.Replace(@"CLAYBCC\", "").ToLower();
+#endif
         //un = "";                                             
 
         switch (Environment.MachineName.ToUpper())
@@ -579,8 +617,9 @@ namespace ClayFinancial.Models
               //{
               //  var broken = "broken";
               //}
+              var me = d[un];
 
-              return d[un]; // we're dun
+              return me; // we're dun
             }
             else
             {
@@ -688,11 +727,13 @@ namespace ClayFinancial.Models
           }
         }
 
+        
+
       }
 
 
-
-      return name_list;
+      //TODO: Fix this. Supposed to only add users with transactions.
+      return transaction_names;
     }
 
     public static UserAccess GetUserAccessByDisplayName(string name)

@@ -783,6 +783,7 @@ WITH transaction_data AS (
       param.Add("@total_cash_amount", 0);
       param.Add("@total_check_amount", 0);
       param.Add("@total_check_count", 0);
+      param.Add("@org_unit", ua.organizational_unit);
       // ValidateNewDeposit was already called in TransactionDataController
       //if(ValidateNewDeposit(UserAccess.GetEmployeeIdFromDisplayName(selected_user_display_name.Length > 0 ? selected_user_display_name : ua.display_name), ua).Length > 0) return null;
 
@@ -807,7 +808,7 @@ WITH transaction_data AS (
                 @my_department_id, 
                 @my_employee_id,
                 @transaction_type,
-                null, 
+                null, -- @child_transaction_id
                 @username, 
                 @created_by_employee_ip_address,
                 @created_by_display_name,

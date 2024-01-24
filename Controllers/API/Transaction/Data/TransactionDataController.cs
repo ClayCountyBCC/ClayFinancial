@@ -34,17 +34,7 @@ namespace ClayFinancial.Controllers.API
     )
     {
 
-
-#if DEBUG
      var ua = UserAccess.GetUserAccess(User.Identity.Name);
-#else
-     var ua = UserAccess.GetUserAccess(User.Identity.Name);
-#endif
-
-
-
-
-
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
@@ -445,7 +435,9 @@ namespace ClayFinancial.Controllers.API
     public IHttpActionResult GetAllActiveControlDataForTransactions(List<long> transaction_ids)
     {
 
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+     var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
 
       if (ua.current_access == UserAccess.access_type.no_access)
       {
