@@ -15,6 +15,7 @@ namespace ClayFinancial.Models
     private const string basic_access_group = "gReceiptAppAccessByDepartment"; // We may make this an argument if we end up using this code elsewhere.
     private const string finance_Level_one_group = "gReceiptAppFinanceLevelOneAccess";
     private const string finance_Level_two_group = "gReceiptAppFinanceLevelTwoAccess";
+    private const string department_maintenance_access_group = "gReceiptAppFinanceLevelTwoAccess";
     private const string maintenance_access_group = "gReceiptAppMaintenanceAccess";
     private const string cc_clerk_access_group = "gClayCountyClerkAccess";
     private const string mis_access_group = "gMISDeveloper_Group";
@@ -27,6 +28,7 @@ namespace ClayFinancial.Models
     public int my_department_id { get; set; } = -1;
     public string display_name { get; set; } = "";
     public bool maintenance_user { get; set; } = false;
+    public bool department_maintenance_user { get; set; } = false;
     public string organizational_unit { get; set; } = "";
     public class temp_user
     {
@@ -40,8 +42,9 @@ namespace ClayFinancial.Models
     {
       no_access = 0,
       basic = 1, 
-      finance_level_one = 2,
-      finance_level_two = 3,    
+      department_access = 2,
+      finance_level_one = 3,
+      finance_level_two = 4,    
       mis_access = 5
     }
     public access_type current_access { get; set; } = access_type.no_access;// default to no_access.
@@ -129,6 +132,7 @@ namespace ClayFinancial.Models
         var groups = (from g in up.GetAuthorizationGroups()
                       select g.Name).ToList();
         maintenance_user = groups.Contains(maintenance_access_group);
+        department_maintenance_user = groups.Contains(department_maintenance_access_group);
 
 
 
@@ -252,6 +256,7 @@ namespace ClayFinancial.Models
         if (groups.Contains(mis_access_group))
         {
           current_access = access_type.mis_access;
+          my_department_id = 26;
           maintenance_user = true;
           
           return;
@@ -534,9 +539,9 @@ namespace ClayFinancial.Models
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
 #if DEBUG
-        Username.Replace(@"CLAYBCC\", "").ToLower();
+        un = "krapfe";
 #endif
-        //un = "";                                             
+
 
         switch (Environment.MachineName.ToUpper())
         {
@@ -585,7 +590,7 @@ namespace ClayFinancial.Models
             //  }
             //}
 
-            if (d.ContainsKey(un))
+              if (d.ContainsKey(un))
             {
 
               var i = new temp_user();
@@ -741,7 +746,10 @@ namespace ClayFinancial.Models
       var users = UserAccess.GetCachedAllUserAccess();
       foreach(string key in users.Keys)
       {
-        if (users[key].display_name == name) return users[key];
+        if (users[key].display_name == name)
+        {
+          return users[key];
+        }
       }
       return null;
     }

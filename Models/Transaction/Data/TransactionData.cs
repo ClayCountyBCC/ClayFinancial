@@ -28,6 +28,7 @@ namespace ClayFinancial.Models.Transaction.Data
     public decimal total_check_amount { get; set; } = -1;
     public int total_check_count { get; set; } = -1;
     public string comment { get; set; } = "";
+    public string workday_receipt { get; set; } = "";
     public string county_manager_name { get; set; }
     public string error_text { get; set; } = "";
     public string received_from { get; set; } = "";
@@ -363,7 +364,7 @@ namespace ClayFinancial.Models.Transaction.Data
 
 
       return @"
-WITH transaction_data AS (
+      WITH transaction_data AS (
 
         SELECT
           TD.transaction_id
@@ -377,6 +378,7 @@ WITH transaction_data AS (
 
           ,TV.department_name
           ,TV.county_manager_name
+          ,TD.workday_receipt
           ,TD.total_cash_amount
           ,TD.total_check_amount
           ,TD.total_check_count
@@ -424,6 +426,7 @@ WITH transaction_data AS (
 
           ,department_name
           ,county_manager_name
+          ,workday_receipt
           ,total_cash_amount
           ,total_check_amount
           ,total_check_count
@@ -515,12 +518,22 @@ WITH transaction_data AS (
           // here we're going to indicate to the client that it should or should not allow
           // the viewer to accept this deposit.
           // the criteria is as follows:
+
+          // OLD RULES
           // the deposit creator must be different from the receipt creator
           // the deposit creator must have a lower access level than the receipt creator
           //    or the receipt creator must be finance level 2 or higher
-          if (td.created_by_display_name != ua.display_name)
+
+
+          // NEW RULES
+          // the deposit creator will be able to accept their own deposit
+          //  - in order for the deposit to be completed, the deposit creator will be required to enter the workday receipt number
+          // the deposit can also be accepted by finance level 1 or 2 as it was previously
+          //  - finance level 1 or 2 will not be required to enter the workday receipt number
+          //
+          if (td.created_by_display_name == ua.display_name || ua.current_access == UserAccess.access_type.finance_level_one || ua.current_access == UserAccess.access_type.finance_level_two)
           {
-            if((int)ua.current_access < (int)UserAccess.access_type.finance_level_two) // this will handle the MIS access level
+            if(td.created_by_display_name != ua.display_name && (int)ua.current_access < (int)UserAccess.access_type.finance_level_two) // this will handle the MIS access level
             {
               var deposit_creator_ua = UserAccess.GetUserAccessByDisplayName(td.created_by_display_name);
               td.can_accept_deposit = ((int)deposit_creator_ua.current_access < (int)ua.current_access);
@@ -575,6 +588,7 @@ WITH transaction_data AS (
       param.Add("@created_by_display_name", created_by_display_name);
       param.Add("@received_from", received_from);
       param.Add("@comment", comment);
+      param.Add("@workday_receipt", workday_receipt);
 
       if (transaction_type.ToUpper() == "R")
       {
@@ -609,6 +623,8 @@ WITH transaction_data AS (
                       @created_by_display_name,
                       @received_from,
                       @comment,
+                      @workday_receipt,
+ 
                       @total_cash_amount,
                       @total_check_amount,
                       @total_check_count;
@@ -638,8 +654,8 @@ WITH transaction_data AS (
           WHERE transaction_id = @deposit_transaction_id
 
           ");
-
-        if ((int)my_access >= (int)UserAccess.access_type.finance_level_two)
+        // UPDTATED THIS IF STATEMENT TO INCLUDE USERS THAT CAN ACCEPT AND MODIFY THE TRANSACTION TO COMPLETE THE DEPOSIT PROCESS
+        if ((can_modify == true && can_accept_deposit == true) || (int)my_access >= (int)UserAccess.access_type.finance_level_two)
         {
 
           query.AppendLine(@"
@@ -778,6 +794,7 @@ WITH transaction_data AS (
       param.Add("@created_by_display_name", ua.display_name);
       param.Add("@received_from", selected_user_display_name);
       param.Add("@comment", "");
+      param.Add("@workday_receipt","");
       param.Add("@selected_employee_id", selected_employee_id);
       param.Add("@my_department_id", (short)ua.my_department_id);
       param.Add("@total_cash_amount", 0);
@@ -814,6 +831,7 @@ WITH transaction_data AS (
                 @created_by_display_name,
                 @received_from,
                 @comment,
+                @workday_receipt,
                 @total_cash_amount,
                 @total_check_amount,
                 @total_check_count;

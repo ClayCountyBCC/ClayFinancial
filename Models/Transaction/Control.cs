@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using System.Web;
+using System.Web.Http.Results;
 
 namespace ClayFinancial.Models.Transaction
 {
@@ -56,7 +57,19 @@ namespace ClayFinancial.Models.Transaction
           department_sort_order ASC, 
           payment_type_id ASC, 
           payment_type_sort_order ASC";
-      return Constants.Get_Data<Control>(sql, Constants.ConnectionString.ClayFinancial);
+      var c = Constants.Get_Data<Control>(sql, Constants.ConnectionString.ClayFinancial);
+
+      if (c == null)
+      {
+        new ErrorLog("List of controls is null or empty",
+                    "Control.Get()",
+                    "Control.Get()",
+                    "",
+                    "");
+        c = new List<Control>();
+
+      }
+      return c;
     }
 
     public static List<Control> GetCached()

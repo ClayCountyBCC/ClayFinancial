@@ -44,15 +44,33 @@ namespace ClayFinancial.Models.Transaction
                       select c).ToList();
 
       string sql = @"
+        with org_units as (
+
+         select distinct
+            lud.department_id,
+
+            stuff((
+                select ',' + ld.org_unit
+                from lookup_org_unit_department_id ld
+                where ld.department_id = lud.department_id
+                order by ld.department_id
+                for xml path('')
+            ),1,1,'') as organization
+          from lookup_org_unit_department_id lud
+          group by lud.department_id
+
+        )
+
         SELECT
           d.department_id
           ,[name]
-          ,lud.org_unit [organization]
+          ,O.organization
           ,is_active
         FROM departments d
-        inner join lookup_org_unit_department_id lud on lud.department_id = d.department_id
-        GROUP BY d.department_id,[name],lud.org_unit,is_active
+        inner join org_units O on O.department_id = d.department_id
+        GROUP BY d.department_id,O.organization,[name],is_active
         ORDER BY name ASC";
+
       var departments = Constants.Get_Data<Department>(sql, Constants.ConnectionString.ClayFinancial);
 
       foreach (Department d in departments)
@@ -130,7 +148,8 @@ namespace ClayFinancial.Models.Transaction
       // let's make sure the department controls are valid
       if (!ValidateDepartmentControls(transactionData))
       {
-        transactionData.error_text = "There was an issue validating some of the data";
+
+        transactionData.error_text = transactionData.error_text.Length == 0 ? "There was an issue validating some of the data" : transactionData.error_text;
         return false;
       }
 
@@ -170,6 +189,12 @@ namespace ClayFinancial.Models.Transaction
       if(controlids.Count() != distinctControlIds.Count())
       {
         transactionData.error_text = "Invalid department information found.";
+        new ErrorLog(
+          "Error: Duplicate control IDs for the department.",
+          "Cannot validate department controls",
+          "controls_dict.Count(): " + controls_dict.Count().ToString() + "; list - distinctControlIds: " + distinctControlIds.Count(),
+          "Transaction.Department.ValidateDepartmentData()",
+          "");
         return false;
       }
 
@@ -178,6 +203,12 @@ namespace ClayFinancial.Models.Transaction
       if (!controlids.SequenceEqual(c.Keys))
       {
         transactionData.error_text = "Missing department information";
+        new ErrorLog(
+          "Error: Missing Department control",
+          "Cannot validate department controls",
+          "controlids.SequenceEqual(c.Keys): " + controlids.SequenceEqual(c.Keys),
+          "Transaction.Department.ValidateDepartmentData()",
+          "");
         return false;
       }
 

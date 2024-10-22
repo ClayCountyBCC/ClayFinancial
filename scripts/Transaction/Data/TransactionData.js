@@ -17,6 +17,7 @@ var Transaction;
                 this.payment_type_data = [];
                 this.county_manager_name = "PREVIEW";
                 this.comment = "";
+                this.workday_receipt = "";
                 this.error_text = "";
                 this.received_from = "";
                 this.total_cash_amount = -1;
@@ -788,6 +789,26 @@ var Transaction;
                 };
                 let comment_input_container = Transaction.ControlGroup.CreateInputFieldContainer(comment_input, "Comments ** optional", true, "is-half");
                 container.appendChild(comment_input_container);
+                //let workday_receipt_input = document.createElement("input");
+                //workday_receipt_input.maxLength = 500;
+                //workday_receipt_input.required = false;
+                //workday_receipt_input.classList.add("text", "is-normal");
+                //workday_receipt_input.value = "";
+                //workday_receipt_input.oninput = (event) => {
+                //  saved_transaction.workday_receipt = workday_receipt_input.value;
+                //}
+                //let field_label = "Workday Receipt Number" + (saved_transaction.can_modify ? "(required)" : "");
+                //let workday_receipt_input_container = ControlGroup.CreateInputFieldContainer(workday_receipt_input, field_label, saved_transaction.can_modify, "is-one-quarter");
+                //container.appendChild(workday_receipt_input_container);
+                let workday_receipt_input = Transaction.ControlGroup.CreateInput("input", 30, true, "Cash Amount");
+                let workday_receipt_input_container = Transaction.ControlGroup.CreateInputFieldContainer(workday_receipt_input, "Workday Receipt Number" + (saved_transaction.can_modify ? "(required)" : ""), true, "is-one-quarter");
+                container.appendChild(workday_receipt_input_container);
+                workday_receipt_input.oninput = (event) => {
+                    saved_transaction.workday_receipt = "";
+                    if (Transaction.ControlGroup.ValidateText(workday_receipt_input, workday_receipt_input_container)) {
+                        saved_transaction.workday_receipt = workday_receipt_input.value;
+                    }
+                };
                 let save_button = document.createElement("button");
                 save_button.classList.add("button", "is-success");
                 save_button.appendChild(document.createTextNode("Create Receipt For This Deposit"));

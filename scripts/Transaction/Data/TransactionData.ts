@@ -18,6 +18,7 @@
     total_check_amount: number;
     total_check_count: number;
     comment: string;
+    workday_receipt: string;
     created_on: any;
     created_by_username: string;
     created_by_display_name: string;
@@ -43,6 +44,7 @@
     public payment_type_data: Array<PaymentTypeData> = [];
     public county_manager_name: string = "PREVIEW";
     public comment: string = "";
+    public workday_receipt: string = "";
     public error_text: string = "";
     public received_from: string = "";
     public total_cash_amount: number = -1;
@@ -1055,6 +1057,30 @@
 
       let comment_input_container = ControlGroup.CreateInputFieldContainer(comment_input, "Comments ** optional", true, "is-half");
       container.appendChild(comment_input_container);
+
+      //let workday_receipt_input = document.createElement("input");
+      //workday_receipt_input.maxLength = 500;
+      //workday_receipt_input.required = false;
+      //workday_receipt_input.classList.add("text", "is-normal");
+      //workday_receipt_input.value = "";
+
+      //workday_receipt_input.oninput = (event) => {
+      //  saved_transaction.workday_receipt = workday_receipt_input.value;
+      //}
+      //let field_label = "Workday Receipt Number" + (saved_transaction.can_modify ? "(required)" : "");
+      //let workday_receipt_input_container = ControlGroup.CreateInputFieldContainer(workday_receipt_input, field_label, saved_transaction.can_modify, "is-one-quarter");
+      //container.appendChild(workday_receipt_input_container);
+
+      let workday_receipt_input = ControlGroup.CreateInput("input", 30, true, "Cash Amount");
+      let workday_receipt_input_container: HTMLElement = ControlGroup.CreateInputFieldContainer(workday_receipt_input, "Workday Receipt Number" + (saved_transaction.can_modify ? "(required)" : ""), true, "is-one-quarter");
+      container.appendChild(workday_receipt_input_container);
+
+      workday_receipt_input.oninput = (event) => {
+        saved_transaction.workday_receipt = "";
+        if (ControlGroup.ValidateText(workday_receipt_input, workday_receipt_input_container)) {
+          saved_transaction.workday_receipt = workday_receipt_input.value;
+        }
+      }
 
       let save_button = document.createElement("button");
       save_button.classList.add("button", "is-success");

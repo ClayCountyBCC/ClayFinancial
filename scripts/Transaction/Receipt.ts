@@ -309,8 +309,16 @@
       let container = document.getElementById("receipt_department_controls");
       Utilities.Clear_Element(container);
       let df = document.createDocumentFragment();
-      df.appendChild(this.CreatePrintableControl("is-half", "Received From", t.received_from));
-      df.appendChild(this.CreatePrintableControl("is-half", "Department", t.department_name));
+
+      if (t.transaction_type == "C") {
+        df.appendChild(this.CreatePrintableControl("is-one-third", "Received From", t.received_from));
+        df.appendChild(this.CreatePrintableControl("is-one-third", "Department", t.department_name));
+        df.appendChild(this.CreatePrintableControl("is-one-third", "Workday Receipt Number", t.workday_receipt));
+
+      } else {
+        df.appendChild(this.CreatePrintableControl("is-half", "Received From", t.received_from));
+        df.appendChild(this.CreatePrintableControl("is-half", "Department", t.department_name));
+      }
       for (let cd of t.department_control_data)
       {
         df.appendChild(this.CreateDepartmentControl(cd));
